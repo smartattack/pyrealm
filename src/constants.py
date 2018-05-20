@@ -1,4 +1,4 @@
-''' Immutable Game data '''
+""" Immutable Game data """
 
 
 magic = [
