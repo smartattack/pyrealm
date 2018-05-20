@@ -2,3 +2,4 @@
 .scannerwork
 venv
 __pycache__
+.vscode
