@@ -2,89 +2,93 @@
 PyRealm
 """
 
-
-from character import Character
-from location import Location
-from server import Server
-from player import Player
-from constants import *
-
-import time
 import logging
+import time
 
+from player import Player
+# from character import Character
+# from location import Location
+from server import Server
+
+"Pull in some global data"
+import constants
+
+
+"""Process Sockets - called from within game loop"""
 def handle_sockets(mud, players):
 
     # Update socket states
     mud.update()
 
     # Handle new connections
-    for id in mud.get_new_players():
-
-        # Create a new player object for this connection id
-        players[id] = Player()
-        players[id].name = "connecting_%d" % id  # temporary name
-        players[id].tell(WELCOME_BANNER)
-        mudlog.info('Player {} connected'.format(players[id].name))
-        print ("Connected: {}".format(players[id].maxhp))
+    for idx in mud.get_new_players():
+        # Create a new player object for this connection idx
+        players[idx] = Player()
+        players[idx].name = "connecting_%d" % idx  # temporary name
+        players[idx].tell(constants.WELCOME_BANNER)
+        mudlog.info('Player {} connected'.format(players[idx].name))
+        print("Connected: {}".format(players[idx].maxhp))
 
     # Handle disconnected players/sockets
-    for id in mud.get_disconnected_players():
+    for idx in mud.get_disconnected_players():
 
-        if id not in players:
+        if idx not in players:
             continue
 
         # Tell all players about the disconnect
 
-        # Remove the id from the players dict
-        del(players[id])
+        # Remove the idx from the players dict
+        del players[idx]
 
     # Handle input from players
-    for id, line in mud.get_input():
+    for idx, line in mud.get_input():
 
-        if id not in players:
+        if idx not in players:
             continue
 
-        players[id].input = line
+        players[idx].input = line
 
-
+"""Push output to players"""
 def send_to_players(mud, players):
-    # Push output to players
-    for id in players:
-        if players[id].output:
-            mud.send_message(id, players[id].output)
-            players[id].output = ""
 
+    for idx in players:
+        if players[idx].output:
+            mud.send_message(idx, players[idx].output)
+            players[idx].output = ""
 
+"""Event queue processor"""
 def process_events():
     pass
 
+"""Handles input from players"""
 def process_input(players):
-    for id in players:
-        if players[id].input:
-           players[id].output = "|%s|" % players[id].input
+    for idx in players:
+        if players[idx].input:
+            players[idx].output = "|%s|" % players[idx].input
 
+
+"""Main entry point"""
 def main():
 
+    global mudlog
     mudlog = logging.getLogger('mudlog')
     mudlog.setLevel(logging.DEBUG)
-    fh = logging.FileHandler('mud.log')
-    fh.setFormatter(logging.Formatter('%(asctime)s %(filename)s:%(lineno)d %(levelname)s: %(message)s'))
+    fh = logging.FileHandler(constants.logfile)
+    fh.setFormatter(
+        logging.Formatter('%(asctime)s %(filename)s:%(lineno)d %(levelname)s: %(message)s'))
     mudlog.addHandler(fh)
-    
+
     mudlog.info("Starting Server()")
     mud = Server()
     players = {}
-    events = []
-
+    #events = []
 
     while True:
-
         handle_sockets(mud, players)
         process_input(players)
         process_events()
         send_to_players(mud, players)
         time.sleep(0.1)
-
 
 
 if __name__ == "__main__":

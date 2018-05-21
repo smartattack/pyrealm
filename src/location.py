@@ -20,8 +20,8 @@ class Location:
         Location._sequence += 1
         self.name = name
         self.desc = desc
-        self.items = set()   # type: set[Item]
-        self.players = set() # type: set[Players]
+        self.items = set()
+        self.players = set()
         self.exits = {}
 
     def destroy(self):

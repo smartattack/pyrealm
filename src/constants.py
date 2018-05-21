@@ -1,4 +1,6 @@
-""" Immutable Game data """
+"""
+Game data - this is imported inside of main()
+"""
 
 logfile = "../log/pyrealm.log"
 

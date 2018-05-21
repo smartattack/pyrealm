@@ -43,8 +43,8 @@ class Server(object):
         # holds on line of input (parsed from buffer)
         line = ""
 
-        def __init__(self, socket, address, buffer, lastcheck):
-            self.socket = socket
+        def __init__(self, sock, address, buffer, lastcheck):
+            self.socket = sock
             self.address = address
             self.buffer = buffer
             self.lastcheck = lastcheck
@@ -169,14 +169,14 @@ class Server(object):
         retval = []
 
         # go through all the clients
-        for id, cl in list(self._clients.items()):
-            retval.append((id, cl.line))
+        for idx, cl in list(self._clients.items()):
+            retval.append((idx, cl.line))
             cl.line = ""
 
         return retval
 
 
-    def send_message(self, to: object, message: object) -> object:
+    def send_message(self, to: object, message: str):
         """Sends the text in the 'message' parameter to the player with
         the id number given in the 'to' parameter. The text will be
         printed out in the player's terminal.
@@ -254,7 +254,7 @@ class Server(object):
     def _check_for_disconnected(self):
 
         # go through all the clients
-        for id, cl in list(self._clients.items()):
+        for idx, cl in list(self._clients.items()):
 
             # if we last checked the client less than 5 seconds ago, skip this
             # client and move on to the next one
@@ -265,7 +265,7 @@ class Server(object):
             # matter what we send, we're really just checking that data can
             # still be written to the socket. If it can't, an error will be
             # raised and we'll know that the client has disconnected.
-            self._attempt_send(id, "\x00")
+            self._attempt_send(idx, "\x00")
 
             # update the last check time
             cl.lastcheck = time.time()
@@ -273,7 +273,7 @@ class Server(object):
     def _check_for_messages(self):
 
         # go through all the clients
-        for id, cl in list(self._clients.items()):
+        for idx, cl in list(self._clients.items()):
 
             # we use 'select' to test whether there is data waiting to be read
             # from the client socket. The function takes 3 lists of sockets,

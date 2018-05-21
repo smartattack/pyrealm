@@ -31,7 +31,7 @@ class Player(Character):
 
         super().__init__()
 
-
+    """"Send output to connected player"""
     def tell(self, msg):
-        "Send output to connected player"
+
         self.output += msg
