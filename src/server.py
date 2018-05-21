@@ -12,7 +12,8 @@ import socket
 import select
 import time
 import sys
-
+import logging
+mudlog = logging.getLogger('mudlog')
 
 class Server(object):
     """A basic server for text-based Multi-User Dungeon (MUD) games.
@@ -29,7 +30,7 @@ class Server(object):
     # info about them
 
     class _Client(object):
-        """Holds information about a connected player"""
+        """Connection-related information"""
 
         # the socket object used to communicate with this client
         socket = None
@@ -50,15 +51,15 @@ class Server(object):
             self.line = ""
 
     # Used to store different types of occurences
-    _EVENT_NEW_PLAYER = 1
-    _EVENT_PLAYER_LEFT = 2
-    _EVENT_COMMAND = 3
+    _EVENT_NEW_PLAYER     = 1
+    _EVENT_PLAYER_LEFT    = 2
+    _EVENT_COMMAND        = 3
 
     # Different states we can be in while reading data from client
     # See _process_sent_data function
-    _READ_STATE_NORMAL = 1
+    _READ_STATE_NORMAL  = 1
     _READ_STATE_COMMAND = 2
-    _READ_STATE_SUBNEG = 3
+    _READ_STATE_SUBNEG  = 3
 
     # Command codes used by Telnet protocol
     # See _process_sent_data function
@@ -163,8 +164,8 @@ class Server(object):
         return retval
 
     def get_input(self):
-        """Returns input from client
-        """
+        """Returns input from client"""
+
         retval = []
 
         # go through all the clients

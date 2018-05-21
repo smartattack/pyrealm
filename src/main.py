@@ -4,13 +4,13 @@ PyRealm
 
 
 from character import Character
-from constants import *
+from location import Location
 from server import Server
 from player import Player
-from log import Logger
+from constants import *
 
 import time
-
+import logging
 
 def handle_sockets(mud, players):
 
@@ -22,8 +22,10 @@ def handle_sockets(mud, players):
 
         # Create a new player object for this connection id
         players[id] = Player()
-
-        mud.send_message(id, WELCOME_BANNER)
+        players[id].name = "connecting_%d" % id  # temporary name
+        players[id].tell(WELCOME_BANNER)
+        mudlog.info('Player {} connected'.format(players[id].name))
+        print ("Connected: {}".format(players[id].maxhp))
 
     # Handle disconnected players/sockets
     for id in mud.get_disconnected_players():
@@ -43,7 +45,7 @@ def handle_sockets(mud, players):
             continue
 
         players[id].input = line
-        print ("Player %s input == |%s|".format(id, line))
+
 
 def send_to_players(mud, players):
     # Push output to players
@@ -63,12 +65,17 @@ def process_input(players):
 
 def main():
 
-    mudlog = Logger(logfile)
-
-    mudlog.add("Starting Server()")
+    mudlog = logging.getLogger('mudlog')
+    mudlog.setLevel(logging.DEBUG)
+    fh = logging.FileHandler('mud.log')
+    fh.setFormatter(logging.Formatter('%(asctime)s %(filename)s:%(lineno)d %(levelname)s: %(message)s'))
+    mudlog.addHandler(fh)
+    
+    mudlog.info("Starting Server()")
     mud = Server()
     players = {}
     events = []
+
 
     while True:
 

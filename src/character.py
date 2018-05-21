@@ -1,8 +1,13 @@
-'''Character is the base class for all NPC and players'''
+"""
+Character is the base class for all NPC and players
+"""
 
 import random
+import logging
+mudlog = logging.getLogger('mudlog')
 
 class Character:
+    "Not used directly, inherited by player and npc"
 
     def __init__(self, hp=10, mp=10, attack=10, defense=10, magic=None):
 
@@ -16,6 +21,7 @@ class Character:
         self.magic = magic
         self.isdead = False
         self.location = ''
+        self.money = 0
         self.status_effects = []
 
     def gen_damage(self):

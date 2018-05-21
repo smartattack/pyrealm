@@ -1,8 +1,13 @@
 """
-Player - one connected player
+Player is a connected user
 """
 
-class Player:
+import location
+from character import Character
+import logging
+mudlog = logging.getLogger('mudlog')
+
+class Player(Character):
 
     """ Instantiated on new connections
         Player will not yet have a name
@@ -12,17 +17,21 @@ class Player:
     _PLAYER_LOGIN = 1      # User has entered a valid username
     _PLAYER_VALIDATE = 2   # User has entered password
     _PLAYER_PLAYING = 3    # User has authenticated
-    
+
     def __init__(self):
-        #
         self.name = None
-        self.room = None
+        self.location = location._limbo
         self.state = self._PLAYER_INIT
-        
+
         # Output buffer
         self.output = ""
 
         # Input parsing
         self.input = ""
 
+        super().__init__()
 
+
+    def tell(self, msg):
+        "Send output to connected player"
+        self.output += msg
