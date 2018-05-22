@@ -4,18 +4,16 @@ PyRealm
 
 import logging
 import time
+import constants
 
 from player import Player
 # from character import Character
 # from location import Location
 from server import Server
 
-"Pull in some global data"
-import constants
 
-
-"""Process Sockets - called from within game loop"""
 def handle_sockets(mud, players):
+    '''Process Sockets - called from within game loop'''
 
     # Update socket states
     mud.update()
@@ -26,7 +24,7 @@ def handle_sockets(mud, players):
         players[idx] = Player()
         players[idx].name = "connecting_%d" % idx  # temporary name
         players[idx].tell(constants.WELCOME_BANNER)
-        mudlog.info('Player {} connected'.format(players[idx].name))
+        mudlog.info("Player {} connected".format(players[idx].name))
         print("Connected: {}".format(players[idx].maxhp))
 
     # Handle disconnected players/sockets
@@ -48,27 +46,27 @@ def handle_sockets(mud, players):
 
         players[idx].input = line
 
-"""Push output to players"""
 def send_to_players(mud, players):
+    '''Push output to players'''
 
     for idx in players:
         if players[idx].output:
             mud.send_message(idx, players[idx].output)
             players[idx].output = ""
 
-"""Event queue processor"""
 def process_events():
+    '''Event queue processor'''
     pass
 
-"""Handles input from players"""
 def process_input(players):
+    """Handles input from players"""
     for idx in players:
         if players[idx].input:
             players[idx].output = "|%s|" % players[idx].input
 
 
-"""Main entry point"""
 def main():
+    """Main entry point"""
 
     global mudlog
     mudlog = logging.getLogger('mudlog')

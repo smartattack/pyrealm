@@ -311,7 +311,7 @@ class Server(object):
     def _handle_disconnect(self, clid):
 
         # remove the client from the clients map
-        del(self._clients[clid])
+        del self._clients[clid]
 
         # add a 'player left' occurence to the new events list, with the
         # player's id number
