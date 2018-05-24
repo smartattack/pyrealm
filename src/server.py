@@ -93,6 +93,7 @@ class Server(object):
         self._events = []
         self._new_events = []
 
+    def start(self):
         # create a new tcp socket which will be used to listen for new clients
         self._listen_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -133,6 +134,7 @@ class Server(object):
         # 'get_commands'. The previous events are discarded
         self._events = list(self._new_events)
         self._new_events = []
+
 
     def get_new_players(self):
         """Returns a list containing info on any new players that have
@@ -184,6 +186,29 @@ class Server(object):
         # we make sure to put a newline on the end so the client receives the
         # message on its own line
         self._attempt_send(to, message+"\n\r")
+
+
+    def send_no_newline(self, to: object, message: str):
+        """Sends the text in the 'message' parameter to the player with
+        the id number given in the 'to' parameter. The text will be
+        printed out in the player's terminal, without a terminating
+        newline.
+        """
+        # we make sure to put a newline on the end so the client receives the
+        # message on its own line
+        self._attempt_send(to, message)
+
+
+    def disconnect(self, cid: int):
+        """Disconnect a client socket.  Called as part of logoff sequence"""
+        # Find matching socket and shut it down
+        for idx, cl in list(self._clients.items()):
+            if idx == cid:
+                cl.socket.shutdown(cid)
+                cl.socket.close()
+                del self._clients[idx]
+                break
+
 
     def shutdown(self):
         """Closes down the server, disconnecting all clients and
