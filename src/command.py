@@ -17,7 +17,7 @@ def do_help(player):
 
 
 def do_quit(player):
-    player.sendnow(player.cid, "Goodbye!\n\n")
+    player.send_now(player.cid, "Goodbye!\n\n")
     player.mud.disconnect(player.cid)
     player.state = Player._PLAYER_DISCONNECT
 
@@ -39,7 +39,7 @@ def find_matching_command(text):
 
 
 
-def commandHandler(player):
+def command_handler(player):
     """ Dispatch command functions based on parsed command"""
 
     parse_command(player)

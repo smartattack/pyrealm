@@ -15,7 +15,7 @@ from command import *
 
 
 def handle_sockets(mud, players):
-    '''Process Sockets - called from within game loop'''
+    """Process Sockets - called from within game loop"""
 
     # Update socket states
     mud.update()
@@ -25,14 +25,13 @@ def handle_sockets(mud, players):
         # Create a new player object for this connection idx
         players[idx] = Player()
         players[idx].cid = idx  # Allow us to call tell later
-        players[idx].sendnow = mud.send_no_newline
+        players[idx].send_now = mud.send_no_newline
         players[idx].mud = mud
         players[idx].name = "connecting_%d" % idx  # temporary name
-        players[idx].tell(constants.WELCOME_BANNER)
+        players[idx].send_now(idx, constants.WELCOME_BANNER)
         players[idx].state = Player._PLAYER_USERNAME
         mudlog.info("Player {} connected".format(players[idx].name))
         print("Connected: {}".format(players[idx].maxhp))
-
 
     # Handle disconnected players/sockets
     for idx in mud.get_disconnected_players():
@@ -53,17 +52,20 @@ def handle_sockets(mud, players):
 
         players[idx].input = line
 
+
 def send_to_players(mud, players):
-    '''Push output to players'''
+    """Push output to players"""
 
     for idx in players:
         if players[idx].output:
             mud.send_message(idx, players[idx].output)
             players[idx].output = ""
 
+
 def process_events():
-    '''Event queue processor'''
+    """Event queue processor"""
     pass
+
 
 def process_input(players):
     """Handles input from players"""
@@ -71,18 +73,24 @@ def process_input(players):
         if players[idx].input:
             # State machine to determine whether to dispatch login or command
             if players[idx].state == Player._PLAYER_PLAYING:
-                commandHandler(players[idx])
+                command_handler(players[idx])
             else:
-                loginHandler(players[idx])
+                login_handler(players[idx])
+            # Clear input after handlers have done processing
+            #players[idx].input = None
+            #players[idx].command = None
+            #players[idx].args = None
+
 
 def handle_disconnects(players):
     disconnected_players = []
-    for idx,player in list(players.items()):
+    for idx, player in list(players.items()):
         if player.state == Player._PLAYER_DISCONNECT:
             disconnected_players.append(idx)
     for i in disconnected_players:
-        mudlog.info("Deleting players[{}] ({})".format(i,players[i].name))
+        mudlog.info("Deleting players[{}] ({})".format(i, players[i].name))
         del players[i]
+
 
 def main():
     """Main entry point"""
@@ -100,10 +108,9 @@ def main():
     mud.start()
 
     players = {}
-    #events = []
+    # events = []
 
     while True:
-
         "Do socket polling"
         handle_sockets(mud, players)
 
