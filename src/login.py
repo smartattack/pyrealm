@@ -1,5 +1,6 @@
 from player import Player
-from server import Server
+import logging
+mudlog = logging.getLogger('mudlog')
 
 def login_handler(player):
     """ Dispatch login/chargen functions based on state table"""
@@ -40,6 +41,7 @@ def check_username(player):
         player.name = player.input
         player.send_now(player.cid, 'Password: ')
         player.state = Player._PLAYER_PASSWORD
+
 
 def validate_username(username):
     """Verify the validity of username
@@ -130,7 +132,6 @@ def newuser_confirm(player):
         player.input = None
         player.state = Player._PLAYER_NEWUSER
         player.send_now(player.cid, "Please choose a name for your character: ")
-
 
 
 

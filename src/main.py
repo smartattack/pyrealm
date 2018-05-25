@@ -12,7 +12,7 @@ from player import Player
 from server import Server
 from login import *
 from command import *
-
+import db
 
 def handle_sockets(mud, players):
     """Process Sockets - called from within game loop"""
@@ -77,12 +77,16 @@ def process_input(players):
             else:
                 login_handler(players[idx])
             # Clear input after handlers have done processing
-            #players[idx].input = None
-            #players[idx].command = None
-            #players[idx].args = None
+            players[idx].input = None
+            players[idx].command = None
+            players[idx].args = None
 
 
 def handle_disconnects(players):
+    """Clean up disconnected players"""
+    # FIXME: do we want to do this after a timeout?
+    # Maybe a body should stay around, at least.
+
     disconnected_players = []
     for idx, player in list(players.items()):
         if player.state == Player._PLAYER_DISCONNECT:
@@ -103,6 +107,9 @@ def main():
         logging.Formatter('%(asctime)s %(filename)s:%(lineno)d %(levelname)s: %(message)s'))
     mudlog.addHandler(fh)
 
+    # Initialize database
+    db.check_db()
+
     mud = Server()
     mudlog.info("Starting Server()")
     mud.start()
@@ -111,22 +118,22 @@ def main():
     # events = []
 
     while True:
-        "Do socket polling"
+        # Do socket polling
         handle_sockets(mud, players)
 
-        "Handle player input"
+        # Handle player input
         process_input(players)
 
-        "Process event queue"
+        # Process event queue
         process_events()
 
         # Clean-up disconnected players
         handle_disconnects(players)
 
-        "Process output to players"
+        # Process output to players
         send_to_players(mud, players)
 
-        "Sleep to avoid pinning cpu"
+        # Sleep to avoid pinning cpu
         time.sleep(0.05)
 
 

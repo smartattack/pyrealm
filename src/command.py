@@ -2,6 +2,8 @@
 Command Interpreter
 """
 
+import logging
+mudlog = logging.getLogger('mudlog')
 from player import Player
 
 command_table = {
