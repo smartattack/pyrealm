@@ -66,34 +66,34 @@ UNKNOWN = -1
 
 #--[ Telnet Commands ]---------------------------------------------------------
 
-SE      = chr(240)      # End of subnegotiation parameters
-NOP     = chr(241)      # No operation
-DATMK   = chr(242)      # Data stream portion of a sync.
-BREAK   = chr(243)      # NVT Character BRK
-IP      = chr(244)      # Interrupt Process
-AO      = chr(245)      # Abort Output
-AYT     = chr(246)      # Are you there
-EC      = chr(247)      # Erase Character
-EL      = chr(248)      # Erase Line
-GA      = chr(249)      # The Go Ahead Signal
-SB      = chr(250)      # Sub-option to follow
-WILL    = chr(251)      # Will; request or confirm option begin
-WONT    = chr(252)      # Wont; deny option request
-DO      = chr(253)      # Do = Request or confirm remote option
-DONT    = chr(254)      # Don't = Demand or confirm option halt
-IAC     = chr(255)      # Interpret as Command
-SEND    = chr(001)      # Sub-process negotiation SEND command
-IS      = chr(000)      # Sub-process negotiation IS command
+SE      = '\x240'      # End of subnegotiation parameters
+NOP     = '\x241'      # No operation
+DATMK   = '\x242'      # Data stream portion of a sync.
+BREAK   = '\x243'      # NVT Character BRK
+IP      = '\x244'      # Interrupt Process
+AO      = '\x245'      # Abort Output
+AYT     = '\x246'      # Are you there
+EC      = '\x247'      # Erase Character
+EL      = '\x248'      # Erase Line
+GA      = '\x249'      # The Go Ahead Signal
+SB      = '\x250'      # Sub-option to follow
+WILL    = '\x251'      # Will; request or confirm option begin
+WONT    = '\x252'      # Wont; deny option request
+DO      = '\x253'      # Do = Request or confirm remote option
+DONT    = '\x254'      # Don't = Demand or confirm option halt
+IAC     = '\x255'      # Interpret as Command
+SEND    = '\x001'      # Sub-process negotiation SEND command
+IS      = '\x000'      # Sub-process negotiation IS command
 
 #--[ Telnet Options ]----------------------------------------------------------
 
-BINARY  = chr(  0)      # Transmit Binary
-ECHO    = chr(  1)      # Echo characters back to sender
-RECON   = chr(  2)      # Reconnection
-SGA     = chr(  3)      # Suppress Go-Ahead
-TTYPE   = chr( 24)      # Terminal Type
-NAWS    = chr( 31)      # Negotiate About Window Size
-LINEMO  = chr( 34)      # Line Mode
+BINARY  = '\x000'      # Transmit Binary
+ECHO    = '\x001'      # Echo characters back to sender
+RECON   = '\x002'      # Reconnection
+SGA     = '\x003'      # Suppress Go-Ahead
+TTYPE   = '\x024'      # Terminal Type
+NAWS    = '\x031'      # Negotiate About Window Size
+LINEMO  = '\x034'      # Line Mode
 
 
 #-----------------------------------------------------------------Telnet Option
@@ -151,7 +151,7 @@ class TelnetClient(object):
 
 #    def __del__(self):
 
-#        print "Telnet destructor called"
+#        print("Telnet destructor called")
 #        pass
 
     def get_command(self):
@@ -275,9 +275,8 @@ class TelnetClient(object):
         if len(self.send_buffer):
             try:
                 sent = self.sock.send(self.send_buffer)
-            except socket.error, err:
-                print("!! SEND error '%d:%s' from %s" % (err[0], err[1],
-                    self.addrport()))
+            except socket.error as err:
+                print("!! SEND error '{}:{}' from {}".format(err[0], err[1],self.addrport()))
                 self.active = False
                 return
             self.bytes_sent += sent
@@ -291,9 +290,8 @@ class TelnetClient(object):
         """
         try:
             data = self.sock.recv(2048)
-        except socket.error, ex:
-            print ("?? socket.recv() error '%d:%s' from %s" %
-                (ex[0], ex[1], self.addrport()))
+        except socket.error as ex:
+            print("?? socket.recv() error '{}:{}' from {}".format(ex[0], ex[1], self.addrport()))
             raise BogConnectionLost()
 
         ## Did they close the connection?
@@ -416,7 +414,7 @@ class TelnetClient(object):
         """
         Handle incoming Telnet commands that are two bytes long.
         """
-        #print "got two byte cmd %d" % ord(cmd)
+        #print("got two byte cmd {}.format(ord(cmd)))
 
         if cmd == SB:
             ## Begin capturing a sub-negotiation string
@@ -453,7 +451,7 @@ class TelnetClient(object):
             pass
 
         else:
-            print "2BC: Should not be here."
+            print("2BC: Should not be here.")
 
         self.telnet_got_iac = False
         self.telnet_got_cmd = None
@@ -463,7 +461,7 @@ class TelnetClient(object):
         Handle incoming Telnet commmands that are three bytes long.
         """
         cmd = self.telnet_got_cmd
-        #print "got three byte cmd %d:%d" % (ord(cmd), ord(option))
+        #print("got three byte cmd {}:{}".format(ord(cmd), ord(option)))
 
         ## Incoming DO's and DONT's refer to the status of this end
 
@@ -647,7 +645,7 @@ class TelnetClient(object):
                     self._iac_dont(TTYPE)
 
         else:
-            print "3BC: Should not be here."
+            print("3BC: Should not be here.")
 
         self.telnet_got_iac = False
         self.telnet_got_cmd = None
@@ -662,16 +660,16 @@ class TelnetClient(object):
 
             if bloc[0] == TTYPE and bloc[1] == IS:
                 self.terminal_type = bloc[2:]
-                #print "Terminal type = '%s'" % self.terminal_type
+                #print("Terminal type = '{}'"format(self.terminal_type))
 
             if bloc[0] == NAWS:
                 if len(bloc) != 5:
-                    print "Bad length on NAWS SB:", len(bloc)
+                    print("Bad length on NAWS SB: {}".format(len(bloc)))
                 else:
                     self.columns = (256 * ord(bloc[1])) + ord(bloc[2])
                     self.rows = (256 * ord(bloc[3])) + ord(bloc[4])
 
-                #print "Screen is %d x %d" % (self.columns, self.rows)
+                #print("Screen is {} x {}"format(self.columns, self.rows))
 
         self.telnet_sb_buffer = ''
 

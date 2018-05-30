@@ -4,7 +4,7 @@ PyRealms Server
 Copyright 2018 Peter Morgan
 -------------------------------------------------
 """
-import globals
+from globals import log
 from miniboa import TelnetServer
 
 
