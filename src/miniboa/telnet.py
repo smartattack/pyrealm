@@ -25,7 +25,7 @@ import time
 from miniboa.error import BogConnectionLost
 from miniboa.xterm import colorize
 from miniboa.xterm import word_wrap
-from globals import log
+from utils import log
 
 #---[ Telnet Notes ]-----------------------------------------------------------
 # (See RFC 854 for more information)
@@ -277,7 +277,7 @@ class TelnetClient(object):
         """
         if len(self.send_buffer):
             try:
-                sent = self.sock.send(self.send_buffer)
+                sent = self.sock.send(self.send_buffer.encode())
             except socket.error as err:
                 log.error("!! SEND error '{}:{}' from {}".format(err[0], err[1],self.addrport()))
                 self.active = False
@@ -329,7 +329,7 @@ class TelnetClient(object):
         #if (byte >= ' ' and byte <= '~') or byte == '\n':
         if self.telnet_echo:
             self._echo_byte(byte)
-        self.recv_buffer += byte
+        self.recv_buffer += chr(byte)
 
     def _echo_byte(self, byte):
         """
@@ -340,7 +340,7 @@ class TelnetClient(object):
         if self.telnet_echo_password:
             self.send_buffer += '*'
         else:
-            self.send_buffer += byte
+            self.send_buffer += chr(byte)
 
     def _iac_sniffer(self, byte):
         """
