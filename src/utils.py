@@ -15,3 +15,7 @@ def init_log(filename = '../log/pyrealms.log', level = logging.DEBUG):
             fh.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
         log.addHandler(fh)
         return log
+
+
+
+log = init_log()
