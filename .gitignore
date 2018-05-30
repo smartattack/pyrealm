@@ -1,8 +1,11 @@
-.idea
-.scannerwork
-log
+# Tooling
 venv
-*.log
-*.pyc
+.scannerwork
+*.py[co]
 __pycache__
 .vscode
+.idea
+
+*.log
+.*swp
+*~
