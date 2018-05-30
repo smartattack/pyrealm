@@ -11,6 +11,9 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 #------------------------------------------------------------------------------
+#   Modified for PyRealm
+#   Copyright 2018 Peter Morgan
+#------------------------------------------------------------------------------
 
 """
 Handle Asynchronous Telnet Connections.
@@ -22,6 +25,8 @@ import sys
 
 from miniboa.telnet import TelnetClient
 from miniboa.error import BogConnectionLost
+from globals import log
+
 
 ## Cap sockets to 512 on Windows because winsock can only process 512 at time
 if sys.platform == 'win32':
@@ -89,7 +94,7 @@ class TelnetServer(object):
             server_socket.bind((address, port))
             server_socket.listen(5)
         except socket.error as err:
-            print("Unable to create the server socket: {}".format(err), file=sys.stderr)
+            log.critical("Unable to create the server socket: {}".format(err), file=sys.stderr)
             sys.exit(1)
 
         self.server_socket = server_socket
@@ -147,7 +152,7 @@ class TelnetServer(object):
 
         except select.error as err:
             ## If we can't even use select(), game over man, game over
-            print("!! FATAL SELECT error '{}:{}'!".format(err[0], err[1]), file=sys.stderr)
+            log.critical("!! FATAL SELECT error '{}:{}'!".format(err[0], err[1]), file=sys.stderr)
             sys.exit(1)
 
         ## Process socket file descriptors with data to recieve
@@ -161,17 +166,16 @@ class TelnetServer(object):
                     sock, addr_tup = self.server_socket.accept()
 
                 except socket.error as err:
-                    print("!! ACCEPT error '{}:{}'.".format(err[0], err[1]), file=sys.stderr)
+                    log.error("!! ACCEPT error '{}:{}'.".format(err[0], err[1]), file=sys.stderr)
                     continue
 
                 ## Check for maximum connections
                 if self.client_count() >= MAX_CONNECTIONS:
-                    print('?? Refusing new connection; maximum in use.')
+                    log.warning('?? Refusing new connection; maximum in use.')
                     sock.close()
                     continue
 
                 new_client = TelnetClient(sock, addr_tup)
-                #print "++ Opened connection to %s" % new_client.addrport()
                 ## Add the connection to our dictionary and call handler
                 self.clients[new_client.fileno] = new_client
                 self.on_connect(new_client)

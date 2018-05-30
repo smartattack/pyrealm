@@ -11,6 +11,9 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 #------------------------------------------------------------------------------
+#   Modified for PyRealm
+#   Copyright 2018 Peter Morgan
+#------------------------------------------------------------------------------
 
 """
 Manage one Telnet client connected via a TCP/IP socket.
@@ -22,7 +25,7 @@ import time
 from miniboa.error import BogConnectionLost
 from miniboa.xterm import colorize
 from miniboa.xterm import word_wrap
-
+from globals import log
 
 #---[ Telnet Notes ]-----------------------------------------------------------
 # (See RFC 854 for more information)
@@ -151,7 +154,7 @@ class TelnetClient(object):
 
 #    def __del__(self):
 
-#        print("Telnet destructor called")
+#        log.debug("Telnet destructor called")
 #        pass
 
     def get_command(self):
@@ -276,7 +279,7 @@ class TelnetClient(object):
             try:
                 sent = self.sock.send(self.send_buffer)
             except socket.error as err:
-                print("!! SEND error '{}:{}' from {}".format(err[0], err[1],self.addrport()))
+                log.error("!! SEND error '{}:{}' from {}".format(err[0], err[1],self.addrport()))
                 self.active = False
                 return
             self.bytes_sent += sent
@@ -291,7 +294,7 @@ class TelnetClient(object):
         try:
             data = self.sock.recv(2048)
         except socket.error as ex:
-            print("?? socket.recv() error '{}:{}' from {}".format(ex[0], ex[1], self.addrport()))
+            log.error("?? socket.recv() error '{}:{}' from {}".format(ex[0], ex[1], self.addrport()))
             raise BogConnectionLost()
 
         ## Did they close the connection?
@@ -330,7 +333,7 @@ class TelnetClient(object):
 
     def _echo_byte(self, byte):
         """
-        Echo a character back to the client and convert LF into CR\LF.
+        Echo a character back to the client and convert LF into CR/LF.
         """
         if byte == '\n':
             self.send_buffer += '\r'
@@ -414,7 +417,7 @@ class TelnetClient(object):
         """
         Handle incoming Telnet commands that are two bytes long.
         """
-        #print("got two byte cmd {}.format(ord(cmd)))
+        log.debug("got two byte cmd {}".format(ord(cmd)))
 
         if cmd == SB:
             ## Begin capturing a sub-negotiation string
@@ -451,7 +454,7 @@ class TelnetClient(object):
             pass
 
         else:
-            print("2BC: Should not be here.")
+            log.warning("2BC: Should not be here.")
 
         self.telnet_got_iac = False
         self.telnet_got_cmd = None
@@ -461,7 +464,7 @@ class TelnetClient(object):
         Handle incoming Telnet commmands that are three bytes long.
         """
         cmd = self.telnet_got_cmd
-        #print("got three byte cmd {}:{}".format(ord(cmd), ord(option)))
+        log.debug("got three byte cmd {}:{}".format(ord(cmd), ord(option)))
 
         ## Incoming DO's and DONT's refer to the status of this end
 
@@ -645,7 +648,7 @@ class TelnetClient(object):
                     self._iac_dont(TTYPE)
 
         else:
-            print("3BC: Should not be here.")
+            log.warning("3BC: Should not be here.")
 
         self.telnet_got_iac = False
         self.telnet_got_cmd = None
@@ -660,16 +663,16 @@ class TelnetClient(object):
 
             if bloc[0] == TTYPE and bloc[1] == IS:
                 self.terminal_type = bloc[2:]
-                #print("Terminal type = '{}'"format(self.terminal_type))
+                log.debug("Terminal type = '{}'".format(self.terminal_type))
 
             if bloc[0] == NAWS:
                 if len(bloc) != 5:
-                    print("Bad length on NAWS SB: {}".format(len(bloc)))
+                    log.warning("Bad length on NAWS SB: {}".format(len(bloc)))
                 else:
                     self.columns = (256 * ord(bloc[1])) + ord(bloc[2])
                     self.rows = (256 * ord(bloc[3])) + ord(bloc[4])
 
-                #print("Screen is {} x {}"format(self.columns, self.rows))
+                log.debug("Screen is {} x {}".format(self.columns, self.rows))
 
         self.telnet_sb_buffer = ''
 
