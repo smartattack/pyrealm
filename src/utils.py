@@ -4,11 +4,14 @@ Utility functions for PyRealm
 
 import logging
 
-def init_log(filename = '../log/pyrealms.log'):
+def init_log(filename = '../log/pyrealms.log', level = logging.DEBUG):
 
         log = logging.getLogger('self.log')
-        log.setLevel(logging.DEBUG)
+        log.setLevel(level)
         fh = logging.FileHandler(filename)
-        fh.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+        if level == logging.DEBUG:
+            fh.setFormatter(logging.Formatter('%(asctime)s %(filename)s:%(lineno)s %(levelname)s: %(message)s'))
+        else:
+            fh.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
         log.addHandler(fh)
         return log
