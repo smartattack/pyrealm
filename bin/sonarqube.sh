@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT_ROOT=~/PycharmProjects/pyrealm
+PROJECT_ROOT=$(pwd)/..
 
 (
 cd ${PROJECT_ROOT}
