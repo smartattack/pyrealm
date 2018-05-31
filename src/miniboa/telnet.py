@@ -69,35 +69,38 @@ UNKNOWN = -1
 
 #--[ Telnet Commands ]---------------------------------------------------------
 
-SE      = '\x240'      # End of subnegotiation parameters
-NOP     = '\x241'      # No operation
-DATMK   = '\x242'      # Data stream portion of a sync.
-BREAK   = '\x243'      # NVT Character BRK
-IP      = '\x244'      # Interrupt Process
-AO      = '\x245'      # Abort Output
-AYT     = '\x246'      # Are you there
-EC      = '\x247'      # Erase Character
-EL      = '\x248'      # Erase Line
-GA      = '\x249'      # The Go Ahead Signal
-SB      = '\x250'      # Sub-option to follow
-WILL    = '\x251'      # Will; request or confirm option begin
-WONT    = '\x252'      # Wont; deny option request
-DO      = '\x253'      # Do = Request or confirm remote option
-DONT    = '\x254'      # Don't = Demand or confirm option halt
-IAC     = '\x255'      # Interpret as Command
-SEND    = '\x001'      # Sub-process negotiation SEND command
-IS      = '\x000'      # Sub-process negotiation IS command
+SE      = chr(240)      # End of subnegotiation parameters
+NOP     = chr(241)      # No operation
+DATMK   = chr(242)      # Data stream portion of a sync.
+BREAK   = chr(243)      # NVT Character BRK
+IP      = chr(244)      # Interrupt Process
+AO      = chr(245)      # Abort Output
+AYT     = chr(246)      # Are you there
+EC      = chr(247)      # Erase Character
+EL      = chr(248)      # Erase Line
+GA      = chr(249)      # The Go Ahead Signal
+SB      = chr(250)      # Sub-option to follow
+WILL    = chr(251)      # Will; request or confirm option begin
+WONT    = chr(252)      # Wont; deny option request
+DO      = chr(253)      # Do = Request or confirm remote option
+DONT    = chr(254)      # Don)t = Demand or confirm option halt
+IAC     = chr(255)      # Interpret as Command
+SEND    = chr(1)        # Sub-process negotiation SEND command
+IS      = chr(0)        # Sub-process negotiation IS command
 
 #--[ Telnet Options ]----------------------------------------------------------
 
-BINARY  = '\x000'      # Transmit Binary
-ECHO    = '\x001'      # Echo characters back to sender
-RECON   = '\x002'      # Reconnection
-SGA     = '\x003'      # Suppress Go-Ahead
-TTYPE   = '\x024'      # Terminal Type
-NAWS    = '\x031'      # Negotiate About Window Size
-LINEMO  = '\x034'      # Line Mode
+BINARY  = chr(0)       # Transmit Binary
+ECHO    = chr(1)       # Echo characters back to sender
+RECON   = chr(2)       # Reconnection
+SGA     = chr(3)       # Suppress Go-Ahead
+TTYPE   = chr(24)      # Terminal Type
+NAWS    = chr(31)      # Negotiate About Window Size
+LINEMO  = chr(34)      # Line Mode
 
+#--[ PROTOCOLS ] --------------------------------------------------------------
+MCCP    = chr(86)
+MSP     = chr(90)
 
 #-----------------------------------------------------------------Telnet Option
 
@@ -193,6 +196,12 @@ class TelnetClient(object):
         for line in lines:
             self.send_cc(line + '\n')
 
+    def keepalive(self):
+        """
+        Send a keepalive - helps detect client disconnects
+        """
+        self._iac_nop()
+
     def deactivate(self):
         """
         Set the client to disconnect on the next server poll.
@@ -203,7 +212,7 @@ class TelnetClient(object):
         """
         Return the DE's IP address and port number as a string.
         """
-        return "%s:%s" % (self.address, self.port)
+        return "{}:{}".format(self.address, self.port)
 
     def idle(self):
         """
@@ -262,6 +271,16 @@ class TelnetClient(object):
         """
         self._iac_do(NAWS)
         self._note_reply_pending(NAWS, True)
+    
+    def request_mccp(self):
+        """Tell DE we support Mud Client Compression Protocol"""
+        self._iac_will(MCCP)
+        self._note_reply_pending(MCCP, True)
+
+    def request_msp(self):
+        """Tell DE we support Mud Sound Protocol"""
+        self._iac_will(MSP)
+        self._note_reply_pending(MSP, True)
 
     def request_terminal_type(self):
         """
@@ -277,9 +296,9 @@ class TelnetClient(object):
         """
         if len(self.send_buffer):
             try:
-                sent = self.sock.send(self.send_buffer.encode())
+                sent = self.sock.send(self.send_buffer.encode('iso8859-1'))
             except socket.error as err:
-                log.error("!! SEND error '{}:{}' from {}".format(err[0], err[1],self.addrport()))
+                log.error("!! SEND error '{}' from {}".format(err,self.addrport()))
                 self.active = False
                 return
             self.bytes_sent += sent
@@ -292,14 +311,15 @@ class TelnetClient(object):
         Called by TelnetServer when recv data is ready.
         """
         try:
-            data = self.sock.recv(2048)
-        except socket.error as ex:
-            log.error("?? socket.recv() error '{}:{}' from {}".format(ex[0], ex[1], self.addrport()))
+            data = str(self.sock.recv(2048), "iso8859-1")
+        except socket.error as err:
+            log.error("?? socket.recv() error '{}' from {}".format(err, self.addrport()))
             raise BogConnectionLost()
 
         ## Did they close the connection?
         size = len(data)
         if size == 0:
+            log.warning('Connection lost: {}'.format(self.addrport()))
             raise BogConnectionLost()
 
         ## Update some trackers
@@ -329,7 +349,7 @@ class TelnetClient(object):
         #if (byte >= ' ' and byte <= '~') or byte == '\n':
         if self.telnet_echo:
             self._echo_byte(byte)
-        self.recv_buffer += chr(byte)
+        self.recv_buffer += byte
 
     def _echo_byte(self, byte):
         """
@@ -417,7 +437,6 @@ class TelnetClient(object):
         """
         Handle incoming Telnet commands that are two bytes long.
         """
-        log.debug("got two byte cmd {}".format(ord(cmd)))
 
         if cmd == SB:
             ## Begin capturing a sub-negotiation string
@@ -464,7 +483,6 @@ class TelnetClient(object):
         Handle incoming Telnet commmands that are three bytes long.
         """
         cmd = self.telnet_got_cmd
-        log.debug("got three byte cmd {}:{}".format(ord(cmd), ord(option)))
 
         ## Incoming DO's and DONT's refer to the status of this end
 
@@ -506,6 +524,34 @@ class TelnetClient(object):
                         self._check_local_option(SGA) is UNKNOWN):
                     self._note_local_option(SGA, True)
                     self._iac_will(SGA)
+                    ## Just nod
+
+            elif option == MSP:
+
+                log.debug('MSP Option negotiation detected...')
+                if self._check_reply_pending(MSP):
+                    self._note_reply_pending(MSP, False)
+                    self._note_local_option(MSP, True)
+
+                elif (self._check_local_option(MSP) is False or
+                        self._check_local_option(MSP) is UNKNOWN):
+                    self._note_local_option(MSP, True)
+                    self._iac_will(MSP)
+                    log.debug('Client supports MSP')
+                    ## Just nod
+
+            elif option == MCCP:
+
+                log.debug('MCCP Option negotiation detected...')
+                if self._check_reply_pending(MCCP):
+                    self._note_reply_pending(MCCP, False)
+                    self._note_local_option(MCCP, True)
+
+                elif (self._check_local_option(MCCP) is False or
+                        self._check_local_option(MCCP) is UNKNOWN):
+                    self._note_local_option(MCCP, True)
+                    self._iac_will(MCCP)
+                    log.debug('Client supports MCCP')
                     ## Just nod
 
             else:
@@ -556,6 +602,32 @@ class TelnetClient(object):
                     self._note_local_option(SGA, False)
                     self._iac_will(SGA)
                     ## Just nod
+
+            elif option == MCCP:
+
+                if self._check_reply_pending(MCCP):
+                    self._note_reply_pending(MCCP, False)
+                    self._note_local_option(MCCP, False)
+
+                elif (self._check_remote_option(MCCP) is True or
+                        self._check_remote_option(MCCP) is UNKNOWN):
+                    self._note_local_option(MCCP, False)
+                    self._iac_will(MCCP)
+                    ## Just nod
+
+            elif option == MSP:
+
+                if self._check_reply_pending(MSP):
+                    self._note_reply_pending(MSP, False)
+                    self._note_local_option(MSP, False)
+
+                elif (self._check_remote_option(MSP) is True or
+                        self._check_remote_option(MSP) is UNKNOWN):
+                    self._note_local_option(MSP, False)
+                    self._iac_will(MSP)
+                    ## Just nod
+
+
 
             else:
 
@@ -638,6 +710,30 @@ class TelnetClient(object):
                     self._note_remote_option(SGA, False)
                     self._iac_dont(SGA)
 
+            elif option == MCCP:
+
+                if self._check_reply_pending(MCCP):
+                    self._note_reply_pending(MCCP, False)
+                    self._note_remote_option(MCCP, False)
+
+                elif (self._check_remote_option(MCCP) is True or
+                        self._check_remote_option(MCCP) is UNKNOWN):
+                    self._note_remote_option(MCCP, False)
+                    self._iac_dont(MCCP)
+
+            elif option == MSP:
+
+                if self._check_reply_pending(MSP):
+                    self._note_reply_pending(MSP, False)
+                    self._note_remote_option(MSP, False)
+
+                elif (self._check_remote_option(MSP) is True or
+                        self._check_remote_option(MSP) is UNKNOWN):
+                    self._note_remote_option(MSP, False)
+                    self._iac_dont(MSP)
+
+            elif option == TTYPE:
+
                 if self._check_reply_pending(TTYPE):
                     self._note_reply_pending(TTYPE, False)
                     self._note_remote_option(TTYPE, False)
@@ -684,37 +780,40 @@ class TelnetClient(object):
 
     def _check_local_option(self, option):
         """Test the status of local negotiated Telnet options."""
-        if not self.telnet_opt_dict.has_key(option):
+        if not option in self.telnet_opt_dict:
             self.telnet_opt_dict[option] = TelnetOption()
         return self.telnet_opt_dict[option].local_option
 
+
     def _note_local_option(self, option, state):
         """Record the status of local negotiated Telnet options."""
-        if not self.telnet_opt_dict.has_key(option):
+        if not option in self.telnet_opt_dict:
             self.telnet_opt_dict[option] = TelnetOption()
         self.telnet_opt_dict[option].local_option = state
 
     def _check_remote_option(self, option):
         """Test the status of remote negotiated Telnet options."""
-        if not self.telnet_opt_dict.has_key(option):
+        if not option in self.telnet_opt_dict:
             self.telnet_opt_dict[option] = TelnetOption()
         return self.telnet_opt_dict[option].remote_option
 
     def _note_remote_option(self, option, state):
         """Record the status of local negotiated Telnet options."""
-        if not self.telnet_opt_dict.has_key(option):
+        if not option in self.telnet_opt_dict:
             self.telnet_opt_dict[option] = TelnetOption()
         self.telnet_opt_dict[option].remote_option = state
 
     def _check_reply_pending(self, option):
         """Test the status of requested Telnet options."""
-        if not self.telnet_opt_dict.has_key(option):
+        if not option in self.telnet_opt_dict:
             self.telnet_opt_dict[option] = TelnetOption()
         return self.telnet_opt_dict[option].reply_pending
 
+
     def _note_reply_pending(self, option, state):
         """Record the status of requested Telnet options."""
-        if not self.telnet_opt_dict.has_key(option):
+
+        if not option in self.telnet_opt_dict:
             self.telnet_opt_dict[option] = TelnetOption()
         self.telnet_opt_dict[option].reply_pending = state
 
@@ -723,16 +822,19 @@ class TelnetClient(object):
 
     def _iac_do(self, option):
         """Send a Telnet IAC "DO" sequence."""
-        self.send('%c%c%c' % (IAC, DO, option))
+        self.send('{}{}{}'.format(IAC, DO, option))
 
     def _iac_dont(self, option):
         """Send a Telnet IAC "DONT" sequence."""
-        self.send('%c%c%c' % (IAC, DONT, option))
+        self.send('{}{}{}'.format(IAC, DONT, option))
 
     def _iac_will(self, option):
         """Send a Telnet IAC "WILL" sequence."""
-        self.send('%c%c%c' % (IAC, WILL, option))
+        self.send('{}{}{}'.format(IAC, WILL, option))
 
     def _iac_wont(self, option):
         """Send a Telnet IAC "WONT" sequence."""
-        self.send('%c%c%c' % (IAC, WONT, option))
+        self.send('{}{}{}'.format(IAC, WONT, option))
+    def _iac_nop(self):
+        """Send a Telnet IAC "NOP" sequence."""
+        self.send('{}{}'.format(chr(255), chr(246)))

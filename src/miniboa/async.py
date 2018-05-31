@@ -26,6 +26,7 @@ import sys
 from miniboa.telnet import TelnetClient
 from miniboa.error import BogConnectionLost
 from utils import log
+import miniboa.telnet
 
 
 ## Cap sockets to 512 on Windows because winsock can only process 512 at time
@@ -129,6 +130,7 @@ class TelnetServer(object):
         recv_list = [self.server_fileno]    # always add the server
 
         for client in list(self.clients.values()):
+            #client.keepalive()
             if client.active:
                 recv_list.append(client.fileno)
             ## Delete inactive connections from the dictionary
@@ -154,6 +156,11 @@ class TelnetServer(object):
             ## If we can't even use select(), game over man, game over
             log.critical("!! FATAL SELECT error '{}'!".format(err), file=sys.stderr)
             sys.exit(1)
+
+        ## Handle sockets that disconnected
+        for sock_fileno in elist:
+            log.info("Socket exception for {}".format(self.clients[sock_fileno].addrport()))
+            self.clients[sock_fileno].active == False
 
         ## Process socket file descriptors with data to recieve
         for sock_fileno in rlist:
@@ -181,7 +188,7 @@ class TelnetServer(object):
                 self.on_connect(new_client)
 
             else:
-                ## Call the connection's recieve method
+                ## Call the connection's receive method
                 try:
                     self.clients[sock_fileno].socket_recv()
                 except BogConnectionLost:
