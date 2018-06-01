@@ -528,7 +528,7 @@ class TelnetClient(object):
 
             elif option == MSP:
 
-                log.debug('MSP Option negotiation detected...')
+                #log.debug('MSP Option negotiation detected...')
                 if self._check_reply_pending(MSP):
                     self._note_reply_pending(MSP, False)
                     self._note_local_option(MSP, True)
@@ -542,7 +542,7 @@ class TelnetClient(object):
 
             elif option == MCCP:
 
-                log.debug('MCCP Option negotiation detected...')
+                #log.debug('MCCP Option negotiation detected...')
                 if self._check_reply_pending(MCCP):
                     self._note_reply_pending(MCCP, False)
                     self._note_local_option(MCCP, True)
@@ -768,7 +768,7 @@ class TelnetClient(object):
                     self.columns = (256 * ord(bloc[1])) + ord(bloc[2])
                     self.rows = (256 * ord(bloc[3])) + ord(bloc[4])
 
-                log.debug("Screen is {} x {}".format(self.columns, self.rows))
+                #log.debug("Screen is {} x {}".format(self.columns, self.rows))
 
         self.telnet_sb_buffer = ''
 
