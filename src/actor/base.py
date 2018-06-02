@@ -58,35 +58,44 @@ class BaseActor(object):
         self._worn = {}
 
 
+    def update(self, **kwargs):
+        """Update one or many attributes/stats/profile of a player"""
+        log.debug('Called player.update():')
+        for k,v in kwargs.items():
+            if k in self._stats:
+                log.debug(' +-> adding stats {}={}'.format(k, v))
+                try:
+                    self._stats[k] = int(v)
+                except (ValueError, KeyError) as e:
+                    log.error(' +-> XX Adding stats FAILED: {}={}: {}'.format(k, v, e))
+            elif k in self._attributes:
+                log.debug(' +-> adding attribute {}={}'.format(k, v))
+                try:
+                    self._attributes[k] = int(v)
+                except (ValueError, KeyError) as e:
+                    log.error(' +-> XX Adding attribute FAILED: {}={}: {}'.format(k, v, e))
+            elif k in self._profile:
+                log.debug(' +-> adding profile {}={}'.format(k, v))
+                try:
+                    self._profile[k] = int(v)
+                except (ValueError, KeyError) as e:
+                    log.error(' +-> XX Adding profile FAILED: {}={}: {}'.format(k, v, e))
 
-    """
-    FIXME: Do I need setters in here at all?
-    Maybe a derivative class has to implement setters,
-    especially for attributes/profile/stats
-    """
 
     def get_name(self):
         return self._profile['name']
 
-    def set_name(self, name):
-        self._profile['name'] = name
 
     def get_race(self):
         return self._profile['race']
 
-    def set_race(self, race):
-        self._profile['race'] = race
 
     def get_gender(self):
         return self._profile['gender']
 
-    def set_gender(self, gender):
-        self._profile['gender'] = gender
 
     def get_class(self):
         return self._profile['class']
 
-    def set_class(self, pclass):
-        self._profile['class'] = pclass
 
 
