@@ -8,7 +8,7 @@ from utils import log
 from miniboa import TelnetServer
 
 
-# Game state / config
+# Default Game state / config
 CLIENTS = []
 IDLE_TIMEOUT = 300
 GAME_RUNNING = True
@@ -19,17 +19,14 @@ Welcome to PyRealm!
 '''
 
 
+
 def connect_hook(client):
     log.info("--> Received connection from {}, sending welcome banner".format(client.addrport()))
     client.request_naws()
     client.request_terminal_type()
-    client.request_mccp()
-    client.request_msp()
+    #client.request_mccp()
+    #client.request_msp()
     client.send(WELCOME_BANNER)
-    if CLIENTS:
-        client.send('Also connected are: {}\n'.format(', '.join(c.addrport() for c in CLIENTS)))
-    else:
-        client.send('You are the only one here.\n')
     CLIENTS.append(client)
 
 

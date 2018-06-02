@@ -18,4 +18,5 @@ def init_log(filename = '../log/pyrealms.log', level = logging.DEBUG):
 
 
 
+# I will be global
 log = init_log()
