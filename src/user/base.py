@@ -17,12 +17,31 @@ class BaseUser(object):
     Holds information about logged in user accounts.
     Stores terminal related user preferences.
     Contains references to client connection and account data.
+    Wraps send and get_command functions.
+    Do not call directly.
     """
 
     def __init__(self, client):
         """Create a user and associate with a connected client"""
         self._client = client
         #Global CLIENTS[] = self
+
+
+    def send(self, msg):
+        """Send text to client, don't wrap but do process colors"""
+        self._client.send_cc(self, msg)
+    
+
+    def senc_wrapped(self, msg):
+        """Send wrapped text to client, processes colors"""
+        self._client.send_wrapped(self, msg)
+    
+
+    def send_raw(self, msg):
+        """Send text to client without any processing"""
+        self._client.send(self, msg)
+    
+
 
     def get_preference(self, which):
         """Return one preference"""
