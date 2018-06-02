@@ -3,7 +3,7 @@ venv
 .scannerwork
 *.py[co]
 __pycache__
-.vscode
+#.vscode
 .idea
 
 *.log
