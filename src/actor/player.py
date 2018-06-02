@@ -1,5 +1,5 @@
 """
-Player is an in-game character played by a user
+Player is an actor being played by a connected user
 """
 
 from utils import log
