@@ -2,12 +2,14 @@
 BaseActor class - base class for NPC and Players
 """
 import copy.copy as copy
+from utils import log
 
 _def_profile = {
     'name':   '',
     'gender': '',
     'race':   '',
-    'class':  ''
+    'class':  '',
+    'age':    ''
 }
 
 _def_stats = {
@@ -55,9 +57,7 @@ class BaseActor(object):
         # items worn or wielded, dict: k=slot, v=item
         self._worn = {}
 
-        # Ability to perform various tasks or skills
-        # Some abilities are granted by class/race
-        self._abilities = set()
+
 
     """
     FIXME: Do I need setters in here at all?
@@ -89,20 +89,4 @@ class BaseActor(object):
     def set_class(self, class):
         self._profile['class'] = class
 
-    def add_ability(self, ability):
-        self._abilities.add(ability)
 
-    def remove_ability(self, ability):
-        self._abilities.remove(ability)
-
-    def clear_abilities(self):
-        self._abilities = set()
-
-    def has_ability(self, ability):
-        if ability in self._abilities:
-            return True
-        else:
-            return False
-    
-    def list_abilities(self):
-        return list(self._abilities)
