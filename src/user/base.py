@@ -1,5 +1,5 @@
 """
-Base User class - base class for logged in accounts
+Base User class - base class for logged in accounts. a FSM.
 """
 
 import copy
@@ -16,7 +16,7 @@ _def_preferences = {
 class BaseUser(object):
     """
     Holds information about logged in user accounts.
-    Stores terminal related user preferences.
+    Stores terminal related user preferences(??)
     Contains references to client connection and account data.
     Wraps send and get_command functions.
     Do not call directly.
@@ -32,6 +32,21 @@ class BaseUser(object):
     FIXME: Maybe I should take BaseActor and BaseUser client function wrappers
     and move them into a Mixin that both inherit from, like TelnetWrapperMixing?
     """
+
+    def change_state(self, state):
+        """Transition to a new state"""
+        self._state = '_state_' + state
+
+
+    def driver(self, func):
+        """Locate a function for current state and execute"""
+        try:
+            self.__getattribute__(self._state)()
+        except Exception as e:
+            # We should never get here
+            log.error('Invalid state passed: {} -> {}'.format(self._state, e))
+            sys.exit(1)
+
 
     def send(self, msg):
         """Send text to client, don't wrap but do process colors"""
@@ -63,13 +78,13 @@ class BaseUser(object):
         return self._client.duration()
 
 
-
     def get_preference(self, which):
         """Return one preference"""
         if which in self._preferences:
             return self._preferences[which]
         else:
             return None
+    
     
     def set_preference(self, which, value):
         """Set a user preference"""
