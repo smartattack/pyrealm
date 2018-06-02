@@ -2,14 +2,15 @@
 Base User class - base class for logged in accounts
 """
 
+import copy
 from utils import log
 from miniboa import TelnetServer
 
 _def_preferences = {
-    color = False,
-    prompt = '>>>',
-    MSP = False,
-    MCCP = False,
+    'color':   False,
+    'prompt':  '>>>',
+    'MSP':     False,
+    'MCCP':    False,
 }
 
 class BaseUser(object):
@@ -25,7 +26,12 @@ class BaseUser(object):
         """Create a user and associate with a connected client"""
         self._client = client
         #Global CLIENTS[] = self
+        self._preferences = copy.copy(_def_preferences)
 
+    """
+    FIXME: Maybe I should take BaseActor and BaseUser client function wrappers
+    and move them into a Mixin that both inherit from, like TelnetWrapperMixing?
+    """
 
     def send(self, msg):
         """Send text to client, don't wrap but do process colors"""
@@ -42,17 +48,35 @@ class BaseUser(object):
         self._client.send(self, msg)
     
 
+    def get_command(self):
+        """Retrieve a command from the client"""
+        return self.get_command()
+
+
+    def get_idle(self):
+        """Return idle_time"""
+        return self._client.idle()
+
+
+    def get_duration(self):
+        """Return connection duration"""
+        return self._client.duration()
+
+
 
     def get_preference(self, which):
         """Return one preference"""
         if which in self._preferences:
-            return self._preference[which]
+            return self._preferences[which]
         else:
             return None
     
     def set_preference(self, which, value):
         """Set a user preference"""
+        """
+        FIXME: this should actually toggle the underlying client's state
+        """
         try:
-            self._preference[which] = value
+            self._preferences[which] = value
         except ValueError as e:
-            log.warning('Setting user preference FAILED: {} -> {}'.format(user._client['name'], e))
+            log.warning('Setting user preference FAILED: {} -> {}'.format(self._client['name'], e))

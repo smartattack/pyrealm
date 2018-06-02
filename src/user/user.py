@@ -13,8 +13,8 @@ class User(BaseUser):
     """
 
     def __init__(self, client):
-        BaseUser.__init__(self, client):
+        BaseUser.__init__(client)
         # Set of allowed commands
-        commands = set()
+        self.commands = set()
 
 
