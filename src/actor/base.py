@@ -1,7 +1,7 @@
 """
 BaseActor class - base class for NPC and Players
 """
-import copy.copy as copy
+import copy as copy
 from utils import log
 
 _def_profile = {
@@ -43,13 +43,13 @@ class BaseActor(object):
         self.is_player = False
         
         # Hold basic player info (name, gender, race, class)
-        self._profile = copy(_def_profile)
+        self._profile = copy.copy(_def_profile)
 
         # Holds current actor state (hp, armor, xp, strength)
-        self._stats = copy(_def_stats)
+        self._stats = copy.copy(_def_stats)
 
         # Hold player traits (strength, intellect, etc)
-        self._attributes = copy(_def_attributes)
+        self._attributes = copy.copy(_def_attributes)
 
         # inventory, dict:  k=item, v=count
         self._carried = {}
@@ -86,7 +86,7 @@ class BaseActor(object):
     def get_class(self):
         return self._profile['class']
 
-    def set_class(self, class):
-        self._profile['class'] = class
+    def set_class(self, pclass):
+        self._profile['class'] = pclass
 
 

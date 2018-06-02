@@ -3,6 +3,7 @@ Player is an in-game character played by a user
 """
 
 from utils import log
+from actor.base import BaseActor
 
 class Player(BaseActor):
     """Player class - holds information about player characters"""
@@ -38,20 +39,20 @@ class Player(BaseActor):
                 log.debug(' +-> adding stats {}={}'.format(k, v))
                 try:
                     self._stats[k] = int(v)
-                except ValueError or KeyError as e:
-                    log.error(' +-> XX Adding stats FAILED: {}={}'.format(k, v))
+                except (ValueError, KeyError) as e:
+                    log.error(' +-> XX Adding stats FAILED: {}={}: {}'.format(k, v, e))
             elif k in self._attributes:
                 log.debug(' +-> adding attribute {}={}'.format(k, v))
                 try:
-                    self._attribute[k] = int(v)
-                except ValueError or KeyError as e:
-                    log.error(' +-> XX Adding attribute FAILED: {}={}'.format(k, v))
+                    self._attributes[k] = int(v)
+                except (ValueError, KeyError) as e:
+                    log.error(' +-> XX Adding attribute FAILED: {}={}: {}'.format(k, v, e))
             elif k in self._profile:
                 log.debug(' +-> adding profile {}={}'.format(k, v))
                 try:
                     self._profile[k] = int(v)
-                except ValueError or KeyError as e:
-                    log.error(' +-> XX Adding profile FAILED: {}={}'.format(k, v))          
+                except (ValueError, KeyError) as e:
+                    log.error(' +-> XX Adding profile FAILED: {}={}: {}'.format(k, v, e))          
 
     def add_ability(self, ability):
         self._abilities.add(ability)
