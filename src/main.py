@@ -7,6 +7,7 @@ Copyright 2018 Peter Morgan
 from utils import log
 from miniboa import TelnetServer
 import globals as GLOBAL
+from user.login import Login
 
 
 def connect_hook(client):
@@ -17,9 +18,9 @@ def connect_hook(client):
     #client.request_mccp()
     #client.request_msp()
     client.send(GLOBAL.WELCOME_BANNER)
-    #user = LoginHandler(client)
+    user = Login(client)
     GLOBAL.CLIENTS.append(client)
-    #LOBBY[client] = user
+    GLOBAL.LOBBY[client] = user
 
 
 def disconnect_hook(client):
@@ -38,18 +39,20 @@ def kick_idlers():
 
 
 def process_commands():
-    for c in GLOBAL.CLIENTS:
-        if c in GLOBAL.LOBBY:
-            GLOBAL.LOBBY[c].driver()
-        elif c in GLOBAL.PLAYERS:
-            GLOBAL.PLAYERS[c].driver()
-"""
     for user in GLOBAL.LOBBY.values():
         # process commands
-        pass
-    for user in GLOBAL.PLAYERS.values():
-        # process commands
-        pass
+        if user._client.active and user._client.cmd_ready:
+            user.driver()
+#    for user in GLOBAL.PLAYERS.values():
+#        # process commands
+#        pass
+"""
+    for c in GLOBAL.CLIENTS:
+        if c.active and c.cmd_ready:
+            if c in GLOBAL.LOBBY:
+                GLOBAL.LOBBY[c].driver()
+            elif c in GLOBAL.PLAYERS:
+                GLOBAL.PLAYERS[c].driver()
 """
 
 
