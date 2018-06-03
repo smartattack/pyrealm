@@ -5,7 +5,9 @@ Login Handler - Implements a FSM to handle logins and chargen
 from actor.player import Player
 from user.base_user import BaseUser
 from utils import log
-
+from user.account import validate_password, hash_password
+from user.db import account_exists, save_account, load_account
+from datetime import datetime
 
 class Login(BaseUser):
     """
@@ -16,6 +18,7 @@ class Login(BaseUser):
         BaseUser.__init__(self, client)
         self.change_state('ask_username')
         self.driver()
+        self.username = 'Guest'
 
 
     def _state_ask_username(self):
@@ -52,9 +55,25 @@ class Login(BaseUser):
         self.password_mode_off()
         self.send('\n')
         password = self.get_command()
-        if password.lower() == 'pass':
-            self.send('Welcome: {}\n\n'.format(self.username))
+        if account_exists(self.username):
+            account = load_account(self.username)
+            print("ACCOUNT: |{}|".format(account))
+            if validate_password(password, account.password, account.salt):
+                account.failures = 0
+                account.last_login = datetime.now()
+                log.info('AUTH LOGIN: {}'.format(self.username))
+                save_account(account)
+                self.send('Welcome: {}\n\n'.format(self.username))
+                #load user
+            else:
+                account.failures += 1
+                log.warning('AUTH WARNING: {} login failures for {}'.format(
+                    account.failures, self.username))
+                save_account(account)
+                self.send('Invalid credentials!\n\n')
+                self.change_state('ask_username')
         else:
+            print("ACCOUNT NOT FOUND: {}".format(self.username))
             self.send('Invalid credentials!\n\n')
             self.change_state('ask_username')
         self.driver()
@@ -127,10 +146,10 @@ class Login(BaseUser):
         self.send('\n') 
         g = self.get_command().lower()
         if g in ('m', 'male'):
-            gender = 'M'
+            self.gender = 'M'
             self.change_state('new_ask_race')
         elif g in ('f', 'female'):
-            gender = 'F'
+            self.gender = 'F'
             self.change_state('new_ask_race')
         else:
             self.send('Please choose only m for male or f for female!\n')

@@ -60,7 +60,7 @@ class BaseUser(object):
         self._client.send_cc(msg)
     
 
-    def senc_wrapped(self, msg):
+    def send_wrapped(self, msg):
         """Send wrapped text to client, processes colors"""
         self._client.send_wrapped(msg)
     
