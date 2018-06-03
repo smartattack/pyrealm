@@ -6,61 +6,68 @@ Copyright 2018 Peter Morgan
 """
 from utils import log
 from miniboa import TelnetServer
-
-
-# Default Game state / config
-CLIENTS = []
-IDLE_TIMEOUT = 300
-GAME_RUNNING = True
-PORT = 1234
-WELCOME_BANNER = '''
-Welcome to PyRealm!
-
-'''
-
+import globals as GLOBAL
 
 
 def connect_hook(client):
     log.info("--> Received connection from {}, sending welcome banner".format(client.addrport()))
+    # Get terminal environment
     client.request_naws()
     client.request_terminal_type()
     #client.request_mccp()
     #client.request_msp()
-    client.send(WELCOME_BANNER)
-    CLIENTS.append(client)
+    client.send(GLOBAL.WELCOME_BANNER)
+    #user = LoginHandler(client)
+    GLOBAL.CLIENTS.append(client)
+    #LOBBY[client] = user
 
 
 def disconnect_hook(client):
     log.info("--> Lost connection to {}".format(client.addrport()))
-    CLIENTS.remove(client)
+    if client in GLOBAL.LOBBY.items():
+        log.info('Removing {} from LOBBY'.format(client.addrport()))
+        del GLOBAL.LOBBY[client]
+        GLOBAL.CLIENTS.remove(client)
 
 
 def kick_idlers():
-    for c in CLIENTS:
-        if c.idle() > IDLE_TIMEOUT:
+    for c in GLOBAL.CLIENTS:
+        if c.idle() > GLOBAL.IDLE_TIMEOUT:
             c.active = False
             log.info("Kicking idle client: {}".format(c.addrport()))
 
-def process():
-    pass
+
+def process_commands():
+    for c in GLOBAL.CLIENTS:
+        if c in GLOBAL.LOBBY:
+            GLOBAL.LOBBY[c].driver()
+        elif c in GLOBAL.PLAYERS:
+            GLOBAL.PLAYERS[c].driver()
+"""
+    for user in GLOBAL.LOBBY.values():
+        # process commands
+        pass
+    for user in GLOBAL.PLAYERS.values():
+        # process commands
+        pass
+"""
 
 
 def main():
 
-    log.info("Starting server on port {}".format(PORT))
+    log.info("Starting server on port {}".format(GLOBAL.PORT))
 
-    server = TelnetServer(port=PORT, timeout=.05)
+    server = TelnetServer(port=GLOBAL.PORT, timeout=.05)
     # set our own hooks for welcome/disconnect messaging
     server.on_connect = connect_hook
     server.on_disconnect = disconnect_hook
 
-    while GAME_RUNNING:
+    while GLOBAL.GAME_RUNNING:
         # Tick / run game here
         server.poll()
         kick_idlers()
-        process()
+        process_commands()
 
-        
 
     log.info("Server shutdown received")
 
