@@ -3,7 +3,7 @@ User Class - represents a connected user
 """
 
 from utils import log
-from user import BaseUser
+from user.base_user import BaseUser
 
 
 class User(BaseUser):

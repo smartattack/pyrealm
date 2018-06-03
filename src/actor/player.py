@@ -3,7 +3,7 @@ Player is an actor being played by a connected user
 """
 
 from utils import log
-from actor.base import BaseActor
+from actor.base_actor import BaseActor
 
 class Player(BaseActor):
     """Player class - holds information about player characters"""

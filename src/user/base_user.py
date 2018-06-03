@@ -2,6 +2,7 @@
 Base User class - base class for logged in accounts. a FSM.
 """
 
+import sys
 import copy
 from utils import log
 from miniboa import TelnetServer
@@ -27,6 +28,7 @@ class BaseUser(object):
         self._client = client
         #Global CLIENTS[] = self
         self._preferences = copy.copy(_def_preferences)
+        self._state = 'none'
 
     """
     FIXME: Maybe I should take BaseActor and BaseUser client function wrappers
@@ -46,6 +48,11 @@ class BaseUser(object):
             # We should never get here
             log.error('Invalid state passed: {} -> {}'.format(self._state, e))
             sys.exit(1)
+
+
+    def _state_none(self):
+        """Empty state to serve as a default"""
+        pass
 
 
     def send(self, msg):
