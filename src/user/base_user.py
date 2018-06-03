@@ -40,7 +40,7 @@ class BaseUser(object):
         self._state = '_state_' + state
 
 
-    def driver(self, func):
+    def driver(self):
         """Locate a function for current state and execute"""
         try:
             self.__getattribute__(self._state)()
@@ -57,22 +57,22 @@ class BaseUser(object):
 
     def send(self, msg):
         """Send text to client, don't wrap but do process colors"""
-        self._client.send_cc(self, msg)
+        self._client.send_cc(msg)
     
 
     def senc_wrapped(self, msg):
         """Send wrapped text to client, processes colors"""
-        self._client.send_wrapped(self, msg)
+        self._client.send_wrapped(msg)
     
 
     def send_raw(self, msg):
         """Send text to client without any processing"""
-        self._client.send(self, msg)
+        self._client.send(msg)
     
 
     def get_command(self):
         """Retrieve a command from the client"""
-        return self.get_command()
+        return self._client.get_command()
 
 
     def get_idle(self):
@@ -83,6 +83,21 @@ class BaseUser(object):
     def get_duration(self):
         """Return connection duration"""
         return self._client.duration()
+
+
+    def password_mode_on(self):
+        """Disable echo"""
+        self._client.password_mode_on()
+
+
+    def password_mode_off(self):
+        """Re-enable echo"""
+        self._client.password_mode_off()
+ 
+ 
+    def deactivate(self):
+        """Deactivate client session"""
+        self._client.deactivate()
 
 
     def get_preference(self, which):
