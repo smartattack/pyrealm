@@ -61,6 +61,8 @@ class Login(BaseUser):
                 account['failures'] = 0
                 account['logins'] += 1
                 account['last_login'] = datetime.now()
+                # For now we assume player == account/user
+                account['playing'] = account['username']
                 log.info('AUTH LOGIN: {}'.format(self.username))
                 save_account(account)
                 self.send('Welcome: {}\n\n'.format(self.username))

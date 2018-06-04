@@ -24,6 +24,7 @@ def create_accounts_table():
               hash BLOB,
               salt TEXT,
               active INT,
+              profiles TEXT,
               banned INT,
               created TIMESTAMP,
               last_login TIMESTAMP,
@@ -103,24 +104,25 @@ def save_account(data):
     result = None
     if account_exists(data['username']):
         sql = '''UPDATE accounts SET hash=?, salt=?,
-                    active=?, banned=?, created=?, last_login=?, 
+                    active=?, playing=?, banned=?, created=?, last_login=?, 
                     logins=?, failures=? WHERE username=?'''
         log.debug('EXECUTE SQL: {} <- {}'.format(sql, data))
         try:
             result = CURSOR.execute(sql, (data['hash'], data['salt'],
-                data['active'], data['banned'], data['created'],
+                data['active'], data['playing'], data['banned'], data['created'],
                 data['last_login'], data['logins'], data['failures'],
                 data['username']))
         except sqlite3.Error as e:
             log.error('save_account() FAILED: {}'.format(e))
     else:
         sql = '''INSERT INTO accounts (username, hash, salt, active,
-                    banned, created, last_login, logins, failures ) 
+                    playing, banned, created, last_login, logins, failures ) 
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);'''
         log.debug('EXECUTE SQL: {} <- {}'.format(sql, data))
         try:
             result = CURSOR.execute(sql, (data['username'],
-                data['hash'], data['salt'], data['active'], data['banned'],
+                data['hash'], data['salt'], data['active'], 
+                data['playing'], data['banned'],
                 data['created'], data['last_login'], 
                 data['logins'], data['failures']))
         except sqlite3.Error as e:
