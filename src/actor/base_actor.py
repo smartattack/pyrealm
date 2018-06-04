@@ -4,14 +4,6 @@ BaseActor class - base class for NPC and Players
 import copy as copy
 from utils import log
 
-_def_profile = {
-    'name':   '',
-    'gender': '',
-    'race':   '',
-    'class':  '',
-    'age':    ''
-}
-
 _def_stats = {
     'hp':    0,
     'maxhp': 0,
@@ -42,9 +34,11 @@ class BaseActor(object):
         self.location = None
         self.is_player = False
         
-        # Hold basic player info (name, gender, race, class)
-        self._profile = copy.copy(_def_profile)
-
+        self._name = 'nobody'
+        self._gender = 'M'
+        self._class = ''
+        self._race = ''
+        
         # Holds current actor state (hp, armor, xp, strength)
         self._stats = copy.copy(_def_stats)
 
@@ -74,28 +68,38 @@ class BaseActor(object):
                     self._attributes[k] = int(v)
                 except (ValueError, KeyError) as e:
                     log.error(' +-> XX Adding attribute FAILED: {}={}: {}'.format(k, v, e))
-            elif k in self._profile:
-                log.debug(' +-> adding profile {}={}'.format(k, v))
-                try:
-                    self._profile[k] = int(v)
-                except (ValueError, KeyError) as e:
-                    log.error(' +-> XX Adding profile FAILED: {}={}: {}'.format(k, v, e))
+            else:
+                log.error(' +-> ?? Unknown argument: {}={}'.format(k, v))
 
 
     def get_name(self):
-        return self._profile['name']
+        return self._name
+
+
+    def set_name(self, name):
+        self._name = name
 
 
     def get_race(self):
-        return self._profile['race']
+
+        return self._race
+
+
+    def set_race(self, race):
+        self._race = race
 
 
     def get_gender(self):
-        return self._profile['gender']
+        return self._gender
+
+
+    def set_gender(self, gender):
+        self._gender = gender
 
 
     def get_class(self):
-        return self._profile['class']
+        return self._class
 
 
-
+    def set_class(self, pclass):
+        self._class = pclass
