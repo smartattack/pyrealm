@@ -43,6 +43,7 @@ class BaseUser(object):
     def driver(self):
         """Locate a function for current state and execute"""
         try:
+            log.debug('STATE: {}'.format(self._state))
             self.__getattribute__(self._state)()
         except Exception as e:
             # We should never get here

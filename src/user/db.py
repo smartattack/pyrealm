@@ -8,8 +8,8 @@ from version import DB_VERSION
 
 
 # Connect to database
-CONN = sqlite3.connect('../../data/pyrealm.db')
-
+CONN = sqlite3.connect('../data/pyrealm.db', isolation_level=None)
+CONN.row_factory = sqlite3.Row
 with CONN:
     CURSOR = CONN.cursor()
 
@@ -18,21 +18,20 @@ def create_accounts_table():
     """Table to store user / login data"""
 
     sql = """CREATE TABLE IF NOT EXISTS accounts (
-              id INT PRIMARY KEY);"""
-    """,
-              name TEXT,
+              id INT PRIMARY KEY,
+              username TEXT,
               email TEXT,
-              hash TEXT,
+              hash BLOB,
               salt TEXT,
               active INT,
-              banned INT
+              banned INT,
               created TIMESTAMP,
               last_login TIMESTAMP,
               logins INT,
               failures INT);"""
     try:
         CURSOR.execute(sql)
-    except Exception as e:
+    except sqlite3.Error as e:
         print("Error creating table: accounts - {}\n".format(e))
 
 
@@ -46,7 +45,7 @@ def create_login_history_table():
                 );"""
     try:
         CURSOR.execute(sql)
-    except Exception as e:
+    except sqlite3.Error as e:
         print("Error creating table: accounts - {}\n".format(e))
 
 
@@ -75,39 +74,55 @@ def boot_db():
 
 def account_exists(username):
     """Search user database to see if an account exists"""
-    sql = 'SELECT COUNT(*) FROM accounts WHERE username={};'.format(username)
-    CURSOR.execute(sql)
-    if len(CURSOR.fetchall()) > 0:
+    log.debug('FUNC account_exists({})'.format(username))
+    sql = 'SELECT COUNT(*) FROM accounts WHERE username=?'
+    count = 0
+    try:
+        count = CURSOR.execute(sql, (username,)).fetchone()[0]
+    except sqlite3.Error as e:
+        log.debug('Query FAILED: {} -> e={}'.format(sql, e))
+    if count > 0:
         return True
-    else:
-        return False
+    return False
 
 
 def load_account(username):
     """Return a dict of account data"""
-    sql = 'SELECT * FROM accounts WHERE username={};'.format(username)
-    account = CURSOR.execute(sql).fetchone()
-    return account
-
+    log.debug('FUNC load_account({})'.format(username))
+    sql = 'SELECT * FROM accounts WHERE username=?'
+    log.debug('SQL: {}'.format(sql))
+    try:
+        row = CURSOR.execute(sql, (username,)).fetchone()
+    except sqlite3.Error as e:
+        log.error('Load account FAILED: {}'.format(e))
+    return dict(row)
 
 def save_account(data):
     """Save account data - figures out whether to insert or update"""
-    if account_exists(data.username):
-        sql = '''UPDATE accounts SET VALUES = (username="{}", hash="{}",
-                     salt="{}", active={}, banned={}, 
-                     created={}, last_login={}, logins={}, 
-                     failures={});'''.format(data.username,
-                     data.hash, data.salt, data.active, data.banned, 
-                     data.created, data.last_login, data.logins, 
-                     data.failures)
+    log.debug('FUNC save_account({data})')
+    result = None
+    if account_exists(data['username']):
+        sql = '''UPDATE accounts SET hash=?, salt=?,
+                    active=?, banned=?, created=?, last_login=?, 
+                    logins=?, failures=? WHERE username=?'''
+        log.debug('EXECUTE SQL: {} <- {}'.format(sql, data))
+        try:
+            result = CURSOR.execute(sql, (data['hash'], data['salt'],
+                data['active'], data['banned'], data['created'],
+                data['last_login'], data['logins'], data['failures'],
+                data['username']))
+        except sqlite3.Error as e:
+            log.error('save_account() FAILED: {}'.format(e))
     else:
-        sql = '''INSERT INTO accounts VALUES (username="{}", hash="{}", 
-                     salt="{}", active={}, banned={}, 
-                     created={}, last_login={}, logins={}, 
-                     failures={});'''.format(data.username,
-                     data.hash, data.salt, data.active, data.banned, 
-                     data.suspended, data.created, data.last_login, 
-                     data.logins, data.failures)
-    log.debug('EXECUTE SQL: {}'.format(sql))
-    result = CURSOR.execute(sql)
+        sql = '''INSERT INTO accounts (username, hash, salt, active,
+                    banned, created, last_login, logins, failures ) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);'''
+        log.debug('EXECUTE SQL: {} <- {}'.format(sql, data))
+        try:
+            result = CURSOR.execute(sql, (data['username'],
+                data['hash'], data['salt'], data['active'], data['banned'],
+                data['created'], data['last_login'], 
+                data['logins'], data['failures']))
+        except sqlite3.Error as e:
+            log.error('save_account() FAILED: {}'.format(e))
     return result

@@ -5,7 +5,7 @@ Login Handler - Implements a FSM to handle logins and chargen
 from actor.player import Player
 from user.base_user import BaseUser
 from utils import log
-from user.account import validate_password, hash_password
+from user.account import create_account, validate_password, hash_password
 from user.db import account_exists, save_account, load_account
 from datetime import datetime
 
@@ -44,8 +44,8 @@ class Login(BaseUser):
 
     def _state_ask_password(self):
         """Send password prompt"""
-        self.password_mode_on()
         self.send('Password: ')
+        self.password_mode_on()
         self.change_state('check_password')
 
 
@@ -57,23 +57,23 @@ class Login(BaseUser):
         password = self.get_command()
         if account_exists(self.username):
             account = load_account(self.username)
-            print("ACCOUNT: |{}|".format(account))
-            if validate_password(password, account.password, account.salt):
-                account.failures = 0
-                account.last_login = datetime.now()
+            if validate_password(password = password, hash = account['hash'], salt = account['salt']):
+                account['failures'] = 0
+                account['logins'] += 1
+                account['last_login'] = datetime.now()
                 log.info('AUTH LOGIN: {}'.format(self.username))
                 save_account(account)
                 self.send('Welcome: {}\n\n'.format(self.username))
-                #load user
+                self.change_state('new_ask_gender')
+                # FIXME: GO TO PLAYING STATE 
             else:
-                account.failures += 1
+                account['failures'] += 1
                 log.warning('AUTH WARNING: {} login failures for {}'.format(
-                    account.failures, self.username))
+                    account['failures'], self.username))
                 save_account(account)
                 self.send('Invalid credentials!\n\n')
                 self.change_state('ask_username')
         else:
-            print("ACCOUNT NOT FOUND: {}".format(self.username))
             self.send('Invalid credentials!\n\n')
             self.change_state('ask_username')
         self.driver()
@@ -95,10 +95,11 @@ class Login(BaseUser):
         if len(username) < 5 or len(username) > 20:
             self.send('\nUsername must be between 5-20 characters...\n')
             self.change_state('new_ask_username')
-        elif re.search('^[a-zA-Z]', username): # FIXME: THIS IS BROKEN
+        elif re.search('[^a-zA-Z]', username): # FIXME: THIS IS BROKEN
             self.send('\nUsername must contain only letters...\n')
             self.change_state('new_ask_username')
         else:
+            self.username = username
             self.change_state('new_ask_password')
         self.driver()
 
@@ -133,8 +134,10 @@ class Login(BaseUser):
         Do not save either, yet
         """
         # FIXME: implement
-        #self.driver()
-        pass
+        data = create_account(self.username, self.password)
+        save_account(data)
+        self.change_state('new_ask_gender')
+        self.driver()
 
 
     def _state_new_ask_gender(self):

@@ -8,7 +8,7 @@ from utils import log
 from miniboa import TelnetServer
 import globals as GLOBAL
 from user.login import Login
-
+from user.db import boot_db
 
 def connect_hook(client):
     log.info("--> Received connection from {}, sending welcome banner".format(client.addrport()))
@@ -58,6 +58,8 @@ def process_commands():
 
 def main():
 
+    boot_db()
+    
     log.info("Starting server on port {}".format(GLOBAL.PORT))
 
     server = TelnetServer(port=GLOBAL.PORT, timeout=.05)
