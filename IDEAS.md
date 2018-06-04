@@ -46,10 +46,10 @@ Procedurally generated areas - Quest/Area that's auto-generated (map to find
                 and lives until you slay the dragon, at which point it is
                 destroyed and a new area is auto-generated)
 
-Custom UI for mudlet / mushclient
+Food / Drink  - not for hunger, but for buffs / effects.  Might be some risk involved.
 
-Food / Drink not for hunger, but for buffs / effects.  Might be some risk involved.
-
+Combat - Impair NPCs more according to their condition.  As they are wounded, they
+         don't dodge/parry, and they lose dexterity and strength
 
 
 
