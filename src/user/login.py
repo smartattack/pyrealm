@@ -29,10 +29,10 @@ class Login(BaseUser):
 
     def _state_check_username(self):
         """Check username, either enter chargen or request password"""
-        username = self.get_command()
-        if username.lower() == 'new':
+        username = self.get_command().capitalize()
+        if username == 'New':
             self.change_state('new_ask_username')
-        elif username.lower() == 'quit':
+        elif username == 'Quit':
             self.change_state('none')
             self.send('Goodbye\n\n')
             self.deactivate()
@@ -98,8 +98,11 @@ class Login(BaseUser):
         elif re.search('[^a-zA-Z]', username): # FIXME: THIS IS BROKEN
             self.send('\nUsername must contain only letters...\n')
             self.change_state('new_ask_username')
+        elif account_exists(username.capitalize()):
+            self.send('\nUsername is taken... please choose another.\n')
+            self.change_state('new_ask_username')
         else:
-            self.username = username
+            self.username = username.capitalize()
             self.change_state('new_ask_password')
         self.driver()
 
