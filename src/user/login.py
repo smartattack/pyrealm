@@ -138,6 +138,7 @@ class Login(BaseUser):
         """
         # FIXME: implement
         data = create_account(self.username, self.password)
+        # Add to lobby?
         save_account(data)
         self.change_state('new_ask_gender')
         self.driver()
@@ -152,52 +153,67 @@ class Login(BaseUser):
         self.send('\n') 
         g = self.get_command().lower()
         if g in ('m', 'male'):
-            self.gender = 'M'
+            self.gender = 'Male'
             self.change_state('new_ask_race')
         elif g in ('f', 'female'):
-            self.gender = 'F'
+            self.gender = 'Female' 
             self.change_state('new_ask_race')
         else:
             self.send('Please choose only m for male or f for female!\n')
             self.change_state('new_ask_gender')
         self.driver()
-        
+
+
     def _state_new_ask_race(self):
         # FIXME: implement
-        pass
+        self.send('\nChoose your race(Human):')
+        self.change_state('new_assign_race')
 
 
     def _state_new_assign_race(self):
         # FIXME: implement
+        self.race = 'Human'
         self.change_state('new_ask_class')
         self.driver()
 
     
     def _state_new_ask_class(self):
         # FIXME: implement
-        pass
-    
+        self.send('\nChoose your class(Warrior):')
+        self.change_state('new_assign_class')
+
 
     def _state_new_assign_class(self):
         # FIXME: implement
+        self.pclass = 'Warrior'
         self.change_state('new_ask_confirm')
         self.driver()
 
 
     def _state_new_ask_confirm(self):
         # FIXME: implement
-        pass
-    
+        self.send('\nIs this correct? ')
+        self.change_state('new_confirm')
+
 
     def _state_new_confirm(self):
         """
         Now that we have a complete profile(assuming 'yes' here):
-          - Assign profile to user
-          - Commit user account
+          - Create player object
+          - Assign properties to player
           - Finalize player(inventory, abilities, place in start room, 
                             assign commandset)
+          - Create user object, assign player to user
           - change to user_command state
           ** Figure out how to cleanup Login object so we don't leak
           """
         # FIXME: implement
-        pass
+        self.send('\n\nCreating your player...')
+        self.player = Player(self._client)
+        self.player.client = self._client
+        self.player.set_name(self.username)
+        self.player.set_gender(self.gender)
+        self.player.set_race(self.race)
+        self.player.set_class(self.pclass)
+        # FIXME: self.player.save()
+        self.send('Finished!\n')
