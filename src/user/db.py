@@ -24,7 +24,7 @@ def create_accounts_table():
               hash BLOB,
               salt TEXT,
               active INT,
-              profiles TEXT,
+              playing TEXT,
               banned INT,
               created TIMESTAMP,
               last_login TIMESTAMP,
