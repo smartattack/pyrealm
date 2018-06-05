@@ -18,8 +18,10 @@ def connect_hook(client):
     #client.request_mccp()
     #client.request_msp()
     client.send(GLOBAL.WELCOME_BANNER)
-    user = Login(client)
     GLOBAL.CLIENTS.append(client)
+    # Initial "user" is a login handler
+    user = Login(client)
+    # Adding user to LOBBY activates it's driver() in main loop
     GLOBAL.LOBBY[client] = user
 
 
@@ -29,6 +31,8 @@ def disconnect_hook(client):
         log.info('Removing {} from LOBBY'.format(client.addrport()))
         del GLOBAL.LOBBY[client]
         GLOBAL.CLIENTS.remove(client)
+    if client in list(GLOBAL.PLAYERS):
+        GLOBAL.PLAYERS.remove(client)
 
 
 def kick_idlers():
@@ -46,14 +50,7 @@ def process_commands():
 #    for user in GLOBAL.PLAYERS.values():
 #        # process commands
 #        pass
-"""
-    for c in GLOBAL.CLIENTS:
-        if c.active and c.cmd_ready:
-            if c in GLOBAL.LOBBY:
-                GLOBAL.LOBBY[c].driver()
-            elif c in GLOBAL.PLAYERS:
-                GLOBAL.PLAYERS[c].driver()
-"""
+
 
 
 def main():
