@@ -53,3 +53,11 @@ Combat - Impair NPCs more according to their condition.  As they are wounded, th
 
 
 
+-----
+## Abilities:
+
+* Heal
+* Resurrect
+* Shield (minor/major)
+
+
