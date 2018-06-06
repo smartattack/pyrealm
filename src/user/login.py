@@ -7,14 +7,25 @@ from user.base_user import BaseUser
 from utils import log
 from user.account import create_account, validate_password, hash_password
 from user.db import account_exists, save_account, load_account
+from user.user import User
+import globals as GLOBAL
 from datetime import datetime
 
-def player_handoff():
+def player_handoff(player, account):
     """
-    Create the player and associate user/client/player
+    Create the user and associate user account
     Set command handler, assign commands, initial room
     """
-    pass
+    log.debug('FUNC: player_handoff()')
+    user = User(player._client)
+    user.client = player._client
+    user.username = account.username
+    user.player = player
+    user.change_state('player')
+    del GLOBAL.LOBBY[player._client]
+    GLOBAL.PLAYERS.append(player._client)
+    user.send(user.prompt)
+
 
 class Login(BaseUser):
     """
@@ -58,32 +69,34 @@ class Login(BaseUser):
 
     def _state_check_password(self):
         """Validate login"""
-        #FIXME: actually validate password here
         self.password_mode_off()
         self.send('\n')
         password = self.get_command()
         if account_exists(self.username):
             account = load_account(self.username)
+            self.account = account
             if validate_password(password = password, hash = account['hash'], salt = account['salt']):
-                account['failures'] = 0
-                account['logins'] += 1
-                account['last_login'] = datetime.now()
+                self.account['failures'] = 0
+                self.account['logins'] += 1
+                self.account['last_login'] = datetime.now()
                 log.info('AUTH LOGIN: {}'.format(self.username))
                 # If we are already playing, enter the game
-                if account['playing']:
+                if self.account['playing']:
                     try:
-                        #player = load_player(account['playing'])
+                        
+                        #player = load_player(self.account['playing'])
+                        player = Player(self.client)
                         player_handoff(player, account)
                     except:
-                        account['playing'] = None
-                save_account(account)
+                        self.account['playing'] = None
+                save_account(self.account)
                 self.send('Welcome, {}\n\n'.format(self.username))
                 self.change_state('new_ask_gender')
             else:
-                account['failures'] += 1
+                self.account['failures'] += 1
                 log.warning('AUTH WARNING: {} login failures for {}'.format(
-                    account['failures'], self.username))
-                save_account(account)
+                    self.account['failures'], self.username))
+                save_account(self.account)
                 self.send('Invalid credentials!\n\n')
                 self.change_state('ask_username')
         else:
@@ -140,6 +153,7 @@ class Login(BaseUser):
         if self.password == confirm:
             self.password_mode_off()
             self.send('\n\nPassword assigned... creating account.\n')
+            log.debug('Confirmed new password for player, entering assign_account')
             self.change_state('new_assign_account')
         else:
             self.password = ''
@@ -152,9 +166,9 @@ class Login(BaseUser):
         Create the account and initialize a Player
         Do not save either, yet
         """
-        data = create_account(self.username, self.password)
+        self.account = create_account(self.username, self.password)
         # Add to lobby?
-        save_account(data)
+        save_account(self.account)
         self.change_state('new_ask_gender')
         self.driver()
 
@@ -180,33 +194,32 @@ class Login(BaseUser):
 
 
     def _state_new_ask_race(self):
-        # FIXME: implement
         self.send('\nChoose your race(Human):')
         self.change_state('new_assign_race')
 
 
     def _state_new_assign_race(self):
-        # FIXME: implement
         self.race = 'Human'
+        junk = self.get_command()
+        del junk
         self.change_state('new_ask_class')
         self.driver()
 
     
     def _state_new_ask_class(self):
-        # FIXME: implement
         self.send('\nChoose your class(Warrior):')
         self.change_state('new_assign_class')
 
 
     def _state_new_assign_class(self):
-        # FIXME: implement
         self.pclass = 'Warrior'
+        junk = self.get_command()
+        del junk
         self.change_state('new_ask_confirm')
         self.driver()
 
 
     def _state_new_ask_confirm(self):
-        # FIXME: implement
         self.send('\nIs this correct? ')
         self.change_state('new_confirm')
 
@@ -221,15 +234,21 @@ class Login(BaseUser):
           - Create user object, assign player to user
           - change to user_command state
           """
-        # FIXME: Figure out how to cleanup Login object so we don't leak
-        self.send('\n\nCreating your player...')
-        self.player = Player(self._client)
-        self.player.client = self._client
-        self.player.set_name(self.username)
-        self.player.set_gender(self.gender)
-        self.player.set_race(self.race)
-        self.player.set_class(self.pclass)
-        # FIXME: self.player.save()
-        self.send('Finished!\n')
-        # Enter game
-        player_handoff(player, self)
+        confirm = self.get_command().lower()
+        if confirm in ('n', 'no'):
+            self.change_state('new_ask_gender')
+            self.driver()
+        else:
+            self.send('\n\nCreating your player...')
+            log.debug('Creating Player() object')
+            self.player = Player(self._client)
+            self.player.set_name(self.username)
+            self.player.set_gender(self.gender)
+            self.player.set_race(self.race)
+            self.player.set_class(self.pclass)
+            self.account['playing'] = self.username
+            # FIXME: self.player.save()
+            self.send('Finished!\n')
+            # Enter game
+            log.debug('Entering handoff')
+            player_handoff(self.player, self.account)
