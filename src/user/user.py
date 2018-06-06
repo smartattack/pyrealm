@@ -44,10 +44,20 @@ class User(BaseUser):
     def list_commands(self):
         return list(self._commands)
 
+    def _parse_command(self):
+        """Return a command and args[] for user input"""
+        line = self._client.get_command()
+        words = line.split(' ')
+        command = words[0]
+        if len(words) > 1:
+            args = words[1:]
+        else:
+            args = []        
+        return command, args
 
     def _state_playing(self):
         """User command interpreter"""
-        line = self._client.get_command()
-        command, args = line.split(' ')
+        command, args = self._parse_command()
         log.debug('USER INPUT: {} -> {}'.format(command, args))
-        self.send('{} -> {}'.format(command, args))
+        self.send('\n{} -> {}\n'.format(command, args))
+        self.send_prompt()
