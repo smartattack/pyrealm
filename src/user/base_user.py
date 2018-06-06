@@ -25,10 +25,12 @@ class BaseUser(object):
 
     def __init__(self, client):
         """Create a user and associate with a connected client"""
+        log.debug('Inside BaseUser.__init__()')
         self._client = client
         #Global CLIENTS[] = self
         self._preferences = copy.copy(_def_preferences)
         self._state = 'none'
+        self.username = 'Anonymous'
 
     """
     FIXME: Maybe I should take BaseActor and BaseUser client function wrappers
