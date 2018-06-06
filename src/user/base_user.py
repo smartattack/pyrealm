@@ -73,6 +73,11 @@ class BaseUser(object):
         self._client.send(msg)
     
 
+    def send_prompt(self):
+        """Send user prompt"""
+        self.send_raw(self._preferences['prompt'])
+
+        
     def get_command(self):
         """Retrieve a command from the client"""
         return self._client.get_command()
