@@ -47,10 +47,10 @@ def process_commands():
         # process commands
         if user._client.active and user._client.cmd_ready:
             user.driver()
-#    for user in GLOBAL.PLAYERS.values():
-#        # process commands
-#        pass
-
+    for user in GLOBAL.PLAYERS.values():
+        # process commands
+        if user._client.active and user._client.cmd_ready:
+            user.driver()
 
 
 def main():
