@@ -25,7 +25,7 @@ USERS = {}
 # players (in-game characters, owned by a user)
 PLAYERS = {}
 
-IDLE_TIMEOUT = 60
+IDLE_TIMEOUT = 30
 
 # default game state
 GAME_RUNNING = True
