@@ -19,12 +19,14 @@ def player_handoff(player, account):
     log.debug('FUNC: player_handoff()')
     user = User(player._client)
     user.client = player._client
-    user.username = account.username
+    user.username = account['username']
     user.player = player
-    user.change_state('player')
+    user.change_state('playing')
     del GLOBAL.LOBBY[player._client]
-    GLOBAL.PLAYERS[player._client] = player
-    user.send(user.player.prompt)
+    # Insert the user into the PLAYERS dict
+    # This enables the user command interpreter via User.driver()
+    GLOBAL.PLAYERS[player._client] = user
+    user.send_prompt()
 
 
 class Login(BaseUser):
@@ -166,7 +168,6 @@ class Login(BaseUser):
         Do not save either, yet
         """
         self.account = create_account(self.username, self.password)
-        # Add to lobby?
         save_account(self.account)
         self.change_state('new_ask_gender')
         self.driver()
@@ -237,7 +238,7 @@ class Login(BaseUser):
         if confirm in ('n', 'no'):
             self.change_state('new_ask_gender')
             self.driver()
-        else:
+        elif confirm in ('y', 'yes'):
             self.send('\n\nCreating your player...')
             log.debug('Creating Player() object')
             self.player = Player(self._client)
@@ -245,9 +246,12 @@ class Login(BaseUser):
             self.player.set_gender(self.gender)
             self.player.set_race(self.race)
             self.player.set_class(self.pclass)
-            self.account['playing'] = self.username
             # FIXME: self.player.save()
             self.send('Finished!\n')
             # Enter game
             log.debug('Entering handoff')
             player_handoff(self.player, self.account)
+        else:
+            self.send("\nPlease answer only 'y'es or 'n'o\n")
+            self.change_state('new_ask_confirm')
+            self.driver()
