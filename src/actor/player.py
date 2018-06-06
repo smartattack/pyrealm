@@ -36,17 +36,17 @@ class Player(BaseActor):
 
 
     def add_ability(self, ability):
-        log.debug('Adding "{}" ability to player {}'.format(ability, self._profile['name']))
+        log.debug('Adding "{}" ability to player {}'.format(ability, self._name))
         self._abilities.add(ability)
 
 
     def remove_ability(self, ability):
-        log.debug('Removing "{}" ability from player {}'.format(ability, self._profile['name']))
+        log.debug('Removing "{}" ability from player {}'.format(ability, self._name))
         self._abilities.remove(ability)
 
 
     def clear_abilities(self):
-        log.debug('Removing all abilities from player {}'.format(self._profile['name']))
+        log.debug('Removing all abilities from player {}'.format(self._name))
         self._abilities = set()
 
 

@@ -32,7 +32,7 @@ def disconnect_hook(client):
         del GLOBAL.LOBBY[client]
         GLOBAL.CLIENTS.remove(client)
     if client in list(GLOBAL.PLAYERS):
-        GLOBAL.PLAYERS.remove(client)
+        del GLOBAL.PLAYERS[client]
 
 
 def kick_idlers():

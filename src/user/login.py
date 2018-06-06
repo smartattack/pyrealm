@@ -23,8 +23,8 @@ def player_handoff(player, account):
     user.player = player
     user.change_state('player')
     del GLOBAL.LOBBY[player._client]
-    GLOBAL.PLAYERS.append(player._client)
-    user.send(user.prompt)
+    GLOBAL.PLAYERS[player._client] = player
+    user.send(user.player.prompt)
 
 
 class Login(BaseUser):
@@ -85,7 +85,7 @@ class Login(BaseUser):
                     try:
                         
                         #player = load_player(self.account['playing'])
-                        player = Player(self.client)
+                        player = Player(self._client)
                         player_handoff(player, account)
                     except:
                         self.account['playing'] = None
@@ -118,7 +118,6 @@ class Login(BaseUser):
         Does not duplicate an existing player name
         If the username passes, save it and move on, else re-prompt
         """
-        import re
         # FIXME: add banned/reserved words check
         username = self.get_command().capitalize()
         if len(username) < 5 or len(username) > 20:
