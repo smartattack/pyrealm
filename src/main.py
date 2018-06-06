@@ -20,30 +20,33 @@ def connect_hook(client):
     client.send(GLOBAL.WELCOME_BANNER)
     GLOBAL.CLIENTS.append(client)
     # Initial "user" is a login handler
-    user = Login(client)
+    anonymous_user = Login(client)
     # Adding user to LOBBY activates it's driver() in main loop
-    GLOBAL.LOBBY[client] = user
+    GLOBAL.LOBBY[client] = anonymous_user
 
 
 def disconnect_hook(client):
-    log.info("--> Lost connection to {}".format(client.addrport()))
-    if client in GLOBAL.LOBBY.items():
-        log.info('Removing {} from LOBBY'.format(client.addrport()))
+    log.info("DISCONNECT_HOOK: Lost connection to {}".format(client.addrport()))
+    if client in GLOBAL.LOBBY:
+        log.info(' +-> Removing {} from LOBBY'.format(client.addrport()))
         del GLOBAL.LOBBY[client]
-        GLOBAL.CLIENTS.remove(client)
-    if client in list(GLOBAL.PLAYERS):
+    if client in GLOBAL.PLAYERS:
+        log.debug(' +-> Removing CLIENTS[{}]'.format(GLOBAL.PLAYERS[client].player.get_name()))
         del GLOBAL.PLAYERS[client]
+    log.debug(' +-> Removing GLOBAL.CLIENTS[{}]'.format(client.addrport()))
+    GLOBAL.CLIENTS.remove(client)
+
 
 
 def kick_idlers():
     for c in GLOBAL.CLIENTS:
         if c.idle() > GLOBAL.IDLE_TIMEOUT:
             c.active = False
-            log.info("Kicking idle client: {}".format(c.addrport()))
+            log.info("Marking idle client inactive: {}".format(c.addrport()))
 
 
 def process_commands():
-    for user in GLOBAL.LOBBY.values():
+    for user in list(GLOBAL.LOBBY.values()):
         # process commands
         if user._client.active and user._client.cmd_ready:
             user.driver()
