@@ -60,4 +60,31 @@ Combat - Impair NPCs more according to their condition.  As they are wounded, th
 * Resurrect
 * Shield (minor/major)
 
+### Commands:
 
+# Specials: @USER commands
+Have a special class of "breakout" commands that pertain to users and not to
+players.  The idea is that some commands like subscribing to a chat channel 
+or altering protocol prefs (MCCP, Colorize, etc) would always be within a
+user's commandSet (maybe by virtue of default/extra parsing).  Maybe this 
+toggles a player's state to a pause/protect and while you're in the @command
+system you're not affected by the world around you.
+
+# Pager system in prompt output
+@prefs prompt
+@prefs pager [on|off] - page output longer than _preferences['rows']
+  This one could be tricky to implement well.  What can break out of a pager
+  state, and what becomes of prompt?  (supposedly prompt is only shown once
+  paged text is fully flushed and confirmed).  Seems like attacks should break
+  through pager.  In a client that enables OOB protocol for chat updates, at
+  least that could update in a separate context and not muck up the main
+  window.
+
+### Automap
+## Found a cool article on mapping, looks like it might be possible to
+automap if the world is kept regular enough to make this practical.
+It would be really nice if this could be defined as an X * Y grid of text
+rows and columns and the map would render within this (so LoD would shift
+based on how large a canvas we can allocate)
+--
+Color scheme office: Abyss, Seti
