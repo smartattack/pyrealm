@@ -1,0 +1,21 @@
+## Travis CI config
+#
+#language: python
+#
+## sudo false implies containerized builds
+#sudo: false
+#
+#python:
+#  - 3.5
+#  - 3.6
+#  - 3.7
+#
+#env:
+#  global:
+#  - PACKAGENAME="test"
+#
+#install:
+#- pip install -r requirements/dev.txt
+#
+#script:
+#- pytest $PACKAGENAME
