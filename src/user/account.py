@@ -39,6 +39,7 @@ def create_account(username, password):
         'hash': hash, 
         'salt': salt,
         'active': 0,
+        'playing': '',
         'banned': 0,
         'created': now,
         'last_login': now,

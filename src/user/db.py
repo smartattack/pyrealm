@@ -117,7 +117,7 @@ def save_account(data):
     else:
         sql = '''INSERT INTO accounts (username, hash, salt, active,
                     playing, banned, created, last_login, logins, failures ) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);'''
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);'''
         log.debug('EXECUTE SQL: {} <- {}'.format(sql, data))
         try:
             result = CURSOR.execute(sql, (data['username'],
