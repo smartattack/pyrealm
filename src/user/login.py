@@ -9,6 +9,13 @@ from user.account import create_account, validate_password, hash_password
 from user.db import account_exists, save_account, load_account
 from datetime import datetime
 
+def player_handoff():
+    """
+    Create the player and associate user/client/player
+    Set command handler, assign commands, initial room
+    """
+    pass
+
 class Login(BaseUser):
     """
     Login existing players
@@ -61,13 +68,17 @@ class Login(BaseUser):
                 account['failures'] = 0
                 account['logins'] += 1
                 account['last_login'] = datetime.now()
-                # For now we assume player == account/user
-                account['playing'] = account['username']
                 log.info('AUTH LOGIN: {}'.format(self.username))
+                # If we are already playing, enter the game
+                if account['playing']:
+                    try:
+                        #player = load_player(account['playing'])
+                        player_handoff(player, account)
+                    except:
+                        account['playing'] = None
                 save_account(account)
-                self.send('Welcome: {}\n\n'.format(self.username))
+                self.send('Welcome, {}\n\n'.format(self.username))
                 self.change_state('new_ask_gender')
-                # FIXME: GO TO PLAYING STATE 
             else:
                 account['failures'] += 1
                 log.warning('AUTH WARNING: {} login failures for {}'.format(
@@ -88,23 +99,26 @@ class Login(BaseUser):
         self.change_state('new_check_username')
 
 
-
     def _state_new_check_username(self):
+        """Validate a username against the following conditions:
+        Between 5 and 20 alphabetic characters in length
+        Does not duplicate an existing player name
+        If the username passes, save it and move on, else re-prompt
+        """
         import re
-        # FIXME: implement
-        #self.driver()
-        username = self.get_command()
+        # FIXME: add banned/reserved words check
+        username = self.get_command().capitalize()
         if len(username) < 5 or len(username) > 20:
             self.send('\nUsername must be between 5-20 characters...\n')
             self.change_state('new_ask_username')
-        elif re.search('[^a-zA-Z]', username): # FIXME: THIS IS BROKEN
+        elif not username.isalpha():
             self.send('\nUsername must contain only letters...\n')
             self.change_state('new_ask_username')
-        elif account_exists(username.capitalize()):
+        elif account_exists(username):
             self.send('\nUsername is taken... please choose another.\n')
             self.change_state('new_ask_username')
         else:
-            self.username = username.capitalize()
+            self.username = username
             self.change_state('new_ask_password')
         self.driver()
 
@@ -138,7 +152,6 @@ class Login(BaseUser):
         Create the account and initialize a Player
         Do not save either, yet
         """
-        # FIXME: implement
         data = create_account(self.username, self.password)
         # Add to lobby?
         save_account(data)
@@ -207,9 +220,8 @@ class Login(BaseUser):
                             assign commandset)
           - Create user object, assign player to user
           - change to user_command state
-          ** Figure out how to cleanup Login object so we don't leak
           """
-        # FIXME: implement
+        # FIXME: Figure out how to cleanup Login object so we don't leak
         self.send('\n\nCreating your player...')
         self.player = Player(self._client)
         self.player.client = self._client
@@ -219,3 +231,5 @@ class Login(BaseUser):
         self.player.set_class(self.pclass)
         # FIXME: self.player.save()
         self.send('Finished!\n')
+        # Enter game
+        player_handoff(player, self)
