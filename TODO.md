@@ -1,9 +1,13 @@
 ###To Do:
 -----------------------------------------------------------------------------
+* STORAGE - save/load for player data, including inventory
+* Create basic Items type, and inventory
+
 * Implement commandHandler
 * First set of commands:  who, tell, shout(broadcast), quit, stats* write unit tests!
 * Implement races
 * Implement classes
+* Implement random chargen
 
 * Check out pylint hinting tags:
    #noinspection 
