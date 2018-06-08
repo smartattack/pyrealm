@@ -1,7 +1,24 @@
 ###To Do:
 -----------------------------------------------------------------------------
-* STORAGE - save/load for player data, including inventory
-* Create basic Items type, and inventory
+## STORAGE
+* Player.save and Player.load are basically working
+* Generalize to_json to work with any class/object
+* Generalized save/load to work with all types (items, rooms, players, npcs, shops, etc)
+* Boot_db() to load all world objects on startup
+* Player startup should check if player is already logged in.
+
+## Handler:
+* Create pager
+* Test wrapping
+* Create customizable prompt
+* Create @who
+* Create score, help, quit
+
+
+
+# Items
+* Create base_item
+* Create weapon, armor, book, food, potion, scroll, 
 
 * Implement commandHandler
 * First set of commands:  who, tell, shout(broadcast), quit, stats* write unit tests!
