@@ -85,9 +85,7 @@ class Login(BaseUser):
                 # If we are already playing, enter the game
                 if self.account['playing']:
                     try:
-                        
-                        #player = load_player(self.account['playing'])
-                        player = Player(self._client)
+                        player = Player.load(self.username)
                         player_handoff(player, account)
                     except:
                         self.account['playing'] = None
@@ -247,6 +245,8 @@ class Login(BaseUser):
             self.player.set_race(self.race)
             self.player.set_class(self.pclass)
             # FIXME: self.player.save()
+            log.info('Saving player {}'.format(self.player.get_name()))
+            self.player.save()
             self.send('Finished!\n')
             # Enter game
             log.debug('Entering handoff')

@@ -13,6 +13,11 @@ Welcome to PyRealm!
 
 '''
 
+# Storage paths
+DATA_DIR = '../data'
+PLAYER_DIR = 'players'
+
+
 # List of client connections (TelnetClient)
 CLIENTS = []
 
