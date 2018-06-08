@@ -96,6 +96,7 @@ def load_account(username):
         row = CURSOR.execute(sql, (username,)).fetchone()
     except sqlite3.Error as e:
         log.error('Load account FAILED: {}'.format(e))
+    log.debug('FUNC LEAVE: load_account({})'.format(username))
     return dict(row)
 
 def save_account(data):
