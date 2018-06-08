@@ -79,6 +79,15 @@ class BaseActor(object):
                 log.error(' +-> ?? Unknown argument: {}={}'.format(k, v))
 
 
+    def get_attribute(self, name):
+        """Return attribute value"""
+        try:
+            return self._attributes[name]
+        except (KeyError, AttributeError) as e:
+            log.error('Undefined attribute: {}'.format(e))
+            return None
+
+
     def get_name(self):
         return self._name
 
