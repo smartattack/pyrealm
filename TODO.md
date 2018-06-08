@@ -1,12 +1,8 @@
 ###To Do:
 -----------------------------------------------------------------------------
 ## STORAGE
-* Player.save and Player.load are basically working
-* Generalize to_json to work with any class/object
 * Generalized save/load to work with all types (items, rooms, players, npcs, shops, etc)
 * Boot_db() to load all world objects on startup
-* Player startup should check if player is already logged in.
-
 
 
 ## Items
@@ -16,14 +12,14 @@
 
 
 ## Characters / Chargen / Login
+* Player startup should check if player is already logged in.
+* Player save/logout should track/increment time played 
 * Implement banned
 * Implement badwords
 * Implement races
 * Implement classes
 * Implement random chargen
 
-* Check out pylint hinting tags:
-   #noinspection 
 
 ## Command Handler
 * Create pager
