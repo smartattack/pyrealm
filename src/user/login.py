@@ -239,6 +239,7 @@ class Login(BaseUser):
             # Enter game
             log.debug('Entering handoff')
             self.change_state('player_handoff')
+            self.driver()
         else:
             self.send("\nPlease answer only 'y'es or 'n'o\n")
             self.change_state('new_ask_confirm')
