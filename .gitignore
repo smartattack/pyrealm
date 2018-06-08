@@ -2,6 +2,7 @@
 venv
 .scannerwork
 *.py[co]
+.pytest_cache
 __pycache__
 #.vscode
 .idea

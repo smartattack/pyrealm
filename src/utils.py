@@ -9,7 +9,7 @@ import copy
 import hashlib
 
 
-def init_log(filename = '../log/pyrealms.log', level = logging.DEBUG):
+def init_log(filename = 'log/pyrealm.log', level = logging.DEBUG):
         """Called only once in main to give us consistent logging"""
         log = logging.getLogger('self.log')
         log.setLevel(level)
@@ -26,11 +26,12 @@ def init_log(filename = '../log/pyrealms.log', level = logging.DEBUG):
 log = init_log()
 
 
-def to_json(target: object, skip_list = None):
+def to_json(target: object, skip_list = []):
     """Create a Player() with select fields
     and serialize to JSON"""
 
     p = copy.copy(target)
+    assert skip_list == type(list)
     for i in skip_list:
         log.debug('skip_list: {}'.format(i))
         try:

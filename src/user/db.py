@@ -8,7 +8,7 @@ from version import DB_VERSION
 
 
 # Connect to database
-CONN = sqlite3.connect('../data/pyrealm.db', isolation_level=None)
+CONN = sqlite3.connect('data/pyrealm.db', isolation_level=None)
 CONN.row_factory = sqlite3.Row
 with CONN:
     CURSOR = CONN.cursor()
