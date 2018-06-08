@@ -2,15 +2,14 @@
 Player is an actor being played by a connected user
 """
 
-from utils import log
+from utils import log, to_json, from_json
 from actor.base_actor import BaseActor
 import globals as GLOBALS
 import os
 import copy
 import time
 import hashlib
-import jsonpickle
-import json
+
 
 
 class Player(BaseActor):
@@ -95,8 +94,7 @@ class Player(BaseActor):
             os.makedirs(pathname, 0o755, True)
         except Exception as e:
             log.critical('Failed to create directory: {} -> {}'.format(pathname, e))
-        data = self._to_json(skip_list = ['_client','_checksum'])
-        print(json.dumps(data, indent=4))
+        data = utils.to_json(skip_list = ['_client','_checksum'])
         checksum = hashlib.md5(data.encode('utf-8')).hexdigest()
         if hasattr(self, '_checksum'):
             log.debug('Player.save(): Checking checksum for Player {}'.format(player.get_name()))
@@ -106,8 +104,8 @@ class Player(BaseActor):
         log.info('Saving player: {}'.format(self.get_name()))
         filename = os.path.join(pathname, self.get_name().lower() + '.json')
         with open(filename, "w") as f:
-            f.write(json.dumps(json.loads(data), indent=4, sort_keys=True))
-    
+            f.write(data)
+
 
     def load(self, username):
         """Load from disk"""
@@ -120,7 +118,7 @@ class Player(BaseActor):
             for line in f:
                 data += line
         try:
-            loaded = jsonpickle.decode(data)
+            loaded = utils.from_json(data)
         except Exception as e:
             log.error('Could not load Player data: {}'.format(e))
         if isinstance(loaded, Player):
