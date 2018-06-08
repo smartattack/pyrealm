@@ -2,7 +2,7 @@
 Player is an actor being played by a connected user
 """
 
-from utils import log, to_json, from_json
+from utils import log, to_json, from_json, object_changed, make_checksum
 from actor.base_actor import BaseActor
 import globals as GLOBALS
 import os
@@ -29,6 +29,8 @@ class Player(BaseActor):
         # Some abilities are granted by class/race
         self._abilities = set()
 
+        # Tracks play time for this character
+        self._playtime = 0
 
     def send(self, msg):
         """Send a message to player, supports color codes"""
@@ -71,40 +73,28 @@ class Player(BaseActor):
         return list(self._abilities)
 
 
-    def _to_json(self, skip_list = None):
-        """Create a Player() with select fields
-        and serialize to JSON"""
-        #for i in copylist:
-        #    setattr(p, i, getattr(self, i))
-        p = copy.copy(self)
-        for i in skip_list:
-            log.debug('skip_list: {}'.format(i))
-            try:
-                delattr(p, i)
-            except:
-                pass
-        return jsonpickle.encode(p)
-
-
-    def save(self):
+    def save(self, logout=False):
         """Write to disk"""
         log.debug('FUNC: Player.save()')
+        if logout == True:
+            log.debug('+ Updating playtime for {} += {}'.format(self.get_name(), self._client.duration()))
+            # update playtime duration
+            self._playtime += self._client.duration()
         pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR)    
         try:
             os.makedirs(pathname, 0o755, True)
         except Exception as e:
             log.critical('Failed to create directory: {} -> {}'.format(pathname, e))
-        data = utils.to_json(skip_list = ['_client','_checksum'])
-        checksum = hashlib.md5(data.encode('utf-8')).hexdigest()
-        if hasattr(self, '_checksum'):
-            log.debug('Player.save(): Checking checksum for Player {}'.format(player.get_name()))
-            if self._checksum != checksum:
-                self._checksum = checksum
-                self._last_saved = time.time()
-        log.info('Saving player: {}'.format(self.get_name()))
-        filename = os.path.join(pathname, self.get_name().lower() + '.json')
-        with open(filename, "w") as f:
-            f.write(data)
+        data = to_json(self, skip_list = ['_client','_checksum', '_last_saved'])
+        checksum = make_checksum(data)
+        if object_changed(self, checksum) or logout == True:
+            self._checksum = checksum
+            self._last_saved = time.time()
+            log.info('Saving player: {}'.format(self.get_name()))
+            filename = os.path.join(pathname, self.get_name().lower() + '.json')
+            with open(filename, "w") as f:
+                f.write(data)
+                #log.debug('PLAYERDATA: {}'.format(data))
 
 
     def load(self, username):
@@ -118,7 +108,7 @@ class Player(BaseActor):
             for line in f:
                 data += line
         try:
-            loaded = utils.from_json(data)
+            loaded = from_json(data)
         except Exception as e:
             log.error('Could not load Player data: {}'.format(e))
         if isinstance(loaded, Player):
