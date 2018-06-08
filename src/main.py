@@ -32,6 +32,7 @@ def disconnect_hook(client):
         del GLOBAL.LOBBY[client]
     if client in GLOBAL.PLAYERS:
         log.debug(' +-> Removing CLIENTS[{}]'.format(GLOBAL.PLAYERS[client].player.get_name()))
+        GLOBAL.PLAYERS[client].player.save(logout = True)
         del GLOBAL.PLAYERS[client]
     log.debug(' +-> Removing GLOBAL.CLIENTS[{}]'.format(client.addrport()))
     GLOBAL.CLIENTS.remove(client)

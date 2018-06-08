@@ -73,9 +73,15 @@ class BaseUser(object):
         self._client.send(msg)
     
 
+    def flush(self):
+        """Flush socket output buffer"""
+        self._client.socket_send()
+
+
     def send_prompt(self):
         """Send user prompt"""
         self.send_raw(self._preferences['prompt'])
+        self.flush()
 
         
     def get_command(self):

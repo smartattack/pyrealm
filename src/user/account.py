@@ -21,6 +21,7 @@ def hash_password(password, salt):
 
 def validate_password(password, hash, salt):
     """Compare a plaintext password against a hash/salt"""
+    log.debug('password={}, hash={}, salt={}'.format(password, hash, salt))
     attempt = hash_password(password, salt)
     if attempt == hash:
         return True
