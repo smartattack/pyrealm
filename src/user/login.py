@@ -58,18 +58,14 @@ class Login(BaseUser):
         """Validate login"""
         self.password_mode_off()
         self.send('\n')
-        print("BEFORE: {}".format(self._client.command_list))
         input = self.get_command()
-        print("   1 AFTER: {} -> {}".format(self._client.command_list, input))
         if not account_exists(self.username):
             self.send('Invalid credentials!\n\n')
             self.username = ''
             self.change_state('ask_username')
             self.driver()
             return None
-        print("   2 AFTER: {} -> {}".format(self._client.command_list, input))
         self.account = load_account(self.username)
-        print("   3 AFTER: {} -> {}".format(self._client.command_list, input))
         if not validate_password(password = input, hash = self.account['hash'],
                                  salt = self.account['salt']):
             self.account['failures'] += 1
@@ -99,14 +95,12 @@ class Login(BaseUser):
         if self.account['playing']:
             log.debug(' +-> Playing as {}'.format(self.account['playing']))
             try:
-                log.debug('TRYING PLAYER LOAD')
                 self.player = Player.load(self, self.account['playing'])
                 self.player._client = self._client
                 log.debug('CHANGING STATE TO HANDOFF')
                 self.change_state('player_handoff')
                 self.send('Welcome back, {}!\n\n'.format(self.username))
             except Exception as e:
-                log.debug('FAILED PLAYER LOAD')
                 log.warning('Player.load({}): {}'.format(self.username, e))
                 self.change_state('new_ask_gender')
             self.driver()

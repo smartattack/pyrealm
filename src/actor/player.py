@@ -104,6 +104,7 @@ class Player(BaseActor):
             raise KeyError('Must include a username with load()')
         filename = os.path.join(GLOBAL.DATA_DIR, GLOBAL.PLAYER_DIR, username.lower() + '.json')
         data = ''
+        log.info('Loading Player({})'.format(username))
         with open(filename, "r") as f:
             for line in f:
                 data += line
@@ -117,5 +118,5 @@ class Player(BaseActor):
             self._checksum = hashlib.md5(data.encode('utf-8')).hexdigest()
             return loaded
         else:
-            log.error('loaded != Player()')
+            log.error('Loaded data != Player() - possible corruption')
             raise IOError('Failed to load player data for {}'.format(username))
