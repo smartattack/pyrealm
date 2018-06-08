@@ -31,7 +31,7 @@ def to_json(target: object, skip_list = []):
     and serialize to JSON"""
 
     p = copy.copy(target)
-    assert skip_list == type(list)
+    assert isinstance(skip_list, list)
     for i in skip_list:
         log.debug('skip_list: {}'.format(i))
         try:
