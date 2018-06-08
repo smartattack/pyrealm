@@ -12,8 +12,6 @@
 
 
 ## Characters / Chargen / Login
-* Player startup should check if player is already logged in.
-* Player save/logout should track/increment time played 
 * Implement banned
 * Implement badwords
 * Implement races

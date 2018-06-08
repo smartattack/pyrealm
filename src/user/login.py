@@ -4,6 +4,7 @@ Login Handler - Implements a FSM to handle logins and chargen
 
 from actor.player import Player
 from user.base_user import BaseUser
+from user.user import user_online
 from utils import log
 from user.account import create_account, validate_password, hash_password
 from user.db import account_exists, save_account, load_account
@@ -50,44 +51,72 @@ class Login(BaseUser):
         self.send('Password: ')
         self.password_mode_on()
         self.change_state('check_password')
+        print("ASK_PASSWORD: {}".format(self._client.command_list))
 
 
     def _state_check_password(self):
         """Validate login"""
         self.password_mode_off()
         self.send('\n')
+        print("BEFORE: {}".format(self._client.command_list))
         input = self.get_command()
-        if account_exists(self.username):
-            self.account = load_account(self.username)
-            if validate_password(password = input, hash = self.account['hash'], salt = self.account['salt']):
-                self.account['failures'] = 0
-                self.account['logins'] += 1
-                self.account['last_login'] = datetime.now()
-                log.info('AUTH LOGIN: {}'.format(self.username))
-                # If we are already playing, enter the game
-                if self.account['playing']:
-                    log.debug(' +-> Playing as {}'.format(self.account['playing']))
-                    try:
-                        self.player = Player.load(self, self.account['playing'])
-                        self.player._client = self._client
-                        self.change_state('player_handoff')
-                        self.send('Welcome back, {}!\n\n'.format(self.username))
-                    except Exception as e:
-                        log.warning('Player.load({}): {}'.format(self.username, e))
-                        self.account['playing'] = None
-                        self.change_state('new_ask_gender')
-                save_account(self.account)
-            else:
-                self.account['failures'] += 1
-                log.warning('AUTH WARNING: {} login failures for {}'.format(
-                    self.account['failures'], self.username))
-                save_account(self.account)
-                self.send('Invalid credentials!\n\n')
-                self.change_state('ask_username')
-        else:
+        print("   1 AFTER: {} -> {}".format(self._client.command_list, input))
+        if not account_exists(self.username):
             self.send('Invalid credentials!\n\n')
+            self.username = ''
             self.change_state('ask_username')
-        self.driver()
+            self.driver()
+            return None
+        print("   2 AFTER: {} -> {}".format(self._client.command_list, input))
+        self.account = load_account(self.username)
+        print("   3 AFTER: {} -> {}".format(self._client.command_list, input))
+        if not validate_password(password = input, hash = self.account['hash'],
+                                 salt = self.account['salt']):
+            self.account['failures'] += 1
+            log.warning('AUTH WARNING: {} login failures for {}'.format(
+                self.account['failures'], self.username))
+            save_account(self.account)
+            self.send('Invalid credentials!\n\n')
+            self.username = ''
+            self.change_state('ask_username')
+            self.driver()
+            return None
+        # There can be only one
+        if user_online(self.username):
+            log.warning('Duplicate login detected: {}'.format(self.username))
+            self.send('It looks like are already playing!\n\n\n')
+            self.flush()
+            self._client.deactivate()
+            self.change_state('none')
+            self.driver()
+            return None
+        #Looks like we're legit
+        self.account['failures'] = 0
+        self.account['logins'] += 1
+        self.account['last_login'] = datetime.now()
+        log.info('AUTH LOGIN: {}'.format(self.username))
+        # Try to load existing player if found
+        if self.account['playing']:
+            log.debug(' +-> Playing as {}'.format(self.account['playing']))
+            try:
+                log.debug('TRYING PLAYER LOAD')
+                self.player = Player.load(self, self.account['playing'])
+                self.player._client = self._client
+                log.debug('CHANGING STATE TO HANDOFF')
+                self.change_state('player_handoff')
+                self.send('Welcome back, {}!\n\n'.format(self.username))
+            except Exception as e:
+                log.debug('FAILED PLAYER LOAD')
+                log.warning('Player.load({}): {}'.format(self.username, e))
+                self.change_state('new_ask_gender')
+            self.driver()
+        else:
+            self.account['playing'] = None
+            self.change_state('new_ask_gender')
+            save_account(self.account)
+            self.driver()
+
+        
 
 
     # ----------[ chargen ]------------------------------------------------
