@@ -16,10 +16,17 @@ _def_stats = {
 }
 
 _def_attributes = {
+    # Determines carry capacity, strength of attacks
     'strength':  0,
+    # Affects skill learning, MP leveling
     'intellect': 0,
+    # points per level, MP
+    'wisdom':    0,
+    # Increases likelihood of hit, dodging, critical hits
     'dexterity': 0,
+    # base HP, regen rates
     'stamina':   0,
+    # Affects buy/sell rates, likelihood of NPCs to attack
     'charisma':  0
 }
 
