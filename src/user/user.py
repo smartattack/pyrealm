@@ -5,7 +5,7 @@ User Class - represents a connected user
 from utils import log
 import globals as GLOBAL
 from user.base_user import BaseUser
-
+from commands.cmds_system import *
 
 def user_online(username):
     """Check if a given username is logged in"""
@@ -69,5 +69,11 @@ class User(BaseUser):
         """User command interpreter"""
         command, args = self._parse_command()
         log.debug('USER INPUT: {} -> {}'.format(command, args))
-        self.send('\n{} -> {}\n'.format(command, args))
+
+        if command == 'quit':
+            do_quit(self.player)
+        elif command == 'who':
+            do_who(self.player)
+        else:
+            self.send('Unknown command!\n')
         self.send_prompt()
