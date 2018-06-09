@@ -9,14 +9,14 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/src/main.py",
-            "cwd": "${workspaceFolder}/src"
+            "cwd": "${workspaceFolder}"
         },            
         {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "cwd": "${workspaceFolder}/src"
+            "cwd": "${workspaceFolder}"
         },
         {
             "name": "Python: Attach",
