@@ -9,7 +9,7 @@ from utils import log
 from user.account import create_account, validate_password, hash_password
 from user.db import account_exists, save_account, load_account
 from user.user import User
-import globals as GLOBAL
+import globals as GLOBALS
 from datetime import datetime
 
 
@@ -280,8 +280,8 @@ class Login(BaseUser):
         user.player = self.player
         user.change_state('playing')
         # Remove us from LOBBY, should clean up Login() object
-        del GLOBAL.LOBBY[self.player._client]
+        del GLOBALS.LOBBY[self.player._client]
         # Insert the user into the PLAYERS dict
         # This enables the user command interpreter via User.driver()
-        GLOBAL.PLAYERS[self.player._client] = user
+        GLOBALS.PLAYERS[self.player._client] = user
         user.send_prompt()

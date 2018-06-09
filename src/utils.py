@@ -7,6 +7,7 @@ import jsonpickle
 import json
 import copy
 import hashlib
+import globals as GLOBALS
 
 
 def init_log(filename = 'log/pyrealm.log', level = logging.DEBUG):

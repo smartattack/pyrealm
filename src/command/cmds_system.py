@@ -4,7 +4,7 @@ System / Preference commands
 
 from utils import log
 from actor.player import Player
-import globals as GLOBAL
+import globals as GLOBALS
 
 def do_quit(ch: Player, *args):
     """
@@ -18,7 +18,7 @@ def do_who(ch: Player, *args):
     List players
     """
     here = []
-    for u in GLOBAL.PLAYERS.values():
+    for u in GLOBALS.PLAYERS.values():
         if u.player == ch:
             continue
         here.append(u.player.get_name())
@@ -27,6 +27,6 @@ def do_who(ch: Player, *args):
         ch.send('{}\n'.format(', '.join(here)))
     else:
         ch.send('There is nobody else here.\n')
-    #for u in GLOBAL.PLAYERS.values():
+    #for u in GLOBALS.PLAYERS.values():
     #    ch.send('{}\n'.format(u.player.get_name()))
     
