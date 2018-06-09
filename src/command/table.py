@@ -19,12 +19,26 @@ class Command():
         self.level = level
 
 
+def find_command(search: str):
+    """Look for a matching command in command table"""
+    log.debug('FUNC ENTER: find_command({})'.format(search))
+    if search is None:
+        log.debug('FUNC RETURN: find_command() == None')
+        return None
+    for c in cmd_table.values():
+        if c.name.startswith(search):
+            return c
+
+
 def register_command(entry: Command):
     """Add a command to cmd_table"""
     log.info('++ Adding cmd_table[{}]'.format(entry.name))
     cmd_table[entry.name] = entry
 
+
 cmd_table = OrderedDict()
 
-register_command(name = 'quit',     func = command.do_quit,    0, level = 0)
-register_command(name = 'who',      func = command.do_who,     0, level = 0)
+
+# Due to ordered dict, listed here first to assert preference
+register_command(Command(name = 'quit',     func = 'do_quit',    position = 0, level = 0))
+register_command(Command(name = 'who',      func = 'do_who',     position = 0, level = 0))

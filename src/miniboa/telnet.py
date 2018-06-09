@@ -225,7 +225,7 @@ class TelnetClient(object):
         """
         Returns the number of seconds the DE has been connected.
         """
-        return time.time() - self.connect_time
+        return int(time.time() - self.connect_time)
 
     def request_do_sga(self):
         """

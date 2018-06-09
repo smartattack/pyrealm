@@ -32,6 +32,11 @@ class Player(BaseActor):
         # Tracks play time for this character
         self._playtime = 0
 
+
+    def __repr__(self):
+        return 'Player({}) = {}'.format(self._name, self.__dict__)
+
+
     def send(self, msg):
         """Send a message to player, supports color codes"""
         self._client.send_cc(msg)
@@ -79,7 +84,10 @@ class Player(BaseActor):
         if logout == True:
             log.debug('+ Updating playtime for {} += {}'.format(self.get_name(), self._client.duration()))
             # update playtime duration
-            self._playtime += self._client.duration()
+            if hasattr(self, '_playtime'):
+                self._playtime += self._client.duration()
+            else:
+                self._playtime = self._client.duration()
         pathname = os.path.join(GLOBAL.DATA_DIR, GLOBAL.PLAYER_DIR)    
         try:
             os.makedirs(pathname, 0o755, True)

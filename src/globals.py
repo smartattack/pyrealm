@@ -14,7 +14,7 @@ Welcome to PyRealm!
 '''
 
 # Storage paths
-DATA_DIR = '../data'
+DATA_DIR = 'data'
 PLAYER_DIR = 'players'
 
 

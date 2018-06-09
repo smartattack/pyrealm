@@ -6,14 +6,14 @@ from utils import log
 from actor.player import Player
 import globals as GLOBAL
 
-def do_quit(ch: Player, **args):
+def do_quit(ch: Player, *args):
     """
     Log out player
     """
     ch._client.deactivate()
 
 
-def do_who(ch: Player, **args):
+def do_who(ch: Player, *args):
     """
     List players
     """

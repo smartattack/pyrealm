@@ -5,7 +5,9 @@ User Class - represents a connected user
 from utils import log
 import globals as GLOBAL
 from user.base_user import BaseUser
-from commands.cmds_system import *
+import command
+from command.table import find_command
+
 
 def user_online(username):
     """Check if a given username is logged in"""
@@ -54,6 +56,7 @@ class User(BaseUser):
     def list_commands(self):
         return list(self._commands)
 
+
     def _parse_command(self):
         """Return a command and args[] for user input"""
         line = self._client.get_command()
@@ -67,13 +70,24 @@ class User(BaseUser):
 
     def _state_playing(self):
         """User command interpreter"""
-        command, args = self._parse_command()
-        log.debug('USER INPUT: {} -> {}'.format(command, args))
-
-        if command == 'quit':
-            do_quit(self.player)
-        elif command == 'who':
-            do_who(self.player)
+        cmd, args = self._parse_command()
+        log.debug('USER INPUT: {} -> {}'.format(cmd, args))
+        c = find_command(cmd)
+        if c:
+            log.debug('MATCHED COMMAND: {}'.format(c.name))
+            # Check level
+            if c.level <= self.player.get_stat('level'):
+                # Attempt to dispatch the command
+                if hasattr(command, c.func):
+                    log.debug('Command module has method: {}'.format(c.func))
+                    getattr(command, c.func)(self.player, args)
+                    log.debug('Calling {}({}, {})'.format(c.func, self.player.get_name(), args))
+                    self.send_prompt()
+                else:
+                    log.debug('Command module does not have method: {}'.format(c.func))
+            else:
+                log.debug('Player {} has too low a level to invoke command: {}'.format(
+                        self.player.get_name(), c.name))
         else:
-            self.send('Unknown command!\n')
-        self.send_prompt()
+            self.send('Unknown command!')
+            self.send_prompt()

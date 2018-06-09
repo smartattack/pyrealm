@@ -8,6 +8,7 @@ from utils import log
 from miniboa import TelnetServer
 import globals as GLOBAL
 from user.login import Login
+from actor.player import Player
 from user.db import boot_db
 
 def connect_hook(client):

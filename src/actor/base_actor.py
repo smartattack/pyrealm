@@ -88,6 +88,15 @@ class BaseActor(object):
             return None
 
 
+    def get_stat(self, name):
+        """Return stats value"""
+        try:
+            return self._stats[name]
+        except (KeyError, AttributeError) as e:
+            log.error('Undefined stat: {}'.format(e))
+            return None
+
+
     def get_name(self):
         return self._name
 
