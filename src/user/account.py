@@ -3,7 +3,7 @@ User Account Management
 """
 
 import hashlib
-from datetime import datetime
+import time
 import uuid
 from utils import log
 
@@ -31,7 +31,7 @@ def validate_password(password, hash, salt):
 
 def create_account(username, password):
     """Initialize an account structure for a new player"""
-    now = datetime.now()
+    now = int(time.time())
     salt = create_salt()
     hash = hash_password(password = password, salt = salt)
     account = {

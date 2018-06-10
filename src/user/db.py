@@ -2,6 +2,7 @@
 User Database
 """
 
+import sys
 import sqlite3
 from utils import log
 from version import DB_VERSION
@@ -18,7 +19,6 @@ def create_accounts_table():
     """Table to store user / login data"""
 
     sql = """CREATE TABLE IF NOT EXISTS accounts (
-              id INT PRIMARY KEY,
               username TEXT,
               email TEXT,
               hash BLOB,
@@ -33,13 +33,13 @@ def create_accounts_table():
     try:
         CURSOR.execute(sql)
     except sqlite3.Error as e:
-        print("Error creating table: accounts - {}\n".format(e))
+        log.error("Error creating table: accounts - {}\n".format(e))
+        sys.exit(1)
 
 
 def create_login_history_table():
     """Table to store ip, login dates for users"""
     sql = """CREATE TABLE IF NOT EXISTS login_history (
-                id INT PRIMARY KEY,
                 account INT,
                 date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 ip TEXT KEY NOT NULL
@@ -47,7 +47,8 @@ def create_login_history_table():
     try:
         CURSOR.execute(sql)
     except sqlite3.Error as e:
-        print("Error creating table: accounts - {}\n".format(e))
+        log.error("Error creating table: login_history - {}\n".format(e))
+        sys.exit(1)
 
 
 def boot_db():
@@ -99,6 +100,7 @@ def load_account(username):
     log.debug('FUNC LEAVE: load_account({})'.format(username))
     return dict(row)
 
+
 def save_account(data):
     """Save account data - figures out whether to insert or update"""
     log.debug('FUNC save_account({data})')
@@ -129,3 +131,22 @@ def save_account(data):
         except sqlite3.Error as e:
             log.error('save_account() FAILED: {}'.format(e))
     return result
+
+
+def record_visit(data: dict):
+    """Insert IP/date into login_history table"""
+    log.debug('FUNC record_visit({})'.format(data))
+    sql = 'SELECT rowid FROM accounts WHERE username=?'
+    log.debug('EXECUTE SQL: {} <- {}'.format(sql, data['username']))
+    try:
+        result = CURSOR.execute(sql, (data['username'],)).fetchone()
+    except sqlite3.Error as e:
+        log.error('SQL query failed: {}'.format(sql))
+    log.debug('Result: {}'.format(result[0]))
+    sql = 'INSERT INTO login_history (account, date, ip) VALUES (?, ?, ?);'
+    try:
+        log.debug('EXECUTE SQL: {} <- {}'.format(sql, result[0], data['date'], data['ip']))
+        result = CURSOR.execute(sql, (result[0], data['date'], data['ip']))
+    except sqlite3.Error as e:
+        log.error('SQL query failed: {}'.format(sql))    
+
