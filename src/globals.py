@@ -3,9 +3,6 @@ PyRealm - main server functionality lives here
 outside of main.py so globals can be included more easily.
 """
 
-from utils import log
-from miniboa import TelnetServer
-
 # Default Game state / config
 PORT = 1234
 WELCOME_BANNER = '''
@@ -33,9 +30,7 @@ players = {}
 # All Players and NPCs
 actors = []
 
-IDLE_TIMEOUT = 30
+IDLE_TIMEOUT = 1800
 
 # default game state
 GAME_RUNNING = True
-
-

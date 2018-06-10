@@ -4,16 +4,19 @@ PyRealms Server
 Copyright 2018 Peter Morgan
 -------------------------------------------------
 """
-from utils import log
-from miniboa import TelnetServer
-import globals as GLOBALS
+
+
 from user.login import Login
-from command.cmds_system import do_quit
-from actor.player import Player
 from user.db import boot_db
+from command.cmds_system import do_quit
+from miniboa import TelnetServer
+from utils import log
+import globals as GLOBALS
+
 
 def connect_hook(client):
-    log.info("--> Received connection from {}, sending welcome banner".format(client.addrport()))
+    """Initialization routine run when clients connect"""
+    log.info("--> Received connection from %s, sending welcome banner", client.addrport())
     # Get terminal environment
     client.request_naws()
     client.request_terminal_type()
@@ -28,28 +31,31 @@ def connect_hook(client):
 
 
 def disconnect_hook(client):
-    log.info("DISCONNECT_HOOK: Lost connection to {}".format(client.addrport()))
+    """Overrides miniboa hook, gets called on client disconnection"""
+    log.info("DISCONNECT_HOOK: Lost connection to %s", client.addrport())
     if client in GLOBALS.lobby:
-        log.info(' +-> Removing {} from lobby'.format(client.addrport()))
+        log.info(' +-> Removing %s from lobby', client.addrport())
         del GLOBALS.lobby[client]
     if client in GLOBALS.players:
-        log.debug(' +-> Removing clients[{}]'.format(GLOBALS.players[client].player.get_name()))
-        GLOBALS.players[client].player.save(logout = True)
+        log.debug(' +-> Removing clients[%s]', GLOBALS.players[client].player.get_name())
+        GLOBALS.players[client].player.save(logout=True)
         del GLOBALS.players[client]
-    log.debug(' +-> Removing GLOBALS.clients[{}]'.format(client.addrport()))
+    log.debug(' +-> Removing GLOBALS.clients[%s]', client.addrport())
     GLOBALS.clients.remove(client)
 
 
 def kick_idlers():
-    for c in GLOBALS.clients:
-        if c.idle() > GLOBALS.IDLE_TIMEOUT:
-            if c in GLOBALS.players:
-                do_quit(GLOBALS.players[c].player)
-            c.active = False
-            log.info("Marking idle client inactive: {}".format(c.addrport()))
+    """Scan for and deactivate clients which have surpassed IDLE_TIMEOUT"""
+    for client in GLOBALS.clients:
+        if client.idle() > GLOBALS.IDLE_TIMEOUT:
+            if client in GLOBALS.players:
+                do_quit(GLOBALS.players[client].player, [])
+            client.active = False
+            log.info("Marking idle client inactive: %s", client.addrport())
 
 
 def process_commands():
+    """Handle user input"""
     for user in list(GLOBALS.lobby.values()):
         # process commands
         if user._client.active and user._client.cmd_ready:
@@ -61,10 +67,11 @@ def process_commands():
 
 
 def main():
+    """Pyrealms main()"""
 
     boot_db()
-    
-    log.info("Starting server on port {}".format(GLOBALS.PORT))
+
+    log.info("Starting server on port %s", GLOBALS.PORT)
 
     server = TelnetServer(port=GLOBALS.PORT, timeout=.05)
     # set our own hooks for welcome/disconnect messaging
