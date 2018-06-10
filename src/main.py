@@ -8,6 +8,7 @@ from utils import log
 from miniboa import TelnetServer
 import globals as GLOBALS
 from user.login import Login
+from command.cmds_system import do_quit
 from actor.player import Player
 from user.db import boot_db
 
@@ -42,6 +43,8 @@ def disconnect_hook(client):
 def kick_idlers():
     for c in GLOBALS.CLIENTS:
         if c.idle() > GLOBALS.IDLE_TIMEOUT:
+            if c in GLOBALS.PLAYERS:
+                do_quit(GLOBALS.PLAYERS[c].player)
             c.active = False
             log.info("Marking idle client inactive: {}".format(c.addrport()))
 
