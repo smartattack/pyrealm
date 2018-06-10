@@ -66,7 +66,10 @@ class User(BaseUser):
     def _state_playing(self):
         """User command interpreter"""
         cmd, args = self._parse_command()
-        log.debug('USER INPUT: {} -> {}'.format(cmd, args))
+        log.debug('USER INPUT: |{}| -> |{}|'.format(cmd, args))
+        if len(cmd) < 1:
+            self.send_prompt()
+            return
         c = find_command(cmd)
         if c:
             log.debug('MATCHED COMMAND: {}'.format(c.name))
@@ -84,5 +87,5 @@ class User(BaseUser):
                 log.debug('Player {} has too low a level to invoke command: {}'.format(
                         self.player.get_name(), c.name))
         else:
-            self.send('Unknown command!')
+            self.send('^rUnknown command!^d\n')
             self.send_prompt()
