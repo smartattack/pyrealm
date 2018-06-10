@@ -13,7 +13,7 @@ POS_READY    = 4
 
 class Command():
     """Command table entry definition"""
-    def __init__(self, name, func, position = 0, level = 0):
+    def __init__(self, name, func, position=0, level=0):
         self.name = name
         self.func = func
         self.position = position
@@ -41,8 +41,8 @@ cmd_table = OrderedDict()
 
 
 # Due to ordered dict, listed here first to assert preference
-register_command(Command(name = 'quit',     func = 'do_quit',    position = 0, level = 0))
-register_command(Command(name = 'who',      func = 'do_who',     position = 0, level = 0))
-register_command(Command(name = 'shout',    func = 'do_shout',   position = 0, level = 0))
-register_command(Command(name = 'tell',     func = 'do_tell',    position = 0, level = 0))
-
+register_command(Command(name='quit',      func='do_quit',      position=0, level=0))
+register_command(Command(name='who',       func='do_who',       position=0, level=0))
+register_command(Command(name='shout',     func='do_shout',     position=0, level=0))
+register_command(Command(name='tell',      func='do_tell',      position=0, level=0))
+register_command(Command(name='shutdown',  func='do_shutdown',  position=0, level=100))

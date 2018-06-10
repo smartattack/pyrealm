@@ -2,7 +2,7 @@
 System / Preference commands
 """
 
-from user.helpers import send_all
+from user.helpers import send_all, broadcast
 from utils import log
 from actor.player import Player
 from command.helpers import find_actor
@@ -56,3 +56,20 @@ def do_tell(plr: Player, args: list):
             target.send('\n^w{} says, ^g"{}"^d\n'.format(plr.get_name(), msg))
     else:
         plr.send('\n^wI do not see anyone like that, here.^d\n')
+
+
+def do_shutdown(plr: Player, args: list):
+    """Shut down the server"""
+    # Fixme: allow delay
+    if args[0]:
+        delay = int(args[0])
+        if delay > 10 and delay < 3600:
+            # schedule event and warnings
+            pass
+        else:
+            plr.send('^wUsage: ^Wshutdown [delay seconds]\n' +
+                     '^wDelay should be between 10 and 3600 seconds.^d\n')
+    else:
+        log.info('%s issued shutdown', plr)
+        broadcast('^RMud shutting down!\n\n^d')
+        GLOBALS.GAME_RUNNING = False
