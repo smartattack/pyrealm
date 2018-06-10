@@ -73,7 +73,7 @@ class Login(BaseUser):
             self.driver()
             return None
         self.account = load_account(self.username)
-        if not validate_password(password=passwd, hash=self.account['hash'],
+        if not validate_password(password=passwd, pwhash=self.account['hash'],
                                  salt=self.account['salt']):
             self.account['failures'] += 1
             log.warning('AUTH WARNING: %s login failures for %s',

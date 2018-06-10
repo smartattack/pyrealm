@@ -5,6 +5,7 @@ User Database
 import sys
 import sqlite3
 from user.account import create_account
+import user
 from utils import log
 from version import DB_VERSION
 
@@ -17,7 +18,7 @@ with CONN:
 
 def create_accounts_table():
     """Table to store user / login data"""
-
+    log.debug('FUNC create_accounts_table()')
     sql = """CREATE TABLE IF NOT EXISTS accounts (
               username TEXT,
               email TEXT,
@@ -32,15 +33,15 @@ def create_accounts_table():
               failures INT);"""
     try:
         CURSOR.execute(sql)
+        log.info('Creating Admin user account...')
+        # FIXME: this needs to come from a config file outside of git repo
+        # Alternatively, on boot w/ empty db, the first user to log in is
+        # Run through login wizard with username fixed to Admin
+        data = create_account('Admin', 'changeme')
+        save_account(data)
     except sqlite3.Error as err:
         log.error("Error creating table: accounts - %s\n", err)
         sys.exit(1)
-    log.info('Creating Admin user account...')
-    # FIXME: this needs to come from a config file outside of git repo
-    # Alternatively, on boot w/ empty db, the first user to log in is
-    # Run through login wizard with username fixed to Admin
-    data = create_account('Admin', 'changeme')
-    save_account(data)
 
 
 def create_login_history_table():
@@ -71,7 +72,7 @@ def boot_db():
         if not CURSOR.execute(sql, (str(table),)).fetchone()[0]:
             log.info("Creating table: %s", table)
             func = 'create_{}_table'.format(table)
-            getattr(locals(), func)()
+            getattr(user.db, func)()
         else:
             log.info("Found table: %s", table)
 

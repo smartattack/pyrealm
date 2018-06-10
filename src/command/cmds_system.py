@@ -14,7 +14,7 @@ def do_quit(plr: Player, args: list):
     Log out player
     """
     send_all(plr, '\n^W{} ^yhas left the game.^d\n'.format(plr.get_name()))
-    for user in GLOBALS.players:
+    for user in GLOBALS.players.values():
         if user.player == plr:
             user.deactivate()
             break
@@ -61,7 +61,7 @@ def do_tell(plr: Player, args: list):
 def do_shutdown(plr: Player, args: list):
     """Shut down the server"""
     # Fixme: allow delay
-    if args[0]:
+    if args and args[0]:
         delay = int(args[0])
         if delay > 10 and delay < 3600:
             # schedule event and warnings
