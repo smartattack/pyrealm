@@ -15,13 +15,13 @@ def create_salt():
 
 def hash_password(password, salt):
     """Hash a password with a salt and return the result"""
-    log.debug('FUNC hash_password(password={}, salt={})'.format(password, salt))
+    log.debug('FUNC hash_password(password=%s, salt=%s)', password, salt)
     return hashlib.sha512(salt.encode('cp1252') + password.encode('cp1252')).digest()
 
 
-def validate_password(password, hash, salt):
+def validate_password(password, pwhash, salt):
     """Compare a plaintext password against a hash/salt"""
-    log.debug('password={}, hash={}, salt={}'.format(password, hash, salt))
+    log.debug('password=%s, pwhash=%s, salt=%s', password, pwhash, salt)
     attempt = hash_password(password, salt)
     if attempt == hash:
         return True
@@ -33,11 +33,11 @@ def create_account(username, password):
     """Initialize an account structure for a new player"""
     now = int(time.time())
     salt = create_salt()
-    hash = hash_password(password = password, salt = salt)
+    pwhash = hash_password(password=password, salt=salt)
     account = {
         'username': username,
         'email': '',
-        'hash': hash, 
+        'hash': pwhash,
         'salt': salt,
         'active': 0,
         'playing': '',
