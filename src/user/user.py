@@ -4,18 +4,13 @@ User Class - represents a connected user
 
 from utils import log
 import globals as GLOBALS
+from actor.player import Player
 from user.base_user import BaseUser
 import command
 from command.table import find_command
 
 
-def user_online(username):
-    """Check if a given username is logged in"""
-    if username:
-        for user in GLOBALS.PLAYERS.values():
-            if user.username == username:
-                return True
-    return False
+
 
 
 class User(BaseUser):

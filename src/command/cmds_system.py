@@ -4,12 +4,14 @@ System / Preference commands
 
 from utils import log
 from actor.player import Player
+from user.helpers import send_all
 import globals as GLOBALS
 
 def do_quit(ch: Player, *args):
     """
     Log out player
     """
+    send_all(ch, '^W{} ^yhas left the game.^d\n'.format(ch.get_name()))
     ch._client.deactivate()
 
 

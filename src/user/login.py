@@ -4,13 +4,13 @@ Login Handler - Implements a FSM to handle logins and chargen
 
 from actor.player import Player
 from user.base_user import BaseUser
-from user.user import user_online
+from user.helpers import user_online
 from utils import log
 from user.account import create_account, validate_password, hash_password
-from user.db import account_exists, save_account, load_account
+from user.db import account_exists, save_account, load_account, record_visit
 from user.user import User
 import globals as GLOBALS
-from datetime import datetime
+import time
 
 
 class Login(BaseUser):
@@ -51,7 +51,6 @@ class Login(BaseUser):
         self.send('Password: ')
         self.password_mode_on()
         self.change_state('check_password')
-        print("ASK_PASSWORD: {}".format(self._client.command_list))
 
 
     def _state_check_password(self):
@@ -89,7 +88,14 @@ class Login(BaseUser):
         #Looks like we're legit
         self.account['failures'] = 0
         self.account['logins'] += 1
-        self.account['last_login'] = datetime.now()
+        self.account['last_login'] = int(time.time())
+        port_index = self._client.addrport().find(':')
+        ip = self._client.addrport()[:port_index]
+        hist = {'username': self.username,
+                'ip': ip,
+                'date': self.account['last_login']
+        }
+        record_visit(hist)
         log.info('AUTH LOGIN: {}'.format(self.username))
         # Try to load existing player if found
         if self.account['playing']:
@@ -257,10 +263,8 @@ class Login(BaseUser):
             self.player.save()
             self.account['playing'] = self.username
             save_account(self.account)
-            print('ACCOUNT = {}'.format(self.account))
             self.send('Finished!\n')
-            # Enter game
-            log.debug('Entering handoff')
+            # Prepare player to enter game
             self.change_state('player_handoff')
             self.driver()
         else:
@@ -271,6 +275,7 @@ class Login(BaseUser):
 
     def _state_player_handoff(self):
         """
+        Prepare to enter the game
         Create the user and associate user account
         Set command handler, assign commands, initial room
         """
