@@ -11,7 +11,7 @@ def do_quit(ch: Player, *args):
     """
     Log out player
     """
-    send_all(ch, '^W{} ^yhas left the game.^d\n'.format(ch.get_name()))
+    send_all(ch, '\n^W{} ^yhas left the game.^d\n'.format(ch.get_name()))
     ch._client.deactivate()
 
 
@@ -25,10 +25,14 @@ def do_who(ch: Player, *args):
             continue
         here.append(u.player.get_name())
     if len(here) > 0:
-        ch.send('\nAlso here are:\n')
-        ch.send('{}\n'.format(', '.join(here)))
+        if len(here) > 1:
+            verb = 'are'
+        else:
+            verb = 'is'
+        ch.send('\n^wAlso here {}:^d\n'.format(verb))
+        ch.send('^b{}^d\n'.format('^d, ^b'.join(here)))
     else:
-        ch.send('There is nobody else here.\n')
+        ch.send('^wThere is nobody else here.^d\n')
     #for u in GLOBALS.PLAYERS.values():
     #    ch.send('{}\n'.format(u.player.get_name()))
     
