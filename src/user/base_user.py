@@ -27,7 +27,7 @@ class BaseUser(object):
         """Create a user and associate with a connected client"""
         log.debug('Inside BaseUser.__init__()')
         self._client = client
-        #Global CLIENTS[] = self
+        #Global clients[] = self
         self._preferences = copy.copy(_def_preferences)
         self._state = 'none'
         self.username = 'Anonymous'

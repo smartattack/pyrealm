@@ -19,16 +19,19 @@ PLAYER_DIR = 'players'
 
 
 # List of client connections (TelnetClient)
-CLIENTS = []
+clients = []
 
 # users in lobby
-LOBBY = {}
+lobby = {}
 
 # logged in users
-USERS = {}
+users = {}
 
 # players (in-game characters, owned by a user)
-PLAYERS = {}
+players = {}
+
+# All Players and NPCs
+actors = []
 
 IDLE_TIMEOUT = 30
 

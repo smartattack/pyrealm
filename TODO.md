@@ -28,8 +28,8 @@
 * Test wrapping
 * Create customizable prompt
 * Create @who
-* Create score, help, quit
-* First set of commands:  who, tell, shout(broadcast), quit, stats* write unit tests!
+* Create score, help
+* First set of commands:  tell, shout(broadcast), quit, stats* write unit tests!
 
 # Expand command system based on states:
 The command table will include data about what the nominal state of a player

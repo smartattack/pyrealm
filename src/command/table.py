@@ -3,6 +3,7 @@
 from collections import OrderedDict
 from utils import log
 
+
 POS_DEAD     = 0
 POS_SLEEPING = 1
 POS_SITTING  = 2
@@ -42,3 +43,6 @@ cmd_table = OrderedDict()
 # Due to ordered dict, listed here first to assert preference
 register_command(Command(name = 'quit',     func = 'do_quit',    position = 0, level = 0))
 register_command(Command(name = 'who',      func = 'do_who',     position = 0, level = 0))
+register_command(Command(name = 'shout',    func = 'do_shout',   position = 0, level = 0))
+register_command(Command(name = 'tell',     func = 'do_tell',    position = 0, level = 0))
+

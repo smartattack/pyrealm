@@ -141,11 +141,11 @@ def record_visit(data: dict):
     try:
         result = CURSOR.execute(sql, (data['username'],)).fetchone()
     except sqlite3.Error as e:
-        log.error('SQL query failed: {}'.format(sql))
+        log.error('SQL query failed: {} -> {}'.format(sql, e))
     log.debug('Result: {}'.format(result[0]))
     sql = 'INSERT INTO login_history (account, date, ip) VALUES (?, ?, ?);'
     try:
-        log.debug('EXECUTE SQL: {} <- {}'.format(sql, result[0], data['date'], data['ip']))
+        log.debug('EXECUTE SQL: {} <- ({}, {}, {})'.format(sql, result[0], data['date'], data['ip']))
         result = CURSOR.execute(sql, (result[0], data['date'], data['ip']))
     except sqlite3.Error as e:
         log.error('SQL query failed: {}'.format(sql))    

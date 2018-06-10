@@ -2,14 +2,12 @@
 Player is an actor being played by a connected user
 """
 
+import os
+import time
+import hashlib
 from utils import log, to_json, from_json, object_changed, make_checksum
 from actor.base_actor import BaseActor
 import globals as GLOBALS
-import os
-import copy
-import time
-import hashlib
-
 
 
 class Player(BaseActor):
@@ -32,6 +30,9 @@ class Player(BaseActor):
         # Tracks play time for this character
         self._playtime = 0
 
+        self._checksum = None
+        self._last_saved = None
+
 
     def __repr__(self):
         return 'Player({}) = {}'.format(self._name, self.__dict__)
@@ -49,25 +50,29 @@ class Player(BaseActor):
 
     def send_raw(self, msg):
         """Send raw string to player, no color support"""
-        self._client.send_raw(msg)         
+        self._client.send_raw(msg)
 
 
     def add_ability(self, ability):
-        log.debug('Adding "{}" ability to player {}'.format(ability, self._name))
+        """Add an ability to a player"""
+        log.debug('Adding "%s" ability to player %s', ability, self._name)
         self._abilities.add(ability)
 
 
     def remove_ability(self, ability):
-        log.debug('Removing "{}" ability from player {}'.format(ability, self._name))
+        """Remove an ability from a player"""
+        log.debug('Removing "%s" ability from player %s', ability, self._name)
         self._abilities.remove(ability)
 
 
     def clear_abilities(self):
-        log.debug('Removing all abilities from player {}'.format(self._name))
+        """Remove all abilities from a player"""
+        log.debug('Removing all abilities from player %s', self._name)
         self._abilities = set()
 
 
     def has_ability(self, ability):
+        """Return bool if player has ability or not"""
         if ability in self._abilities:
             return True
         else:
@@ -75,33 +80,34 @@ class Player(BaseActor):
 
 
     def list_abilities(self):
-        return list(self._abilities)
+        """Return a list of all abilities for a player"""
+        return list(self._abilities).sort()
 
 
     def save(self, logout=False):
         """Write to disk"""
         log.debug('FUNC: Player.save()')
-        if logout == True:
-            log.debug('+ Updating playtime for {} += {}'.format(self.get_name(), self._client.duration()))
+        if logout:
+            log.debug('+ Updating playtime for %s += %s', self.get_name(), self._client.duration())
             # update playtime duration
             if hasattr(self, '_playtime'):
                 self._playtime += self._client.duration()
             else:
                 self._playtime = self._client.duration()
-        pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR)    
+        pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR)
         try:
             os.makedirs(pathname, 0o755, True)
-        except Exception as e:
-            log.critical('Failed to create directory: {} -> {}'.format(pathname, e))
-        data = to_json(self, skip_list = ['_client','_checksum', '_last_saved'])
+        except OSError as err:
+            log.critical('Failed to create directory: %s -> %s', pathname, err)
+        data = to_json(self, skip_list=['_client', '_checksum', '_last_saved'])
         checksum = make_checksum(data)
-        if object_changed(self, checksum) or logout == True:
+        if object_changed(self, checksum) or logout:
             self._checksum = checksum
             self._last_saved = time.time()
-            log.info('Saving player: {}'.format(self.get_name()))
+            log.info('Saving player: %s', self.get_name())
             filename = os.path.join(pathname, self.get_name().lower() + '.json')
-            with open(filename, "w") as f:
-                f.write(data)
+            with open(filename, "w") as file:
+                file.write(data)
                 #log.debug('PLAYERDATA: {}'.format(data))
 
 
@@ -112,14 +118,14 @@ class Player(BaseActor):
             raise KeyError('Must include a username with load()')
         filename = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR, username.lower() + '.json')
         data = ''
-        log.info('Loading Player({})'.format(username))
-        with open(filename, "r") as f:
-            for line in f:
+        log.info('Loading Player(%s)', username)
+        with open(filename, "r") as file:
+            for line in file:
                 data += line
         try:
             loaded = from_json(data)
-        except Exception as e:
-            log.error('Could not load Player data: {}'.format(e))
+        except Exception as err:
+            log.error('Could not load Player data: %s', err)
         if isinstance(loaded, Player):
             # Avoid resaving right away
             self._last_saved = time.time()

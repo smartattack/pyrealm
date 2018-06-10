@@ -20,41 +20,41 @@ def connect_hook(client):
     #client.request_mccp()
     #client.request_msp()
     client.send(GLOBALS.WELCOME_BANNER)
-    GLOBALS.CLIENTS.append(client)
+    GLOBALS.clients.append(client)
     # Initial "user" is a login handler
     anonymous_user = Login(client)
-    # Adding user to LOBBY activates it's driver() in main loop
-    GLOBALS.LOBBY[client] = anonymous_user
+    # Adding user to lobby activates it's driver() in main loop
+    GLOBALS.lobby[client] = anonymous_user
 
 
 def disconnect_hook(client):
     log.info("DISCONNECT_HOOK: Lost connection to {}".format(client.addrport()))
-    if client in GLOBALS.LOBBY:
-        log.info(' +-> Removing {} from LOBBY'.format(client.addrport()))
-        del GLOBALS.LOBBY[client]
-    if client in GLOBALS.PLAYERS:
-        log.debug(' +-> Removing CLIENTS[{}]'.format(GLOBALS.PLAYERS[client].player.get_name()))
-        GLOBALS.PLAYERS[client].player.save(logout = True)
-        del GLOBALS.PLAYERS[client]
-    log.debug(' +-> Removing GLOBALS.CLIENTS[{}]'.format(client.addrport()))
-    GLOBALS.CLIENTS.remove(client)
+    if client in GLOBALS.lobby:
+        log.info(' +-> Removing {} from lobby'.format(client.addrport()))
+        del GLOBALS.lobby[client]
+    if client in GLOBALS.players:
+        log.debug(' +-> Removing clients[{}]'.format(GLOBALS.players[client].player.get_name()))
+        GLOBALS.players[client].player.save(logout = True)
+        del GLOBALS.players[client]
+    log.debug(' +-> Removing GLOBALS.clients[{}]'.format(client.addrport()))
+    GLOBALS.clients.remove(client)
 
 
 def kick_idlers():
-    for c in GLOBALS.CLIENTS:
+    for c in GLOBALS.clients:
         if c.idle() > GLOBALS.IDLE_TIMEOUT:
-            if c in GLOBALS.PLAYERS:
-                do_quit(GLOBALS.PLAYERS[c].player)
+            if c in GLOBALS.players:
+                do_quit(GLOBALS.players[c].player)
             c.active = False
             log.info("Marking idle client inactive: {}".format(c.addrport()))
 
 
 def process_commands():
-    for user in list(GLOBALS.LOBBY.values()):
+    for user in list(GLOBALS.lobby.values()):
         # process commands
         if user._client.active and user._client.cmd_ready:
             user.driver()
-    for user in GLOBALS.PLAYERS.values():
+    for user in GLOBALS.players.values():
         # process commands
         if user._client.active and user._client.cmd_ready:
             user.driver()

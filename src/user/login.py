@@ -2,15 +2,17 @@
 Login Handler - Implements a FSM to handle logins and chargen
 """
 
-from actor.player import Player
+import time
+
 from user.base_user import BaseUser
 from user.helpers import user_online
-from utils import log
-from user.account import create_account, validate_password, hash_password
+from user.account import create_account, validate_password
 from user.db import account_exists, save_account, load_account, record_visit
 from user.user import User
+from actor.player import Player
+from utils import log
 import globals as GLOBALS
-import time
+
 
 
 class Login(BaseUser):
@@ -23,6 +25,12 @@ class Login(BaseUser):
         self.change_state('ask_username')
         self.driver()
         self.username = 'Guest'
+        self.account = None
+        self.player = None
+        self.password = None
+        self.gender = None
+        self.race = None
+        self.pclass = None
 
 
     def _state_ask_username(self):
@@ -57,7 +65,7 @@ class Login(BaseUser):
         """Validate login"""
         self.password_mode_off()
         self.send('\n')
-        input = self.get_command()
+        passwd = self.get_command()
         if not account_exists(self.username):
             self.send('Invalid credentials!\n\n')
             self.username = ''
@@ -65,11 +73,11 @@ class Login(BaseUser):
             self.driver()
             return None
         self.account = load_account(self.username)
-        if not validate_password(password = input, hash = self.account['hash'],
-                                 salt = self.account['salt']):
+        if not validate_password(password=passwd, hash=self.account['hash'],
+                                 salt=self.account['salt']):
             self.account['failures'] += 1
-            log.warning('AUTH WARNING: {} login failures for {}'.format(
-                self.account['failures'], self.username))
+            log.warning('AUTH WARNING: %s login failures for %s',
+                        self.account['failures'], self.username)
             save_account(self.account)
             self.send('Invalid credentials!\n\n')
             self.username = ''
@@ -78,7 +86,7 @@ class Login(BaseUser):
             return None
         # There can be only one
         if user_online(self.username):
-            log.warning('Duplicate login detected: {}'.format(self.username))
+            log.warning('Duplicate login detected: %s', self.username)
             self.send('It looks like are already playing!\n\n\n')
             self.flush()
             self._client.deactivate()
@@ -90,24 +98,23 @@ class Login(BaseUser):
         self.account['logins'] += 1
         self.account['last_login'] = int(time.time())
         port_index = self._client.addrport().find(':')
-        ip = self._client.addrport()[:port_index]
+        ipaddr = self._client.addrport()[:port_index]
         hist = {'username': self.username,
-                'ip': ip,
-                'date': self.account['last_login']
-        }
+                'ip': ipaddr,
+                'date': self.account['last_login']}
         record_visit(hist)
-        log.info('AUTH LOGIN: {}'.format(self.username))
+        log.info('AUTH LOGIN: %s', self.username)
         # Try to load existing player if found
         if self.account['playing']:
-            log.debug(' +-> Playing as {}'.format(self.account['playing']))
+            log.debug(' +-> Playing as %s', self.account['playing'])
             try:
                 self.player = Player.load(self, self.account['playing'])
                 self.player._client = self._client
                 log.debug('CHANGING STATE TO HANDOFF')
                 self.change_state('player_handoff')
                 self.send('Welcome back, {}!\n\n'.format(self.username))
-            except Exception as e:
-                log.warning('Player.load({}): {}'.format(self.username, e))
+            except Exception as err:
+                log.warning('Player.load(%s): %s', self.username, err)
                 self.change_state('new_ask_gender')
             self.driver()
         else:
@@ -116,11 +123,8 @@ class Login(BaseUser):
             save_account(self.account)
             self.driver()
 
-        
-
 
     # ----------[ chargen ]------------------------------------------------
-    
     def _state_new_ask_username(self):
         self.send('Choose a name for yourself (5-20 Letters only): ')
         self.change_state('new_check_username')
@@ -191,13 +195,13 @@ class Login(BaseUser):
 
 
     def _state_new_assign_gender(self):
-        self.send('\n') 
-        g = self.get_command().lower()
-        if g in ('m', 'male'):
+        self.send('\n')
+        selection = self.get_command().lower()
+        if selection in ('m', 'male'):
             self.gender = 'Male'
             self.change_state('new_ask_race')
-        elif g in ('f', 'female'):
-            self.gender = 'Female' 
+        elif selection in ('f', 'female'):
+            self.gender = 'Female'
             self.change_state('new_ask_race')
         else:
             self.send('Please choose only m for male or f for female!\n')
@@ -217,7 +221,7 @@ class Login(BaseUser):
         self.change_state('new_ask_class')
         self.driver()
 
-    
+
     def _state_new_ask_class(self):
         self.send('\nChoose your class(Warrior):')
         self.change_state('new_assign_class')
@@ -241,7 +245,7 @@ class Login(BaseUser):
         Now that we have a complete profile(assuming 'yes' here):
           - Create player object
           - Assign properties to player
-          - Finalize player(inventory, abilities, place in start room, 
+          - Finalize player(inventory, abilities, place in start room,
                             assign commandset)
           - Create user object, assign player to user
           - change to user_command state
@@ -259,7 +263,7 @@ class Login(BaseUser):
             self.player.set_gender(self.gender)
             self.player.set_race(self.race)
             self.player.set_class(self.pclass)
-            log.info('Saving player {}'.format(self.player.get_name()))
+            log.info('Saving player %s', self.player.get_name())
             self.player.save()
             self.account['playing'] = self.username
             save_account(self.account)
@@ -284,9 +288,11 @@ class Login(BaseUser):
         user.username = self.account['username']
         user.player = self.player
         user.change_state('playing')
-        # Remove us from LOBBY, should clean up Login() object
-        del GLOBALS.LOBBY[self.player._client]
-        # Insert the user into the PLAYERS dict
+        # Remove us from lobby, should clean up Login() object
+        del GLOBALS.lobby[self.player._client]
+        # Insert the user into the players dict
         # This enables the user command interpreter via User.driver()
-        GLOBALS.PLAYERS[self.player._client] = user
+        GLOBALS.players[self.player._client] = user
+        # All actors (Players, NPCs) get entered into global actors table
+        GLOBALS.actors.append(self.player)
         user.send_prompt()
