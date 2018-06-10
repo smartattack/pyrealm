@@ -26,4 +26,5 @@ def send_all(ch: Player, msg: str):
     """Send a message to all other players"""
     if msg is not None:
         for user in GLOBALS.PLAYERS.values():
-            user.send(msg)
+            if user.player != ch:
+                user.send(msg)
