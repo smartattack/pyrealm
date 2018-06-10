@@ -22,7 +22,7 @@ class Command():
 def find_command(search: str):
     """Look for a matching command in command table"""
     log.debug('FUNC ENTER: find_command({})'.format(search))
-    if search is None:
+    if search is None or len(search) < 1:
         log.debug('FUNC RETURN: find_command() == None')
         return None
     for c in cmd_table.values():
