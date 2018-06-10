@@ -39,7 +39,6 @@ def disconnect_hook(client):
     GLOBALS.CLIENTS.remove(client)
 
 
-
 def kick_idlers():
     for c in GLOBALS.CLIENTS:
         if c.idle() > GLOBALS.IDLE_TIMEOUT:

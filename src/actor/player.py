@@ -88,7 +88,7 @@ class Player(BaseActor):
                 self._playtime += self._client.duration()
             else:
                 self._playtime = self._client.duration()
-        pathname = os.path.join(GLOBALS.DATA_DIR, GLOBAL.PLAYER_DIR)    
+        pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR)    
         try:
             os.makedirs(pathname, 0o755, True)
         except Exception as e:
@@ -110,7 +110,7 @@ class Player(BaseActor):
         if not username:
             log.error('Attempted to call Player.load without a username!')
             raise KeyError('Must include a username with load()')
-        filename = os.path.join(GLOBALS.DATA_DIR, GLOBAL.PLAYER_DIR, username.lower() + '.json')
+        filename = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR, username.lower() + '.json')
         data = ''
         log.info('Loading Player({})'.format(username))
         with open(filename, "r") as f:
