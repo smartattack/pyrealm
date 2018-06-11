@@ -56,7 +56,7 @@ class User(BaseUser):
 
     def _parse_command(self):
         """Return a command and args[] for user input"""
-        line = self._client.get_command()
+        line = self.client.get_command()
         words = line.split(' ')
         cmd = words[0]
         if len(words) > 1:

@@ -21,7 +21,7 @@ class Player(BaseActor):
 
         # Set this later, we don't want it as a class attribute
         # since then it would get serialized
-        self._client = None
+        self.client = None
 
         # Ability to perform various tasks or skills
         # Some abilities are granted by class/race
@@ -40,17 +40,17 @@ class Player(BaseActor):
 
     def send(self, msg):
         """Send a message to player, supports color codes"""
-        self._client.send_cc(msg)
+        self.client.send_cc(msg)
 
 
     def send_wrapped(self, msg):
         """Send wrapped text to player, supports color codes"""
-        self._client.send_wrapped(msg)
+        self.client.send_wrapped(msg)
 
 
     def send_raw(self, msg):
         """Send raw string to player, no color support"""
-        self._client.send_raw(msg)
+        self.client.send_raw(msg)
 
 
     def add_ability(self, ability):
@@ -88,18 +88,18 @@ class Player(BaseActor):
         """Write to disk"""
         log.debug('FUNC: Player.save()')
         if logout:
-            log.debug('+ Updating playtime for %s += %s', self.get_name(), self._client.duration())
+            log.debug('+ Updating playtime for %s += %s', self.get_name(), self.client.duration())
             # update playtime duration
             if hasattr(self, '_playtime'):
-                self._playtime += self._client.duration()
+                self._playtime += self.client.duration()
             else:
-                self._playtime = self._client.duration()
+                self._playtime = self.client.duration()
         pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR)
         try:
             os.makedirs(pathname, 0o755, True)
         except OSError as err:
             log.critical('Failed to create directory: %s -> %s', pathname, err)
-        data = to_json(self, skip_list=['_client', '_checksum', '_last_saved'])
+        data = to_json(self, skip_list=['client', '_checksum', '_last_saved'])
         checksum = make_checksum(data)
         if object_changed(self, checksum) or logout:
             self._checksum = checksum

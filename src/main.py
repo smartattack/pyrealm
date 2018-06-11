@@ -39,9 +39,12 @@ def disconnect_hook(client):
     if client in GLOBALS.players:
         log.debug(' +-> Removing clients[%s]', GLOBALS.players[client].player.get_name())
         GLOBALS.players[client].player.save(logout=True)
+        if client in GLOBALS.actors:
+            GLOBALS.actors.remove(GLOBALS.players[client])
         del GLOBALS.players[client]
     log.debug(' +-> Removing GLOBALS.clients[%s]', client.addrport())
     GLOBALS.clients.remove(client)
+
 
 
 def kick_idlers():
@@ -58,11 +61,11 @@ def process_commands():
     """Handle user input"""
     for user in list(GLOBALS.lobby.values()):
         # process commands
-        if user._client.active and user._client.cmd_ready:
+        if user.client.active and user.client.cmd_ready:
             user.driver()
     for user in GLOBALS.players.values():
         # process commands
-        if user._client.active and user._client.cmd_ready:
+        if user.client.active and user.client.cmd_ready:
             user.driver()
 
 
