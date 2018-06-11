@@ -9,7 +9,6 @@ from utils import log
 
 _DEF_PREFERENCES = {
     'color':   False,
-    'prompt':  '>>>',
     'MSP':     False,
     'MCCP':    False,
 }
@@ -31,6 +30,7 @@ class BaseUser(object):
         self._preferences = copy.copy(_DEF_PREFERENCES)
         self._state = 'none'
         self.username = 'Anonymous'
+        self.player = None
         # FIXME: Maybe I should take BaseActor and BaseUser client function wrappers
         # and move them into a Mixin that both inherit from, like TelnetWrapperMixing?
 
@@ -78,7 +78,10 @@ class BaseUser(object):
 
     def send_prompt(self):
         """Send user prompt"""
-        self.send_raw(self._preferences['prompt'])
+        if self.player:
+            self.send(self.player.get_prompt())
+        else:
+            self.send('>>>')
         self.flush()
 
 

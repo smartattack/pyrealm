@@ -4,7 +4,7 @@ BaseActor class - base class for NPC and Players
 import copy as copy
 from utils import log
 
-_def_stats = {
+_DEF_STATS = {
     'hp':    0,
     'maxhp': 0,
     'mp':    0,
@@ -15,7 +15,7 @@ _def_stats = {
     'money': 0
 }
 
-_def_attributes = {
+_DEF_ATTRIBUTES = {
     # Determines carry capacity, strength of attacks
     'strength':  0,
     # Affects skill learning, MP leveling
@@ -47,10 +47,10 @@ class BaseActor(object):
         self._race = ''
         
         # Holds current actor state (hp, armor, xp, strength)
-        self._stats = copy.copy(_def_stats)
+        self._stats = copy.copy(_DEF_STATS)
 
         # Hold player traits (strength, intellect, etc)
-        self._attributes = copy.copy(_def_attributes)
+        self._attributes = copy.copy(_DEF_ATTRIBUTES)
 
         # inventory, dict:  k=item, v=count
         self._carried = {}

@@ -6,6 +6,7 @@ import os
 import time
 import hashlib
 from utils import log, to_json, from_json, object_changed, make_checksum
+from utils import xp_to_level, stat_color
 from actor.base_actor import BaseActor
 import globals as GLOBALS
 
@@ -51,6 +52,19 @@ class Player(BaseActor):
     def send_raw(self, msg):
         """Send raw string to player, no color support"""
         self.client.send_raw(msg)
+
+
+    def get_prompt(self):
+        """Return a prompt for player"""
+        log.debug('FUN get_prompt()')
+        hpcol = stat_color(self._stats['hp'], self._stats['maxhp'])
+        mpcol = stat_color(self._stats['mp'], self._stats['maxmp'])
+        to_level = xp_to_level(self._stats['level'], self._stats['xp'])
+        prompt = '^chp^w[{}{}/{}^w] ^cmp^w[{}{}/{}^w] ^cxp^w[^m{}/{}^w]^W> ^d'.format(
+            hpcol, self._stats['hp'], self._stats['maxhp'], 
+            mpcol, self._stats['mp'], self._stats['maxmp'],
+            self._stats['xp'], to_level)
+        return prompt
 
 
     def add_ability(self, ability):
