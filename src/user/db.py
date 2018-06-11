@@ -58,7 +58,7 @@ def create_login_history_table():
         sys.exit(1)
 
 
-def boot_db():
+def boot_userdb():
     """Check database exists, create tables if missing"""
     sql_tables = ["accounts", "login_history"]
     db_version = CURSOR.execute('PRAGMA user_version').fetchone()[0]

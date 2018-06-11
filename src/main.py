@@ -72,7 +72,7 @@ def process_commands():
 def main():
     """Pyrealms main()"""
 
-    boot_db()
+    boot_userdb()
 
     log.info("Starting server on port %s", GLOBALS.PORT)
 
