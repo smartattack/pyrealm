@@ -5,9 +5,9 @@ Base User class - base class for logged in accounts. a FSM.
 import sys
 import copy
 from utils import log
-from miniboa import TelnetServer
 
-_def_preferences = {
+
+_DEF_PREFERENCES = {
     'color':   False,
     'prompt':  '>>>',
     'MSP':     False,
@@ -26,16 +26,14 @@ class BaseUser(object):
     def __init__(self, client):
         """Create a user and associate with a connected client"""
         log.debug('Inside BaseUser.__init__()')
-        self._client = client
+        self.client = client
         #Global clients[] = self
-        self._preferences = copy.copy(_def_preferences)
+        self._preferences = copy.copy(_DEF_PREFERENCES)
         self._state = 'none'
         self.username = 'Anonymous'
+        # FIXME: Maybe I should take BaseActor and BaseUser client function wrappers
+        # and move them into a Mixin that both inherit from, like TelnetWrapperMixing?
 
-    """
-    FIXME: Maybe I should take BaseActor and BaseUser client function wrappers
-    and move them into a Mixin that both inherit from, like TelnetWrapperMixing?
-    """
 
     def change_state(self, state):
         """Transition to a new state"""
@@ -45,11 +43,11 @@ class BaseUser(object):
     def driver(self):
         """Locate a function for current state and execute"""
         try:
-            log.debug('STATE: {}'.format(self._state))
+            log.debug('STATE: %s', self._state)
             self.__getattribute__(self._state)()
-        except Exception as e:
+        except Exception as err:
             # We should never get here
-            log.error('Invalid state passed: {} -> {}'.format(self._state, e))
+            log.error('Invalid state passed: %s -> %s', self._state, err)
             sys.exit(1)
 
 
@@ -60,22 +58,22 @@ class BaseUser(object):
 
     def send(self, msg):
         """Send text to client, don't wrap but do process colors"""
-        self._client.send_cc(msg)
-    
+        self.client.send_cc(msg)
+
 
     def send_wrapped(self, msg):
         """Send wrapped text to client, processes colors"""
-        self._client.send_wrapped(msg)
-    
+        self.client.send_wrapped(msg)
+
 
     def send_raw(self, msg):
         """Send text to client without any processing"""
-        self._client.send(msg)
-    
+        self.client.send(msg)
+
 
     def flush(self):
         """Flush socket output buffer"""
-        self._client.socket_send()
+        self.client.socket_send()
 
 
     def send_prompt(self):
@@ -83,35 +81,35 @@ class BaseUser(object):
         self.send_raw(self._preferences['prompt'])
         self.flush()
 
-        
+
     def get_command(self):
         """Retrieve a command from the client"""
-        return self._client.get_command()
+        return self.client.get_command()
 
 
     def get_idle(self):
         """Return idle_time"""
-        return self._client.idle()
+        return self.client.idle()
 
 
     def get_duration(self):
         """Return connection duration"""
-        return self._client.duration()
+        return self.client.duration()
 
 
     def password_mode_on(self):
         """Disable echo"""
-        self._client.password_mode_on()
+        self.client.password_mode_on()
 
 
     def password_mode_off(self):
         """Re-enable echo"""
-        self._client.password_mode_off()
- 
- 
+        self.client.password_mode_off()
+
+
     def deactivate(self):
         """Deactivate client session"""
-        self._client.deactivate()
+        self.client.deactivate()
 
 
     def get_preference(self, which):
@@ -120,14 +118,12 @@ class BaseUser(object):
             return self._preferences[which]
         else:
             return None
-    
-    
+
+
     def set_preference(self, which, value):
         """Set a user preference"""
-        """
-        FIXME: this should actually toggle the underlying client's state
-        """
+        # FIXME: this should actually toggle the underlying client's state
         try:
             self._preferences[which] = value
-        except ValueError as e:
-            log.warning('Setting user preference FAILED: {} -> {}'.format(self._client['name'], e))
+        except ValueError as err:
+            log.warning('Setting user preference FAILED: %s -> %s', self.client['name'], err)

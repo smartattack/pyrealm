@@ -89,7 +89,7 @@ class Login(BaseUser):
             log.warning('Duplicate login detected: %s', self.username)
             self.send('It looks like are already playing!\n\n\n')
             self.flush()
-            self._client.deactivate()
+            self.client.deactivate()
             self.change_state('none')
             self.driver()
             return None
@@ -97,8 +97,8 @@ class Login(BaseUser):
         self.account['failures'] = 0
         self.account['logins'] += 1
         self.account['last_login'] = int(time.time())
-        port_index = self._client.addrport().find(':')
-        ipaddr = self._client.addrport()[:port_index]
+        port_index = self.client.addrport().find(':')
+        ipaddr = self.client.addrport()[:port_index]
         hist = {'username': self.username,
                 'ip': ipaddr,
                 'date': self.account['last_login']}
@@ -109,7 +109,7 @@ class Login(BaseUser):
             log.debug(' +-> Playing as %s', self.account['playing'])
             try:
                 self.player = Player.load(self, self.account['playing'])
-                self.player._client = self._client
+                self.player.client = self.client
                 log.debug('CHANGING STATE TO HANDOFF')
                 self.change_state('player_handoff')
                 self.send('Welcome back, {}!\n\n'.format(self.username))
@@ -258,7 +258,7 @@ class Login(BaseUser):
             self.send('\n\nCreating your player...')
             log.debug('Creating Player() object')
             self.player = Player()
-            self.player._client = self._client
+            self.player.client = self.client
             self.player.set_name(self.username)
             self.player.set_gender(self.gender)
             self.player.set_race(self.race)
@@ -283,16 +283,16 @@ class Login(BaseUser):
         Create the user and associate user account
         Set command handler, assign commands, initial room
         """
-        user = User(self.player._client)
-        user.client = self.player._client
+        user = User(self.player.client)
+        user.client = self.player.client
         user.username = self.account['username']
         user.player = self.player
         user.change_state('playing')
         # Remove us from lobby, should clean up Login() object
-        del GLOBALS.lobby[self.player._client]
+        del GLOBALS.lobby[self.player.client]
         # Insert the user into the players dict
         # This enables the user command interpreter via User.driver()
-        GLOBALS.players[self.player._client] = user
+        GLOBALS.players[self.player.client] = user
         # All actors (Players, NPCs) get entered into global actors table
         GLOBALS.actors.append(self.player)
         user.send_prompt()
