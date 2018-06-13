@@ -5,9 +5,9 @@ Copyright 2018 Peter Morgan
 -------------------------------------------------
 """
 
-
+import time
 from user.login import Login
-from user.db import boot_db
+from user.db import boot_userdb
 from command.cmds_system import do_quit
 from miniboa import TelnetServer
 from utils import log
@@ -22,7 +22,7 @@ def connect_hook(client):
     client.request_terminal_type()
     #client.request_mccp()
     #client.request_msp()
-    client.send(GLOBALS.WELCOME_BANNER)
+    client.send_cc(GLOBALS.WELCOME_BANNER)
     GLOBALS.clients.append(client)
     # Initial "user" is a login handler
     anonymous_user = Login(client)
@@ -48,13 +48,20 @@ def disconnect_hook(client):
 
 
 def kick_idlers():
-    """Scan for and deactivate clients which have surpassed IDLE_TIMEOUT"""
+    """Scan for and deactivate clients which have surpassed idle timeout"""
+    # We maintain separate timeouts for players vs lobby connections
     for client in GLOBALS.clients:
-        if client.idle() > GLOBALS.IDLE_TIMEOUT:
-            if client in GLOBALS.players:
+        if client in GLOBALS.players:
+            if client.idle() > GLOBALS.PLAYER_TIMEOUT:
                 do_quit(GLOBALS.players[client].player, [])
-            client.active = False
-            log.info("Marking idle client inactive: %s", client.addrport())
+                client.active = False
+                log.info("Marking idle client inactive: %s", client.addrport())
+        elif client in GLOBALS.lobby:
+            if client.idle() > GLOBALS.LOBBY_TIMEOUT:
+                client.active = False
+                log.info("Marking idle client inactive: %s", client.addrport())
+        else:
+            log.error('Found client not in LOBBY or PLAYERS lists: %s', client.addrport())
 
 
 def process_commands():
@@ -71,6 +78,9 @@ def process_commands():
 
 def main():
     """Pyrealms main()"""
+
+    # Denote time of boot, used by do_uptime
+    GLOBALS.boot_time = int(time.time())
 
     boot_userdb()
 

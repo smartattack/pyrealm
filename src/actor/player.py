@@ -56,6 +56,7 @@ class Player(BaseActor):
 
     def get_prompt(self):
         """Return a prompt for player"""
+        # FIXME: only calc to_level when XP is changed, store in Player()  
         log.debug('FUN get_prompt()')
         hpcol = stat_color(self._stats['hp'], self._stats['maxhp'])
         mpcol = stat_color(self._stats['mp'], self._stats['maxmp'])

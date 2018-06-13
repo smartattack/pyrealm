@@ -21,6 +21,8 @@ class User(BaseUser):
         # Set of allowed commands
         self._commands = set()
         self.player = None
+        self._last_cmd = None
+        self._last_args = []
 
 
     def add_command(self, cmd):
@@ -72,8 +74,15 @@ class User(BaseUser):
         if len(cmd) < 1:
             self.send_prompt()
             return
+        if cmd == '!':
+            # Repeat last command
+            cmd = self._last_cmd
+            args = self._last_args
         match = find_command(cmd)
         if match:
+            # Store this command as last_command
+            self._last_cmd = cmd
+            self._last_args = args
             log.debug('MATCHED COMMAND: %s', match.name)
             # Check level
             if match.level <= self.player.get_stat('level'):

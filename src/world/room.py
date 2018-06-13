@@ -15,3 +15,5 @@ class Room(object):
         self.actors = []
         self.exits = {}
     
+    def __repr__(self):
+        return 'Room object, id={}, name={}'.format(self.id, self.name)
