@@ -11,6 +11,7 @@ from user.db import boot_userdb
 from command.cmds_system import do_quit
 from miniboa import TelnetServer
 from utils import log
+from world.room import Room
 import globals as GLOBALS
 
 

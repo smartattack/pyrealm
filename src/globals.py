@@ -14,6 +14,9 @@ WELCOME_BANNER = '''
 DATA_DIR = 'data'
 PLAYER_DIR = 'players'
 
+# id number of starting room for new players
+START_ROOM = 1
+
 # Hold mud boot time
 boot_time = -1
 
@@ -31,6 +34,9 @@ players = {}
 
 # All Players and NPCs
 actors = []
+
+# Holds the map, for now
+rooms = {}
 
 # Timeouts
 PLAYER_TIMEOUT = 1800

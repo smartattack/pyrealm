@@ -47,3 +47,4 @@ register_command(Command(name='shout',     func='do_shout',     position=0, leve
 register_command(Command(name='tell',      func='do_tell',      position=0, level=0))
 register_command(Command(name='shutdown',  func='do_shutdown',  position=0, level=100))
 register_command(Command(name='uptime',    func='do_uptime',    position=0, level=0))
+register_command(Command(name='go',        func='do_go',        position=0, level=0))
