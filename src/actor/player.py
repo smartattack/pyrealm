@@ -61,7 +61,7 @@ class Player(BaseActor):
         hpcol = stat_color(self._stats['hp'], self._stats['maxhp'])
         mpcol = stat_color(self._stats['mp'], self._stats['maxmp'])
         to_level = xp_to_level(self._stats['level'], self._stats['xp'])
-        prompt = '^chp^w[{}{}/{}^w] ^cmp^w[{}{}/{}^w] ^cxp^w[^m{}/{}^w]^W> ^d'.format(
+        prompt = '{}{}/{} ^chp {}{}/{} ^cmp ^m{}/{} ^cxp^w> ^d'.format(
             hpcol, self._stats['hp'], self._stats['maxhp'], 
             mpcol, self._stats['mp'], self._stats['maxmp'],
             self._stats['xp'], to_level)

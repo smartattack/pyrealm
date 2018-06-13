@@ -136,7 +136,8 @@ class TelnetServer(object):
             ## Delete inactive connections from the dictionary
             else:
                 log.debug('Client marked inactive, disconnecting: {}'.format(client.addrport()))
-                #client.sock.shutdown(?)
+                client.send('^d\n')
+                client.socket_send()
                 client.sock.close()
                 self.on_disconnect(client)
                 del self.clients[client.fileno]
