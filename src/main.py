@@ -77,6 +77,13 @@ def process_commands():
             user.driver()
 
 
+def send_prompts():
+    """Send user prompts"""
+    for user in GLOBALS.players.values():
+        if user.client.send_pending:
+            user.send_prompt()
+
+
 def main():
     """Pyrealms main()"""
 
@@ -97,7 +104,7 @@ def main():
         server.poll()
         kick_idlers()
         process_commands()
-
+        send_prompts()
 
     log.info("Server shutdown received")
 

@@ -33,6 +33,7 @@ def move_actor(actor, new_location, direction):
                 '{} enters from the {}\n'.format(actor.get_name(),
                                                  DIR_FROM_NAMES[direction]))
     GLOBALS.rooms[new_location].add_actor(actor)
+    actor.location = new_location
 
 
 # match directions
@@ -78,7 +79,7 @@ def do_go(plr: Player, args: list):
         move_actor(plr, new_location, which)
     except Exception as err:
         log.error('do_go() failed: %s', err)
-        plr.send('You cannot go that way\n{}\n')
+        plr.send('You cannot go that way\n')
         return
 
 

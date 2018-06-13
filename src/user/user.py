@@ -72,7 +72,8 @@ class User(BaseUser):
         cmd, args = self._parse_command()
         log.debug('USER INPUT: |%s| -> |%s|', cmd, args)
         if len(cmd) < 1:
-            self.send_prompt()
+            self.send('\n')
+            #self.send_prompt()
             return
         if cmd == '!':
             # Repeat last command
@@ -91,7 +92,7 @@ class User(BaseUser):
                     log.debug('Command module has method: %s', match.func)
                     getattr(command, match.func)(self.player, args)
                     log.debug('Calling %s(%s, %s)', match.func, self.player.get_name(), args)
-                    self.send_prompt()
+                    #self.send_prompt()
                 else:
                     log.debug('Command module does not have method: %s', match.func)
             else:
@@ -99,4 +100,4 @@ class User(BaseUser):
                           self.player.get_name(), match.name)
         else:
             self.send('^rUnknown command!^d\n')
-            self.send_prompt()
+            #self.send_prompt()

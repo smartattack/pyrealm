@@ -299,4 +299,4 @@ class Login(BaseUser):
         GLOBALS.rooms[self.player.location].add_actor(self.player)
         # All actors (Players, NPCs) get entered into global actors table
         GLOBALS.actors.append(self.player)
-        user.send_prompt()
+        user.send('\n')

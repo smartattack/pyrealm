@@ -75,6 +75,7 @@ class Room(object):
         else:
             return False
 
+
     def add_actor(self, act):
         """Add a character to a room"""
         log.debug('FUNC Room.add_actor()')
@@ -84,7 +85,7 @@ class Room(object):
             if isinstance(act, Player):
                 act.send('^Y{}^d\n^G{}^d\n'.format(self.name, self.description))
 
-    
+
     def remove_actor(self, act):
         """Remove character from room"""
         log.debug('FUNC Room.remove_actor()')
