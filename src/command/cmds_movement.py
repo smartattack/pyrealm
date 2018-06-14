@@ -27,11 +27,11 @@ def move_actor(actor, new_location, direction):
     old_location = actor.location
     GLOBALS.rooms[old_location].remove_actor(actor)
     send_to_room(old_location, 
-                 '{} exits to the {}\n'.format(actor.get_name(),
-                                               DIR_NAMES[direction]))
+                 '{} heads {}\n'.format(actor.get_name(),
+                                               DIR_NAMES[direction].exits))
     send_to_room(new_location, 
                 '{} enters from the {}\n'.format(actor.get_name(),
-                                                 DIR_FROM_NAMES[direction]))
+                                                 DIR_NAMES[direction].enters))
     GLOBALS.rooms[new_location].add_actor(actor)
     actor.location = new_location
 
@@ -41,7 +41,7 @@ def match_direction(text: str):
     """Match text to direction"""
     log.debug('FUNC match_directions')
     search = text.lower()
-    for dir_number, dir_name in DIR_NAMES.items():
+    for dir_number, dir_name, ignore in DIR_NAMES:
         if dir_name.lower().startswith(search):
             log.debug('Matched direction: %s (%s)', dir_number, dir_name)
             return dir_number
@@ -82,14 +82,3 @@ def do_go(plr: Player, args: list):
         plr.send('You cannot go that way\n')
         return
 
-
-def do_north(plr: Player, args: list):
-    """
-    Move to north room
-    """
-    try:
-        old_location = plr.location
-        plr.location = GLOBALS.rooms[plr.location].exits[DIR_NORTH]['to_room']
-        send_all('{} left to the north.', plr.get_name())
-    except:
-        plr.send('You cannot go that way.')

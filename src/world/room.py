@@ -2,9 +2,25 @@
 Room Class
 """
 
+from collections import namedtuple
 from utils import log
 from actor.player import Player
 import globals as GLOBALS
+
+Dir_Text = namedtuple('Dir_Text', 'dirnum exits enters')
+DIR_NAMES = (
+    Dir_Text(0, 'North', 'South'),
+    Dir_Text(1, 'East', 'West'),
+    Dir_Text(2, 'South', 'North'),
+    Dir_Text(3, 'West', 'East'),
+    Dir_Text(4, 'Up', 'Above'),
+    Dir_Text(5, 'Down', 'Below'),
+    Dir_Text(6, 'Northeast', 'Southwest'),
+    Dir_Text(7, 'Northwest', 'Southeast'),
+    Dir_Text(8, 'Southeast', 'Northwest'),
+    Dir_Text(9, 'Southwest', 'Northeast'),
+    Dir_Text(10, 'nothingness', 'the thin air'), 
+)
 
 # Used by exits.  Compatible with Merc
 DIR_NORTH     = 0
@@ -19,33 +35,6 @@ DIR_SOUTHEAST = 8
 DIR_SOUTHWEST = 9
 DIR_SOMEWHERE = 10
 
-DIR_NAMES = {
-    0:'North',
-    1:'East',
-    2:'South',
-    3:'West',
-    4:'Up',
-    5:'Down',
-    6:'Northeast',
-    7:'Northwest',
-    8:'Southeast',
-    9:'Southwest',
-    10:'nothingness'
-}
-
-DIR_FROM_NAMES = {
-    0:'South',
-    1:'West',
-    2:'North',
-    3:'East',
-    4:'Down',
-    5:'Up',
-    6:'Southwest',
-    7:'Southeast',
-    8:'Northwest',
-    9:'Northeast',
-    10:'thin air'
-}
 
 class Room(object):
     """
