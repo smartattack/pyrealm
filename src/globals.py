@@ -6,7 +6,7 @@ outside of main.py so globals can be included more easily.
 # Default Game state / config
 PORT = 1234
 WELCOME_BANNER = '''
-Welcome to PyRealm!
+^WWelcome to ^YP^Ry^BR^Cealm^w!^d
 
 '''
 
@@ -14,6 +14,11 @@ Welcome to PyRealm!
 DATA_DIR = 'data'
 PLAYER_DIR = 'players'
 
+# id number of starting room for new players
+START_ROOM = 1
+
+# Hold mud boot time
+boot_time = -1
 
 # List of client connections (TelnetClient)
 clients = []
@@ -30,7 +35,13 @@ players = {}
 # All Players and NPCs
 actors = []
 
-IDLE_TIMEOUT = 1800
+# Holds the map, for now
+rooms = {}
+
+# Timeouts
+PLAYER_TIMEOUT = 1800
+LOBBY_TIMEOUT = 90
+
 
 # default game state
 GAME_RUNNING = True

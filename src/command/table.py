@@ -1,23 +1,10 @@
 """Command Table"""
 
-from collections import OrderedDict
+from collections import namedtuple
 from utils import log
 
-
-POS_DEAD     = 0
-POS_SLEEPING = 1
-POS_SITTING  = 2
-POS_FIGHTING = 3
-POS_READY    = 4
-
-
-class Command():
-    """Command table entry definition"""
-    def __init__(self, name, func, position=0, level=0):
-        self.name = name
-        self.func = func
-        self.position = position
-        self.level = level
+# Command table Command Type template
+CT = namedtuple('CmdType', 'name func position level args')
 
 
 def find_command(search: str):
@@ -26,23 +13,30 @@ def find_command(search: str):
     if search is None or len(search) < 1:
         log.debug('FUNC RETURN: find_command() == None')
         return None
-    for c in cmd_table.values():
+    for c in cmd_table:
         if c.name.startswith(search):
             return c
 
 
-def register_command(entry: Command):
-    """Add a command to cmd_table"""
-    log.info('++ Adding cmd_table[{}]'.format(entry.name))
-    cmd_table[entry.name] = entry
+cmd_table = []
 
 
-cmd_table = OrderedDict()
-
-
-# Due to ordered dict, listed here first to assert preference
-register_command(Command(name='quit',      func='do_quit',      position=0, level=0))
-register_command(Command(name='who',       func='do_who',       position=0, level=0))
-register_command(Command(name='shout',     func='do_shout',     position=0, level=0))
-register_command(Command(name='tell',      func='do_tell',      position=0, level=0))
-register_command(Command(name='shutdown',  func='do_shutdown',  position=0, level=100))
+# These are listed here to ensure they are preferred.
+# All other commands are included next to their definitions
+cmd_table.append(CT('go',          'do_go',     'standing',  0, None))
+cmd_table.append(CT('north',       'do_go',     'standing',  0, 'north'))
+cmd_table.append(CT('east',        'do_go',     'standing',  0, 'east'))
+cmd_table.append(CT('south',       'do_go',     'standing',  0, 'south'))
+cmd_table.append(CT('west',        'do_go',     'standing',  0, 'west'))
+cmd_table.append(CT('northeast',   'do_go',     'standing',  0, 'northeast'))
+cmd_table.append(CT('northwest',   'do_go',     'standing',  0, 'northwest'))
+cmd_table.append(CT('southeast',   'do_go',     'standing',  0, 'southeast'))
+cmd_table.append(CT('southwest',   'do_go',     'standing',  0, 'southwest'))
+cmd_table.append(CT('sit',         'do_sit',    'sleeping',  0, None))
+cmd_table.append(CT('stand',       'do_stand',  'sleeping',  0, None))
+cmd_table.append(CT('sleep',       'do_sleep',  'sleeping',  0, None))
+cmd_table.append(CT('wake',        'do_wake',   'sleeping',  0, None))
+cmd_table.append(CT('shutdown',    'do_quit',   'dead',    100, None))
+cmd_table.append(CT('who',         'do_who',    'dead',      0, None))
+cmd_table.append(CT('uptime',      'do_uptime', 'dead',      0, None))
+cmd_table.append(CT('quit',        'do_quit',   'dead',      0, None))

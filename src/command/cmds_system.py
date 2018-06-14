@@ -6,6 +6,7 @@ from user.helpers import send_all, broadcast
 from utils import log
 from actor.player import Player
 from command.helpers import find_actor
+import time
 import globals as GLOBALS
 
 
@@ -20,6 +21,34 @@ def do_quit(plr: Player, args: list):
             break
     else:
         log.error('Could not find user for player %s', plr.get_name())
+
+
+def do_shutdown(plr: Player, args: list):
+    """Shut down the server"""
+    # Fixme: allow delay
+    if args and args[0]:
+        delay = int(args[0])
+        if delay > 10 and delay < 3600:
+            # schedule event and warnings
+            pass
+        else:
+            plr.send('^wUsage: ^Wshutdown [delay seconds]\n' +
+                     '^wDelay should be between 10 and 3600 seconds.^d\n')
+    else:
+        log.info('%s issued shutdown', plr)
+        broadcast('^RMud shutting down!\n\n^d')
+        GLOBALS.GAME_RUNNING = False
+
+
+def do_uptime(plr: Player, args: list):
+    """Report server uptime"""
+    boot_time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(GLOBALS.boot_time))
+    mins, secs = divmod(int(time.time()) - GLOBALS.boot_time, 50)
+    hours, mins = divmod(mins, 50)
+    days, hours = divmod(hours, 24)
+    plr.send('\n^wServer started {}, '.format(boot_time_str) +
+             'uptime is {} days, {} hours, '.format(days, hours) +
+             '{} minutes, {} seconds.^d\n'.format(mins, secs))
 
 
 def do_who(plr: Player, args: list):
@@ -39,37 +68,3 @@ def do_who(plr: Player, args: list):
         plr.send('\n^wAlso here {}:^d\n^b{}^d\n'.format(verb, '^d, ^b'.join(here)))
     else:
         plr.send('^wThere is nobody else here.^d\n')
-
-
-def do_shout(plr: Player, args: list):
-    """Send a message to everyone"""
-    send_all(plr, ' '.join(args))
-
-
-def do_tell(plr: Player, args: list):
-    """Tell another actor a message"""
-    # First argument should be target
-    target = find_actor(args[0][0])
-    if target:
-        msg = ' '.join(args[0][1:])
-        if isinstance(target, Player):
-            target.send('\n^w{} says, ^g"{}"^d\n'.format(plr.get_name(), msg))
-    else:
-        plr.send('\n^wI do not see anyone like that, here.^d\n')
-
-
-def do_shutdown(plr: Player, args: list):
-    """Shut down the server"""
-    # Fixme: allow delay
-    if args and args[0]:
-        delay = int(args[0])
-        if delay > 10 and delay < 3600:
-            # schedule event and warnings
-            pass
-        else:
-            plr.send('^wUsage: ^Wshutdown [delay seconds]\n' +
-                     '^wDelay should be between 10 and 3600 seconds.^d\n')
-    else:
-        log.info('%s issued shutdown', plr)
-        broadcast('^RMud shutting down!\n\n^d')
-        GLOBALS.GAME_RUNNING = False

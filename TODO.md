@@ -1,5 +1,14 @@
 ###To Do:
 -----------------------------------------------------------------------------
+
+## Rooms
+* Implement rooms as a Class with a list of exits
+* Define GLOBALS.rooms with hardcoded test world for now
+* Implement disk load/save
+
+
+
+
 ## STORAGE
 
 * Generalized save/load to work with all types (items, rooms, players, npcs, shops, etc)
@@ -26,10 +35,9 @@
 
 * Create pager
 * Test wrapping
-* Create customizable prompt
-* Create @who
+* Create customizable prompt?
 * Create score, help
-* First set of commands:  tell, shout(broadcast), quit, stats* write unit tests!
+* First set of commands:  shout(broadcast), quit, stats* write unit tests!
 
 # Expand command system based on states:
 The command table will include data about what the nominal state of a player

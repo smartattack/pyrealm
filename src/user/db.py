@@ -58,9 +58,9 @@ def create_login_history_table():
         sys.exit(1)
 
 
-def boot_db():
+def boot_userdb():
     """Check database exists, create tables if missing"""
-    tables = ["accounts", "login_history"]
+    sql_tables = ["accounts", "login_history"]
     db_version = CURSOR.execute('PRAGMA user_version').fetchone()[0]
     if db_version == 0:
         log.info("Initializing database...")
@@ -68,7 +68,7 @@ def boot_db():
     else:
         log.info("Database is version %s", db_version)
     sql = """SELECT COUNT(*) FROM sqlite_master WHERE NAME = ?;"""
-    for table in tables:
+    for table in sql_tables:
         if not CURSOR.execute(sql, (str(table),)).fetchone()[0]:
             log.info("Creating table: %s", table)
             func = 'create_{}_table'.format(table)

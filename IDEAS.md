@@ -87,4 +87,11 @@ It would be really nice if this could be defined as an X * Y grid of text
 rows and columns and the map would render within this (so LoD would shift
 based on how large a canvas we can allocate)
 --
-Color scheme office: Abyss, Seti
+
+## Modals
+Implement a modal which is a class you can inherit and override to implement
+a dialog.  It's a state machine that allows for back-n-forth outside of normal
+command processing.  One question is: what happens if we enter a modal during
+gameplay?  Maybe we disappear or appear "frozen" or similar.  Shouldn't be able
+to enter a modal when you're doing certain things(fighting, f.e.)
+  The login handler could be re-implemented as a modal.

@@ -10,6 +10,9 @@ from utils import xp_to_level, stat_color
 from actor.base_actor import BaseActor
 import globals as GLOBALS
 
+# Positions - these are parsed in the user command handler
+# Move to globals?
+Positions = ('dead', 'sleeping', 'sitting', 'fighting', 'standing')
 
 class Player(BaseActor):
     """Player class - holds information about player characters"""
@@ -27,6 +30,9 @@ class Player(BaseActor):
         # Ability to perform various tasks or skills
         # Some abilities are granted by class/race
         self._abilities = set()
+
+        # Initialize to standing
+        self.position = Position('standing')
 
         # Tracks play time for this character
         self._playtime = 0
@@ -56,11 +62,12 @@ class Player(BaseActor):
 
     def get_prompt(self):
         """Return a prompt for player"""
+        # FIXME: only calc to_level when XP is changed, store in Player()  
         log.debug('FUN get_prompt()')
         hpcol = stat_color(self._stats['hp'], self._stats['maxhp'])
         mpcol = stat_color(self._stats['mp'], self._stats['maxmp'])
         to_level = xp_to_level(self._stats['level'], self._stats['xp'])
-        prompt = '^chp^w[{}{}/{}^w] ^cmp^w[{}{}/{}^w] ^cxp^w[^m{}/{}^w]^W> ^d'.format(
+        prompt = '{}{}/{} ^chp {}{}/{} ^cmp ^m{}/{} ^cxp^w> ^d'.format(
             hpcol, self._stats['hp'], self._stats['maxhp'], 
             mpcol, self._stats['mp'], self._stats['maxmp'],
             self._stats['xp'], to_level)
