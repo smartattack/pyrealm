@@ -10,6 +10,9 @@ from utils import xp_to_level, stat_color
 from actor.base_actor import BaseActor
 import globals as GLOBALS
 
+# Positions - these are parsed in the user command handler
+# Move to globals?
+Positions = ('dead', 'sleeping', 'sitting', 'fighting', 'standing')
 
 class Player(BaseActor):
     """Player class - holds information about player characters"""
@@ -27,6 +30,9 @@ class Player(BaseActor):
         # Ability to perform various tasks or skills
         # Some abilities are granted by class/race
         self._abilities = set()
+
+        # Initialize to standing
+        self.position = Position('standing')
 
         # Tracks play time for this character
         self._playtime = 0

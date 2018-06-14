@@ -3,6 +3,7 @@ User Class - represents a connected user
 """
 
 from user.base_user import BaseUser
+from actor.player import Positions
 from utils import log
 import command
 from command.table import find_command
@@ -73,7 +74,6 @@ class User(BaseUser):
         log.debug('USER INPUT: |%s| -> |%s|', cmd, args)
         if len(cmd) < 1:
             self.send('\n')
-            #self.send_prompt()
             return
         if cmd == '!':
             # Repeat last command
@@ -86,18 +86,26 @@ class User(BaseUser):
             self._last_args = args
             log.debug('MATCHED COMMAND: %s', match.name)
             # Check level
-            if match.level <= self.player.get_stat('level'):
-                # Attempt to dispatch the command
-                if hasattr(command, match.func):
-                    log.debug('Command module has method: %s', match.func)
-                    getattr(command, match.func)(self.player, args)
-                    log.debug('Calling %s(%s, %s)', match.func, self.player.get_name(), args)
-                    #self.send_prompt()
-                else:
-                    log.debug('Command module does not have method: %s', match.func)
-            else:
+            if match.level > self.player.get_stat('level'):
                 log.debug('Player %s has too low a level to invoke command: %s',
                           self.player.get_name(), match.name)
+                return
+            if Positions.index(match.position) > Positions.index(self.player.position):
+                log.debug('Player %s has too low a position to invoke command: %s',
+                          self.player.get_name(), match.name)
+                # FIXME: make this more descriptive (try standing, while you're fighting!?)
+                self.send('You cannot do that right now!\n')
+                return
+            # Attempt to dispatch the command, might make this a try/except
+            if hasattr(command, match.func):
+                # Prepend args if populated in cmd_table entry
+                if match.args:
+                    args = '{} {}'.format(match.args, args)
+                #log.debug('Command module has method: %s', match.func)
+                getattr(command, match.func)(self.player, args)
+                log.debug('Calling %s(%s, %s)', match.func, self.player.get_name(), args)
+            else:
+                log.debug('Command module does not have method: %s', match.func)
         else:
             self.send('^rUnknown command!^d\n')
-            #self.send_prompt()
+
