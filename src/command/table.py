@@ -21,10 +21,8 @@ def find_command(search: str):
 cmd_table = []
 
 
-# Due to ordered dict, listed here first to assert preference
-cmd_table.append(CT('who',         'do_who',    'dead',      0, None))
-cmd_table.append(CT('shout',       'do_shout',  'dead',      0, None))
-cmd_table.append(CT('tell',        'do_tell',   'dead',      0, None))
+# These are listed here to ensure they are preferred.
+# All other commands are included next to their definitions
 cmd_table.append(CT('go',          'do_go',     'standing',  0, None))
 cmd_table.append(CT('north',       'do_go',     'standing',  0, 'north'))
 cmd_table.append(CT('east',        'do_go',     'standing',  0, 'east'))
@@ -39,5 +37,6 @@ cmd_table.append(CT('stand',       'do_stand',  'sleeping',  0, None))
 cmd_table.append(CT('sleep',       'do_sleep',  'sleeping',  0, None))
 cmd_table.append(CT('wake',        'do_wake',   'sleeping',  0, None))
 cmd_table.append(CT('shutdown',    'do_quit',   'dead',    100, None))
+cmd_table.append(CT('who',         'do_who',    'dead',      0, None))
 cmd_table.append(CT('uptime',      'do_uptime', 'dead',      0, None))
 cmd_table.append(CT('quit',        'do_quit',   'dead',      0, None))

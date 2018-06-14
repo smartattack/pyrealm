@@ -7,20 +7,8 @@ from utils import log
 from world.room import *
 from actor.player import Player
 from actor.npc import NPC
+from command.helpers import send_to_room
 import globals as GLOBALS
-
-
-def send_to_room(omit, room_id, msg):
-    """Send text to actors in room"""
-    log.debug('FUNC send_to_room()')
-    if not GLOBALS.rooms[room_id]:
-        log.error('send_to_room called on non-existent room %s', room_id)
-        return
-    for actor in GLOBALS.rooms[room_id].actors:
-        if isinstance(actor, Player):
-            if actor == omit:
-                continue
-            actor.send('\n'+msg)
 
 
 def move_actor(actor, new_location, direction):

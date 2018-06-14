@@ -23,11 +23,6 @@ def do_quit(plr: Player, args: list):
         log.error('Could not find user for player %s', plr.get_name())
 
 
-def do_shout(plr: Player, args: list):
-    """Send a message to everyone"""
-    send_all(plr, '\n{} shouts: "{}"\n'.format(plr.get_name(), ' '.join(args)))
-
-
 def do_shutdown(plr: Player, args: list):
     """Shut down the server"""
     # Fixme: allow delay
@@ -43,18 +38,6 @@ def do_shutdown(plr: Player, args: list):
         log.info('%s issued shutdown', plr)
         broadcast('^RMud shutting down!\n\n^d')
         GLOBALS.GAME_RUNNING = False
-
-
-def do_tell(plr: Player, args: list):
-    """Tell another actor a message"""
-    # First argument should be target
-    target = find_actor(args[0][0])
-    if target:
-        msg = ' '.join(args[0][1:])
-        if isinstance(target, Player):
-            target.send('\n^w{} says, ^g"{}"^d\n'.format(plr.get_name(), msg))
-    else:
-        plr.send('\n^wI do not see anyone like that, here.^d\n')
 
 
 def do_uptime(plr: Player, args: list):
