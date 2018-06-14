@@ -6,6 +6,7 @@ from user.helpers import send_all, broadcast
 from utils import log
 from world.room import *
 from actor.player import Player
+from actor.npc import NPC
 import globals as GLOBALS
 
 
@@ -82,3 +83,53 @@ def do_go(plr: Player, args: list):
         plr.send('You cannot go that way\n')
         return
 
+def do_sit(plr: Player, args: list):
+    """Attempt to sit down"""
+    if isinstance(plr, NPC):
+        return
+    if plr.position == 'sleeping':
+        plr.send('You need to wake up first!\n')
+    elif plr.position == 'sitting':
+        plr.send('You are already sitting!\n')
+    elif plr.position == 'fighting':
+        plr.send('Not while you are fighting!\n')
+    else:
+        plr.position = 'sitting'
+        plr.send('You have a seat.\n')
+
+
+def do_sleep(plr: Player, args: list):
+    """Attempt to go to sleep"""
+    if isinstance(plr, NPC):
+        return
+    if plr.position == 'fighting':
+        plr.send('You are not one to sleep through a fight!\n')
+    elif plr.position == 'sleeping':
+        plr.send('You are already asleep!\n')
+    else:
+        plr.position = 'sleeping'
+        plr.send('You lay down and take a nap.  Zzzz\n')    
+
+
+def do_stand(plr: Player, args: list):
+    """Attempt to stand up"""
+    if isinstance(plr, NPC):
+        return
+    if plr.position == 'sitting':
+        plr.send('You stand up.\n')
+        plr.position = 'standing'
+    elif plr.position == 'sleeping':
+        plr.send('You cannot stand up while you are asleep!\n')
+    else:
+        plr.send('You are already standing!\n')
+
+
+def do_wake(plr: Player, args: list):
+    """Attempt to go wakep"""
+    if isinstance(plr, NPC):
+        return
+    if plr.position == 'sleeping':
+        plr.send('You awaken, sit up and yawn.\n')
+        plr.position = 'sitting'
+    else:
+        plr.send('You are already awake!\n') 

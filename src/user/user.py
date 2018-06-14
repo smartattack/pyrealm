@@ -93,14 +93,13 @@ class User(BaseUser):
             if Positions.index(match.position) > Positions.index(self.player.position):
                 log.debug('Player %s has too low a position to invoke command: %s',
                           self.player.get_name(), match.name)
-                # FIXME: make this more descriptive (try standing, while you're fighting!?)
-                self.send('You cannot do that right now!\n')
+                self.send('You cannot do that while you are {}\n'.format(self.player.position))
                 return
             # Attempt to dispatch the command, might make this a try/except
             if hasattr(command, match.func):
                 # Prepend args if populated in cmd_table entry
                 if match.args:
-                    args = '{} {}'.format(match.args, args)
+                    args = [ match.args ] + args
                 #log.debug('Command module has method: %s', match.func)
                 getattr(command, match.func)(self.player, args)
                 log.debug('Calling %s(%s, %s)', match.func, self.player.get_name(), args)
