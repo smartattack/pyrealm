@@ -10,7 +10,7 @@ from actor.npc import NPC
 import globals as GLOBALS
 
 
-def send_to_room(room_id, msg):
+def send_to_room(omit, room_id, msg):
     """Send text to actors in room"""
     log.debug('FUNC send_to_room()')
     if not GLOBALS.rooms[room_id]:
@@ -18,7 +18,9 @@ def send_to_room(room_id, msg):
         return
     for actor in GLOBALS.rooms[room_id].actors:
         if isinstance(actor, Player):
-            actor.send(msg)
+            if actor == omit:
+                continue
+            actor.send('\n'+msg)
 
 
 def move_actor(actor, new_location, direction):
@@ -27,10 +29,10 @@ def move_actor(actor, new_location, direction):
     # Leave old room
     old_location = actor.location
     GLOBALS.rooms[old_location].remove_actor(actor)
-    send_to_room(old_location, 
+    send_to_room(actor, old_location, 
                  '{} heads {}\n'.format(actor.get_name(),
                                                DIR_NAMES[direction].exits))
-    send_to_room(new_location, 
+    send_to_room(actor, new_location, 
                 '{} enters from the {}\n'.format(actor.get_name(),
                                                  DIR_NAMES[direction].enters))
     GLOBALS.rooms[new_location].add_actor(actor)
@@ -96,6 +98,7 @@ def do_sit(plr: Player, args: list):
     else:
         plr.position = 'sitting'
         plr.send('You have a seat.\n')
+        send_to_room(plr, plr.location, '{} sits down.\n'.format(plr.get_name()))
 
 
 def do_sleep(plr: Player, args: list):
@@ -108,7 +111,8 @@ def do_sleep(plr: Player, args: list):
         plr.send('You are already asleep!\n')
     else:
         plr.position = 'sleeping'
-        plr.send('You lay down and take a nap.  Zzzz\n')    
+        plr.send('You lay down and take a nap.  Zzzz\n')
+        send_to_room(plr, plr.location, '{} lays down to sleep.\n'.format(plr.get_name())) 
 
 
 def do_stand(plr: Player, args: list):
@@ -117,6 +121,7 @@ def do_stand(plr: Player, args: list):
         return
     if plr.position == 'sitting':
         plr.send('You stand up.\n')
+        send_to_room(plr, plr.location, '{} stands up.\n'.format(plr.get_name()))
         plr.position = 'standing'
     elif plr.position == 'sleeping':
         plr.send('You cannot stand up while you are asleep!\n')
@@ -130,6 +135,7 @@ def do_wake(plr: Player, args: list):
         return
     if plr.position == 'sleeping':
         plr.send('You awaken, sit up and yawn.\n')
+        send_to_room(plr, plr.location, '{} awakens.\n'.format(plr.get_name()))
         plr.position = 'sitting'
     else:
         plr.send('You are already awake!\n') 
