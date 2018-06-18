@@ -4,11 +4,12 @@ Movement commands
 
 from user.helpers import send_all, broadcast
 from utils import log
-from world.room import *
+from world.room import Room, match_direction, dir_name
 from actor.player import Player
 from actor.npc import NPC
 from command.helpers import send_to_room
 import globals as GLOBALS
+from .table import cmd_table, CT
 
 
 def move_actor(actor, new_location, direction):
@@ -18,38 +19,12 @@ def move_actor(actor, new_location, direction):
     old_location = actor.location
     GLOBALS.rooms[old_location].remove_actor(actor)
     send_to_room(actor, old_location, 
-                 '{} heads {}\n'.format(actor.get_name(),
-                                               DIR_NAMES[direction].exits))
+                 '{} heads {}\n'.format(actor.get_name(), dir_name(direction)))
     send_to_room(actor, new_location, 
                 '{} enters from the {}\n'.format(actor.get_name(),
-                                                 DIR_NAMES[direction].enters))
+                                                 dir_name(direction, True)))
     GLOBALS.rooms[new_location].add_actor(actor)
     actor.location = new_location
-
-
-# match directions
-def match_direction(text: str):
-    """Match text to direction"""
-    log.debug('FUNC match_directions')
-    search = text.lower()
-    for dir_number, dir_name, ignore in DIR_NAMES:
-        if dir_name.lower().startswith(search):
-            log.debug('Matched direction: %s (%s)', dir_number, dir_name)
-            return dir_number
-    if search == 'ne':
-        log.debug('Matched direction: %s (%s)', dir_number, dir_name)
-        return DIR_NORTHEAST
-    elif search == 'nw':
-        log.debug('Matched direction: %s (%s)', dir_number, dir_name)
-        return DIR_NORTHWEST
-    elif search == 'se':
-        log.debug('Matched direction: %s (%s)', dir_number, dir_name)
-        return DIR_SOUTHEAST
-    elif search == 'sw':
-        log.debug('Matched direction: %s (%s)', dir_number, dir_name)
-        return DIR_SOUTHWEST
-    else:
-        return None
 
 
 def do_go(plr: Player, args: list):
@@ -72,6 +47,7 @@ def do_go(plr: Player, args: list):
         log.error('do_go() failed: %s', err)
         plr.send('You cannot go that way\n')
         return
+
 
 def do_sit(plr: Player, args: list):
     """Attempt to sit down"""
