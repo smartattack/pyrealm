@@ -7,6 +7,7 @@ import copy
 import hashlib
 import json
 import jsonpickle
+import demjson
 
 
 def init_log(filename='log/pyrealm.log', level=logging.DEBUG):
@@ -43,13 +44,18 @@ def to_json(target: object, skip_list=None):
             pass
     # jsonpickle does the serialization we need, but
     # to pretty print it to disk, we have to loads/dumps again
-    return json.dumps(json.loads(jsonpickle.encode(p)), indent=4, sort_keys=True)
+    jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
+    jsonpickle.set_preferred_backend('simplejson')
+    return jsonpickle.encode(p, keys=True)
+#    return json.dumps(json.loads(jsonpickle.encode(p), ),
+#                      indent=4, sort_keys=True)
+
 
 
 def from_json(inp=str):
     """Deserialize JSON data and return object(s)"""
     try:
-        return jsonpickle.decode(inp)
+        return jsonpickle.decode(inp, keys=True)
     except:
         raise AttributeError('Could not deserialize JSON')
 
