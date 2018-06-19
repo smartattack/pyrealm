@@ -120,7 +120,7 @@ class Player(BaseActor):
             os.makedirs(pathname, 0o755, True)
         except OSError as err:
             log.critical('Failed to create directory: %s -> %s', pathname, err)
-        data = to_json(self, skip_list=['client', '_checksum', '_last_saved'])
+        data = to_json(self)
         checksum = make_checksum(data)
         if object_changed(self, checksum) or logout:
             self._checksum = checksum

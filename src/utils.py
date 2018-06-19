@@ -28,11 +28,15 @@ def init_log(filename='log/pyrealm.log', level=logging.DEBUG):
 log = init_log()
 
 
-def to_json(target: object, skip_list=None):
+def to_json(target: object):
     """Create a Player() with select fields
     and serialize to JSON"""
 
-    if skip_list is None:
+    try:
+        log.debug('SKIP LIST IMPORTED FOR TARGET: %s, SKIP_LIST: %s', target, target._skip_list)
+        skip_list = target._skip_list
+    except:
+        log.debug('NO SKIP LIST FOR TARGET: %s', target)
         skip_list = []
     p = copy.copy(target)
     for i in skip_list:

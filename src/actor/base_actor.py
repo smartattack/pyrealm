@@ -57,6 +57,8 @@ class BaseActor(object):
         # items worn or wielded, dict: k=slot, v=item
         self._worn = {}
 
+        self._skip_list = ['client', '_last_saved', '_checksum']
+
 
     def update(self, **kwargs):
         """Update one or many attributes/stats/profile of a player"""

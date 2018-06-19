@@ -77,6 +77,13 @@ def boot_userdb():
             log.info("Found table: %s", table)
 
 
+def sync_userdb():
+    """Save all active users - called during shutdown or checkpoint"""
+    log.info('Running sync_userdb()')
+    for client in GLOBALS.players:
+        GLOBALS.players[client].player.save(logout=True)
+
+
 def account_exists(username):
     """Search user database to see if an account exists"""
     log.debug('FUNC account_exists(%s)', username)

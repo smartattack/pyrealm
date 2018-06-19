@@ -10,6 +10,7 @@ import hashlib
 from utils import log, to_json, from_json, object_changed, make_checksum
 from actor.player import Player
 from actor.race import Race
+from user.user import User
 from actor.npc import NPC
 from world.room import *
 import globals as GLOBALS
@@ -39,6 +40,11 @@ def load_tables():
     """Load database tables"""
     log.info('Loading DB tables:')
     for table_entry in GLOBALS.TABLES:
+        try:
+            if not table_entry['on_boot'] == True:
+                continue
+        except:
+            continue
         log.info(' * %s', table_entry['name'])
         path = os.path.join(GLOBALS.DATA_DIR, table_entry['path'])
         filespec = table_entry['filename']
@@ -49,13 +55,39 @@ def load_tables():
                 load_object(os.path.join(path, filename))
 
 
-def save_to_json(save_object: object, skip_list: list, logout=False):
+def save_tables():
+    """Save database table data"""
+    log.info('Saving DB tables:')
+    for table_entry in GLOBALS.TABLES:
+        log.info(' * %s', table_entry['name'])
+        path = os.path.join(GLOBALS.DATA_DIR, table_entry['path'])
+        filespec = table_entry['filename']
+        name = table_entry['name']
+        try:
+            for item in getattr(GLOBALS, name).values():
+                save_to_json(item, logout=True)
+        except Exception as err:
+            log.error('Could not save GLOBALS.%s : %s', name, err)
+
+
+def save_to_json(save_object: object, logout=False):
     """Generic object save to json"""
     log.debug('FUNC save_to_json(%s)', save_object)
+    # work around for now, maybe we need a list of actual Players
+    if isinstance(save_object, User):
+        save_object = save_object.player
     if isinstance(save_object, Player):
         obj_id_name = 'Player: {}'.format(save_object.name)
         pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR)
         filename = os.path.join(pathname, obj_id_name.lower() + '.json')
+        if logout:
+            log.debug('+ Updating playtime for %s += %s', save_object.name, 
+                      save_object.client.duration())
+            # update playtime duration
+            if hasattr(save_object, '_playtime'):
+                save_object._playtime += save_object.client.duration()
+            else:
+                save_object._playtime = save_object.client.duration()
     elif isinstance(save_object, Room):
         obj_id_name = str(save_object.vnum)
         pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.ROOM_DIR)
@@ -71,13 +103,13 @@ def save_to_json(save_object: object, skip_list: list, logout=False):
         os.makedirs(pathname, 0o755, True)
     except OSError as err:
         log.critical('Failed to create directory: %s -> %s', pathname, err)
-    skip_list = ['_last_saved', '_checksum'] + skip_list
-    data = to_json(save_object, skip_list=skip_list)
+    data = to_json(save_object)
     checksum = make_checksum(data)
     if object_changed(save_object, checksum) or logout:
         save_object._checksum = checksum
         save_object._last_saved = time.time()
-        log.info('Saving %s', obj_id_name)
+        log.debug('OBJECT: -----> %s', save_object.__dict__)
+        log.info('Saving %s: %s', type(save_object), obj_id_name)
         with open(filename, "w") as file:
             file.write(data)
 
@@ -138,3 +170,8 @@ def boot_db():
 
     # save_to_json(GLOBALS.rooms[1], skip_list=[])
     # save_to_json(GLOBALS.rooms[2], skip_list=[])
+
+
+def sync_db():
+    """Save changed game data, called on shutdown or checkpoint"""
+    save_tables()

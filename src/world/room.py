@@ -97,6 +97,7 @@ class Room(object):
             self.exits = exits
         self._checksum = ''
         self._last_saved = ''
+        self._skip_list = ['client', '_last_saved', '_checksum']
         log.debug('Room created: %s', self.__repr__())
 
     

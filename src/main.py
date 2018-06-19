@@ -6,18 +6,20 @@ Copyright 2018 Peter Morgan
 """
 
 import time
+from datetime import datetime
 from user.login import Login
 from user.db import boot_userdb
 from command.cmds_system import do_quit
 from miniboa import TelnetServer
 from utils import log
-from database.tables import boot_db
+from database.tables import boot_db, sync_db
 import globals as GLOBALS
+import gametime
 
 
 def connect_hook(client):
     """Initialization routine run when clients connect"""
-    log.info("--> Received connection from %s, sending welcome banner", client.addrport())
+    log.info('--> Received connection from %s, sending welcome banner', client.addrport())
     # Get terminal environment
     client.request_naws()
     client.request_terminal_type()
@@ -56,11 +58,11 @@ def kick_idlers():
             if client.idle() > GLOBALS.PLAYER_TIMEOUT:
                 do_quit(GLOBALS.players[client].player, [])
                 client.active = False
-                log.info("Marking idle client inactive: %s", client.addrport())
+                log.info('Marking idle client inactive: %s', client.addrport())
         elif client in GLOBALS.lobby:
             if client.idle() > GLOBALS.LOBBY_TIMEOUT:
                 client.active = False
-                log.info("Marking idle client inactive: %s", client.addrport())
+                log.info('Marking idle client inactive: %s', client.addrport())
         else:
             log.error('Found client not in LOBBY or PLAYERS lists: %s', client.addrport())
 
@@ -93,7 +95,7 @@ def main():
     boot_userdb()
     boot_db()
 
-    log.info("Starting server on port %s", GLOBALS.PORT)
+    log.info('Starting server on port %s', GLOBALS.PORT)
 
     server = TelnetServer(port=GLOBALS.PORT, timeout=.05)
     # set our own hooks for welcome/disconnect messaging
@@ -105,9 +107,11 @@ def main():
         server.poll()
         kick_idlers()
         process_commands()
+        #update()
         send_prompts()
 
-    log.info("Server shutdown received")
+    log.info('Server shutdown received')
+    sync_db()
 
 if __name__ == '__main__':
     main()
