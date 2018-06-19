@@ -3,6 +3,7 @@
 ## Rooms
 
 * ~~Move code to check/list exits into rooms.py (avoid importing DIR_*)~~
+* ~~Update room info display to wrap based on width (down to maybe 40 chars)~~
 
 ## STORAGE
 

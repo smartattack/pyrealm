@@ -11,7 +11,7 @@ __all__ = [ 'Room', 'DIR_NAMES', 'DIR_NORTH', 'DIR_EAST', 'DIR_SOUTH', 'DIR_WEST
             'DIR_UP', 'DIR_DOWN', 'DIR_NORTHEAST', 'DIR_NORTHWEST', 'DIR_SOUTHEAST',
             'DIR_SOUTHWEST', 'DIR_SOMEWHERE' ]
 
-Dir_Text = namedtuple('Dir_Text', 'dirnum dest source mapstr')
+Dir_Text = namedtuple('Dir_Text', 'dirnum dest source map')
 DIR_NAMES = (
     Dir_Text(0, 'North', 'South', 'N'),
     Dir_Text(1, 'East', 'West', 'E'),
@@ -40,11 +40,14 @@ DIR_SOUTHWEST = 9
 DIR_SOMEWHERE = 10
 
 
-def dir_name(direction: int, origin=False):
+def dir_name(direction: int, origin=False, map=False):
     """Return a textual direction name"""
+    log.debug('FUNC dir_name(%s)', direction)
     try:
         key = DIR_NAMES[direction]
-        if origin:
+        if map:
+            return key.map
+        elif origin:
             return key.source
         else:
             return key.dest
@@ -57,21 +60,21 @@ def match_direction(text: str):
     """Match text to direction"""
     log.debug('FUNC match_directions')
     search = text.lower()
-    for dir_number, dir_name, ignore in DIR_NAMES:
-        if dir_name.lower().startswith(search):
-            log.debug('Matched direction: %s (%s)', dir_number, dir_name)
-            return dir_number
+    for number, name, ignore, ignore in DIR_NAMES:
+        if name.lower().startswith(search):
+            log.debug('Matched direction: %s (%s)', number, name)
+            return number
     if search == 'ne':
-        log.debug('Matched direction: %s (%s)', dir_number, dir_name)
+        log.debug('Matched direction: %s (%s)', number, name)
         return DIR_NORTHEAST
     elif search == 'nw':
-        log.debug('Matched direction: %s (%s)', dir_number, dir_name)
+        log.debug('Matched direction: %s (%s)', number, name)
         return DIR_NORTHWEST
     elif search == 'se':
-        log.debug('Matched direction: %s (%s)', dir_number, dir_name)
+        log.debug('Matched direction: %s (%s)', number, name)
         return DIR_SOUTHEAST
     elif search == 'sw':
-        log.debug('Matched direction: %s (%s)', dir_number, dir_name)
+        log.debug('Matched direction: %s (%s)', number, name)
         return DIR_SOUTHWEST
     else:
         return None
@@ -110,12 +113,12 @@ class Room(object):
 
     def add_actor(self, act):
         """Add a character to a room"""
-        log.debug('FUNC Room.add_actor()')
+        log.debug('FUNC Room.add_actor(%s) -> %s', act.get_name(), self.vnum)
         if not act in self.actors:
             log.debug('Adding %s to room %s', act.get_name(), self.vnum)
             self.actors.append(act)
             if isinstance(act, Player):
-                act.send(self.show_info())
+                act.send(self.show_info(act.client.columns))
 
 
     def remove_actor(self, act):
@@ -126,18 +129,16 @@ class Room(object):
             self.actors.remove(act)
 
 
-    def _exit_str(self, direction):
+    def _exitstr(self, direction):
         """Show an exit on small map"""
+        log.debug('FUNC _exit_str(%s)', direction)
+        output = None
         if direction in self.exits:
-            output = '^Y{}^d'.format(self.exits[direction].mapstr)
+            log.debug('%s', self.exits[direction])
+            return '^c{}^d'.format(dir_name(direction, map=True))
         else:
-            if direction in (DIR_NORTH, DIR_SOUTH):
-                output = ' '
-            elif direction in (DIR_WEST, DIR_UP, DIR_DOWN, DIR_EAST):
-                output = '-'
-            else:
-                output = '  '
-        return output
+            return ''
+
 
     def show_exits(self):
         """Return stringified exits"""
@@ -149,17 +150,24 @@ class Room(object):
         return '^WExits: ^G' + ', '.join(map(str, exits)) + '^w.^d\n\n'
 
 
-    def show_info(self):
-        output = '^W{0:60}^d{}  {}  {}\n'.format(self.name,
-                                                self._exit_str(DIR_NORTHWEST),
-                                                self._exit_str(DIR_UP),
-                                                self._exit_str(DIR_NORTHEAST))
-                                                
+    def show_info(self, width=70):
+        """Show room name, exit map, description"""
+        swidth = width - 15
+        output = '^W{}^d{}   {}  {}\n'.format(
+                                self.name.ljust(swidth, ' '),
+                                self._exitstr(DIR_NORTHWEST).ljust(2, ' '),
+                                self._exitstr(DIR_NORTH).ljust(2,' '),
+                                self._exitstr(DIR_NORTHEAST).ljust(2, ' '))
+        output += '^w{}^d{}^w--{}^w(^Y*^w){}^w--{}\n'.format(
+                                                '-'.ljust(swidth, '-'),
+                                self._exitstr(DIR_WEST).ljust(1, '-'),
+                                self._exitstr(DIR_UP).ljust(1, '-'),
+                                self._exitstr(DIR_DOWN).ljust(1, '-'),
+                                self._exitstr(DIR_EAST).ljust(1, '-'))
+        output += '^W{}^d{}   {}  {}\n'.format(' '.ljust(swidth, ' '),
+                                self._exitstr(DIR_SOUTHWEST).ljust(2, ' '),
+                                self._exitstr(DIR_SOUTH).ljust(2,' '),
+                                self._exitstr(DIR_SOUTHEAST).ljust(2, ' '))
+        output += '^g{}^d\n'.format(self.description)
+        return output
 
-        return output
-"""
-        output = '^G{}^d\n'.format(self.name) + \
-                 '^g{}^d\n'.format(self.description) + \
-                 self.show_exits()
-        return output
-"""
