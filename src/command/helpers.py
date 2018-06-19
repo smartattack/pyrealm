@@ -14,7 +14,7 @@ def find_actor(name: str):
     log.debug('{} -> {}'.format(name, type(name)))
     name = name.capitalize()
     for a in GLOBALS.actors:
-        if a.get_name() == name:
+        if a.name == name:
             return a
     return None
 

@@ -14,13 +14,13 @@ def do_quit(plr: Player, args: list):
     """
     Log out player
     """
-    send_all(plr, '\n^W{} ^yhas left the game.^d\n'.format(plr.get_name()))
+    send_all(plr, '\n^W{} ^yhas left the game.^d\n'.format(plr.name))
     for user in GLOBALS.players.values():
         if user.player == plr:
             user.deactivate()
             break
     else:
-        log.error('Could not find user for player %s', plr.get_name())
+        log.error('Could not find user for player %s', plr.name)
 
 
 def do_shutdown(plr: Player, args: list):
@@ -59,7 +59,7 @@ def do_who(plr: Player, args: list):
     for user in GLOBALS.players.values():
         if user.player == plr:
             continue
-        here.append(user.player.get_name())
+        here.append(user.player.name)
     if here:
         if len(here) > 1:
             verb = 'are'

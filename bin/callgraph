@@ -1,0 +1,11 @@
+# Create a png callgraph
+
+
+function ctrl-c {
+   echo "Created log/callgraph.png"
+}
+trap ctrl_c INT
+
+source venv/bin/activate
+export PYTHONPATH=$(pwd)/src
+pycallgraph graphviz -o log/callgraph.png src/main.py

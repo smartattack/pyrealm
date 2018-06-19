@@ -13,9 +13,17 @@ WELCOME_BANNER = '''
 # Storage paths
 DATA_DIR = 'data'
 PLAYER_DIR = 'players'
+RACE_DIR = 'race'
+ROOM_DIR = 'room'
 
 # id number of starting room for new players
 START_ROOM = 1
+
+# List of DB tables to load on boot_db
+TABLES = [
+    { 'name': 'rooms', 'path': ROOM_DIR, 'filename': '*.json' },
+    #{ 'name': 'players', 'path': PLAYER_DIR, 'filename': '*.json' }
+]
 
 # Hold mud boot time
 boot_time = -1

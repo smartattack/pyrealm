@@ -3,7 +3,6 @@ Login Handler - Implements a FSM to handle logins and chargen
 """
 
 import time
-
 from user.base_user import BaseUser
 from user.helpers import user_online
 from user.account import create_account, validate_password
@@ -31,7 +30,6 @@ class Login(BaseUser):
         self.password = None
         self.gender = None
         self.race = None
-        self.pclass = None
 
 
     def _state_ask_username(self):
@@ -219,19 +217,6 @@ class Login(BaseUser):
         self.race = 'Human'
         junk = self.get_command()
         del junk
-        self.change_state('new_ask_class')
-        self.driver()
-
-
-    def _state_new_ask_class(self):
-        self.send('\nChoose your class(Warrior):')
-        self.change_state('new_assign_class')
-
-
-    def _state_new_assign_class(self):
-        self.pclass = 'Warrior'
-        junk = self.get_command()
-        del junk
         self.change_state('new_ask_confirm')
         self.driver()
 
@@ -260,11 +245,10 @@ class Login(BaseUser):
             log.debug('Creating Player() object')
             self.player = Player()
             self.player.client = self.client
-            self.player.set_name(self.username)
-            self.player.set_gender(self.gender)
-            self.player.set_race(self.race)
-            self.player.set_class(self.pclass)
-            log.info('Saving player %s', self.player.get_name())
+            self.player.name = self.username
+            self.player.gender = self.gender
+            self.player.race = self.race
+            log.info('Saving player %s', self.player.name)
             self.player.save()
             self.account['playing'] = self.username
             save_account(self.account)

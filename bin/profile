@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Profiler for PyRealms
+
+source venv/bin/activate
+export PYTHONPATH=$(pwd)/src
+
+function ctrl-c {
+   echo "Creating log/profile.svg chart"
+   gprof2dot -f pstats log/pyrealm.prof | dot -Tsvg -o log/profile.svg
+}
+
+
+if [ "$1" == "screen" ]; then
+   python -m cProfile -s time src/main.py
+else
+   trap 'ctrl-c' INT
+   python -m cProfile -s time -o log/pyrealm.prof src/main.py 2>/dev/null
+fi

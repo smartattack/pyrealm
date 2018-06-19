@@ -11,7 +11,7 @@ from user.db import boot_userdb
 from command.cmds_system import do_quit
 from miniboa import TelnetServer
 from utils import log
-from world.room import Room
+from database.tables import boot_db
 import globals as GLOBALS
 
 
@@ -38,7 +38,7 @@ def disconnect_hook(client):
         log.info(' +-> Removing %s from lobby', client.addrport())
         del GLOBALS.lobby[client]
     if client in GLOBALS.players:
-        log.debug(' +-> Removing clients[%s]', GLOBALS.players[client].player.get_name())
+        log.debug(' +-> Removing clients[%s]', GLOBALS.players[client].player.name)
         GLOBALS.players[client].player.save(logout=True)
         if client in GLOBALS.actors:
             GLOBALS.actors.remove(GLOBALS.players[client])
@@ -91,6 +91,7 @@ def main():
     GLOBALS.boot_time = int(time.time())
 
     boot_userdb()
+    boot_db()
 
     log.info("Starting server on port %s", GLOBALS.PORT)
 
