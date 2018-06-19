@@ -17,7 +17,7 @@ def test_player_name():
 def test_player_set_name():
     name = 'Testname'
     p = Player()
-    p.set_name(name)
+    p.name = name
     assert p.name == name
 
 def test_player_attributes():
