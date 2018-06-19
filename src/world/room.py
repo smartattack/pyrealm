@@ -113,9 +113,9 @@ class Room(object):
 
     def add_actor(self, act):
         """Add a character to a room"""
-        log.debug('FUNC Room.add_actor(%s) -> %s', act.get_name(), self.vnum)
+        log.debug('FUNC Room.add_actor(%s) -> %s', act.name, self.vnum)
         if not act in self.actors:
-            log.debug('Adding %s to room %s', act.get_name(), self.vnum)
+            log.debug('Adding %s to room %s', act.name, self.vnum)
             self.actors.append(act)
             if isinstance(act, Player):
                 act.send(self.show_info(act.client.columns))
@@ -125,7 +125,7 @@ class Room(object):
         """Remove character from room"""
         log.debug('FUNC Room.remove_actor()')
         if act in self.actors:
-            log.debug('Removing %s from room %s', act.get_name(), self.vnum)
+            log.debug('Removing %s from room %s', act.name, self.vnum)
             self.actors.remove(act)
 
 
@@ -152,6 +152,7 @@ class Room(object):
 
     def show_info(self, width=70):
         """Show room name, exit map, description"""
+        log.debug('FUNC show_info(%s)', width)
         swidth = width - 15
         output = '^W{}^d{}   {}  {}\n'.format(
                                 self.name.ljust(swidth, ' '),

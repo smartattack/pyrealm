@@ -12,13 +12,13 @@ from actor.player import Player
 
 def test_player_name():
     p = Player()
-    assert p.get_name() == 'nobody'
+    assert p.name == 'nobody'
 
 def test_player_set_name():
     name = 'Testname'
     p = Player()
     p.set_name(name)
-    assert p.get_name() == name
+    assert p.name == name
 
 def test_player_attributes():
     p = Player()

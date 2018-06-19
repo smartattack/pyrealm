@@ -43,7 +43,6 @@ class BaseActor(object):
         
         self._name = 'nobody'
         self._gender = 'M'
-        self._class = ''
         self._race = ''
         
         # Holds current actor state (hp, armor, xp, strength)
@@ -96,35 +95,26 @@ class BaseActor(object):
             log.error('Undefined stat: {}'.format(e))
             return None
 
-
-    def get_name(self):
+    @property
+    def name(self):
         return self._name
 
-
-    def set_name(self, name):
+    @name.setter
+    def name(self, name):
         self._name = name
 
-
-    def get_race(self):
-
+    @property
+    def race(self):
         return self._race
 
-
-    def set_race(self, race):
+    @race.setter
+    def race(self, race):
         self._race = race
 
-
-    def get_gender(self):
+    @property
+    def gender(self):
         return self._gender
 
-
-    def set_gender(self, gender):
+    @gender.setter
+    def gender(self, gender):
         self._gender = gender
-
-
-    def get_class(self):
-        return self._class
-
-
-    def set_class(self, pclass):
-        self._class = pclass

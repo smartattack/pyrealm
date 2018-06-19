@@ -88,11 +88,11 @@ class User(BaseUser):
             # Check level
             if match.level > self.player.get_stat('level'):
                 log.debug('Player %s has too low a level to invoke command: %s',
-                          self.player.get_name(), match.name)
+                          self.player.name, match.name)
                 return
             if Positions.index(match.position) > Positions.index(self.player.position):
                 log.debug('Player %s has too low a position to invoke command: %s',
-                          self.player.get_name(), match.name)
+                          self.player.name, match.name)
                 self.send('You cannot do that while you are {}\n'.format(self.player.position))
                 return
             # Attempt to dispatch the command, might make this a try/except
@@ -102,7 +102,7 @@ class User(BaseUser):
                     args = [ match.args ] + args
                 #log.debug('Command module has method: %s', match.func)
                 getattr(command, match.func)(self.player, args)
-                log.debug('Calling %s(%s, %s)', match.func, self.player.get_name(), args)
+                log.debug('Calling %s(%s, %s)', match.func, self.player.name, args)
             else:
                 log.debug('Command module does not have method: %s', match.func)
         else:

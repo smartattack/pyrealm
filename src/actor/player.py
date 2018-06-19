@@ -32,7 +32,7 @@ class Player(BaseActor):
         self._abilities = set()
 
         # Initialize to standing
-        self.position = Position('standing')
+        self.position = 'standing'
 
         # Tracks play time for this character
         self._playtime = 0
@@ -109,7 +109,7 @@ class Player(BaseActor):
         """Write to disk"""
         log.debug('FUNC: Player.save()')
         if logout:
-            log.debug('+ Updating playtime for %s += %s', self.get_name(), self.client.duration())
+            log.debug('+ Updating playtime for %s += %s', self.name, self.client.duration())
             # update playtime duration
             if hasattr(self, '_playtime'):
                 self._playtime += self.client.duration()
@@ -125,8 +125,8 @@ class Player(BaseActor):
         if object_changed(self, checksum) or logout:
             self._checksum = checksum
             self._last_saved = time.time()
-            log.info('Saving player: %s', self.get_name())
-            filename = os.path.join(pathname, self.get_name().lower() + '.json')
+            log.info('Saving player: %s', self.name)
+            filename = os.path.join(pathname, self.name.lower() + '.json')
             with open(filename, "w") as file:
                 file.write(data)
                 #log.debug('PLAYERDATA: {}'.format(data))

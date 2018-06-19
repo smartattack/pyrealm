@@ -53,7 +53,7 @@ def save_to_json(save_object: object, skip_list: list, logout=False):
     """Generic object save to json"""
     log.debug('FUNC save_to_json(%s)', save_object)
     if isinstance(save_object, Player):
-        obj_id_name = 'Player: {}'.format(save_object.get_name())
+        obj_id_name = 'Player: {}'.format(save_object.name)
         pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR)
         filename = os.path.join(pathname, obj_id_name.lower() + '.json')
     elif isinstance(save_object, Room):

@@ -7,7 +7,6 @@ import copy
 import hashlib
 import json
 import jsonpickle
-import demjson
 
 
 def init_log(filename='log/pyrealm.log', level=logging.DEBUG):

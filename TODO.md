@@ -20,11 +20,9 @@
 
 ## Characters / Chargen / Login
 
-* Re-visit TelnetClient.duration() as int()
 * Implement banned
 * Implement badwords
 * Implement races
-* Implement classes
 * Implement random chargen
 
 ## Command Handler
