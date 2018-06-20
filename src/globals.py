@@ -19,6 +19,10 @@ ROOM_DIR = 'room'
 # id number of starting room for new players
 START_ROOM = 1
 
+# Dawn of time for the game (YYYY/mm/dd HH:MM:SS)
+GAME_EPOCH = '0776/07/04 12:00:00'
+TIME_FACTOR = 24
+
 # List of DB tables to load on boot_db
 TABLES = [
     { 'name': 'rooms', 'path': ROOM_DIR, 'filename': '*.json' },
