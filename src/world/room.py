@@ -6,6 +6,8 @@ from collections import namedtuple
 from utils import log
 from actor.player import Player
 import globals as GLOBALS
+from game_object import GameObject
+
 
 __all__ = [ 'Room', 'DIR_NAMES', 'DIR_NORTH', 'DIR_EAST', 'DIR_SOUTH', 'DIR_WEST',
             'DIR_UP', 'DIR_DOWN', 'DIR_NORTHEAST', 'DIR_NORTHWEST', 'DIR_SOUTHEAST',
@@ -80,24 +82,20 @@ def match_direction(text: str):
         return None
 
 
-class Room(object):
+class Room(GameObject):
     """
     A room is basically a container object
     """
 
-    def __init__(self, vnum=None, name=None, desc=None,
+    def __init__(self, vnum=None, name=None, description=None,
                  outside=None, exits=None):
+        super().__init__(name=name, description=description)
         self.vnum = vnum
-        self.name = name
-        self.description = desc
         self._outside = outside
         self.actors = []
         self.exits = {}
         if exits:
             self.exits = exits
-        self._checksum = ''
-        self._last_saved = ''
-        self._skip_list = ['client', '_last_saved', '_checksum']
         log.debug('Room created: %s', self.__repr__())
 
     

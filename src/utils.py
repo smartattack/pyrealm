@@ -29,8 +29,7 @@ log = init_log()
 
 
 def to_json(target: object):
-    """Create a Player() with select fields
-    and serialize to JSON"""
+    """Create a Player() with select fields and serialize to JSON"""
 
     try:
         log.debug('SKIP LIST IMPORTED FOR TARGET: %s, SKIP_LIST: %s', target, target._skip_list)
@@ -45,14 +44,10 @@ def to_json(target: object):
             delattr(p, i)
         except AttributeError:
             pass
-    # jsonpickle does the serialization we need, but
-    # to pretty print it to disk, we have to loads/dumps again
+    # format to make more legible
     jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
     jsonpickle.set_preferred_backend('simplejson')
     return jsonpickle.encode(p, keys=True)
-#    return json.dumps(json.loads(jsonpickle.encode(p), ),
-#                      indent=4, sort_keys=True)
-
 
 
 def from_json(inp=str):
