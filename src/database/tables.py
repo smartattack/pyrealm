@@ -85,7 +85,7 @@ def save_to_json(save_object: object, logout=False):
             log.debug('+ Updating playtime for %s += %s', save_object.name, 
                       save_object.client.duration())
             # update playtime duration
-            if hasattr(save_object, '_playtime')
+            if hasattr(save_object, '_playtime'):
                 save_object._playtime += save_object.client.duration()
             else:
                 save_object._playtime = save_object.client.duration()
