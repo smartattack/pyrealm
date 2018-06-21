@@ -6,7 +6,8 @@ Copyright 2018 Peter Morgan
 """
 
 import time
-from datetime import datetime
+import sys
+import signal
 from user.login import Login
 from user.db import boot_userdb
 from command.cmds_system import do_quit
@@ -14,7 +15,14 @@ from miniboa import TelnetServer
 from utils import log
 from database.tables import boot_db, sync_db, save_to_json
 import globals as GLOBALS
-import gametime
+from update import update_time
+
+
+def signal_handler(signal, frame):
+    """Make sure we close the db on shutdown"""
+    log.info('SIGINT caught, shutting down...')
+    #sync_db()
+    sys.exit(0)
 
 
 def connect_hook(client):
@@ -89,7 +97,12 @@ def send_prompts():
 def main():
     """Pyrealms main()"""
 
-    # Denote time of boot, used by do_uptime
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # Start the clock
+    GLOBALS.EPOCH_S = int(time.strftime('%s', time.strptime(GLOBALS.GAME_EPOCH, '%Y/%m/%d %H:%M:%S')))
+    log.info('Converted GAME_EPOCH: %s -> %s', GLOBALS.GAME_EPOCH, GLOBALS.EPOCH_S)
+    log.info('Game time will be scaled by a factor of: %s', GLOBALS.TIME_FACTOR)
     GLOBALS.boot_time = int(time.time())
 
     boot_userdb()
@@ -109,6 +122,7 @@ def main():
         process_commands()
         #update()
         send_prompts()
+        update_time()
 
     log.info('Server shutdown received')
     sync_db()
