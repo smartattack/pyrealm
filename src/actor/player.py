@@ -5,9 +5,12 @@ Player is an actor being played by a connected user
 import os
 import time
 import hashlib
-from utils import log, to_json, from_json, object_changed, make_checksum
+from utils import log, from_json, object_changed, make_checksum
 from utils import xp_to_level, stat_color
 from actor.base_actor import BaseActor
+from game_object import GameObject
+
+
 import globals as GLOBALS
 
 # Positions - these are parsed in the user command handler
@@ -17,8 +20,7 @@ Positions = ('dead', 'sleeping', 'sitting', 'fighting', 'standing')
 class Player(BaseActor):
     """Player class - holds information about player characters"""
 
-    def __init__(self):
-        BaseActor.__init__(self)
+    def __init__(self, name=None, description=None):
         # This might not be needed - we can probably check
         # if the object is of subclass Player or NPC instead
         self.is_player = True
@@ -37,9 +39,10 @@ class Player(BaseActor):
         # Tracks play time for this character
         self._playtime = 0
 
-        self._checksum = None
-        self._last_saved = None
 
+    def post_init(self):
+        self._skip_list += ['client']
+        self.client = None
 
     def __repr__(self):
         return 'Player({}) = {}'.format(self._name, self.__dict__)
@@ -105,9 +108,11 @@ class Player(BaseActor):
         return list(self._abilities).sort()
 
 
-    def save(self, logout=False):
-        """Write to disk"""
-        log.debug('FUNC: Player.save()')
+    #def save(self, logout=False):
+    #    """Write to disk"""
+    #    log.debug('FUNC: Player.save()')
+    #    save_to_json(self, logout=logout)
+        """
         if logout:
             log.debug('+ Updating playtime for %s += %s', self.name, self.client.duration())
             # update playtime duration
@@ -130,6 +135,7 @@ class Player(BaseActor):
             with open(filename, "w") as file:
                 file.write(data)
                 #log.debug('PLAYERDATA: {}'.format(data))
+        """
 
 
     def load(self, username):

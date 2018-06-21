@@ -8,6 +8,7 @@ import time
 import hashlib
 #from world.room import Room
 from utils import log, to_json, from_json, object_changed, make_checksum
+from game_object import GameObject
 from actor.player import Player
 from actor.race import Race
 from user.user import User
@@ -77,14 +78,14 @@ def save_to_json(save_object: object, logout=False):
     if isinstance(save_object, User):
         save_object = save_object.player
     if isinstance(save_object, Player):
-        obj_id_name = 'Player: {}'.format(save_object.name)
+        obj_id_name = save_object.name.lower()
         pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR)
         filename = os.path.join(pathname, obj_id_name.lower() + '.json')
         if logout:
             log.debug('+ Updating playtime for %s += %s', save_object.name, 
                       save_object.client.duration())
             # update playtime duration
-            if hasattr(save_object, '_playtime'):
+            if hasattr(save_object, '_playtime')
                 save_object._playtime += save_object.client.duration()
             else:
                 save_object._playtime = save_object.client.duration()
@@ -127,6 +128,7 @@ def load_from_json(filename):
     # Avoid resaving right away
     loaded._last_saved = time.time()
     loaded._checksum = hashlib.md5(data.encode('utf-8')).hexdigest()
+    loaded.post_init()
     return loaded
 
 
@@ -157,19 +159,25 @@ def load_object(filename: str):
         log.error(' +-> Unrecognized object: %s', type(loaded))
         return
 
+
 def boot_db():
     """Attempt to load game data from storage"""
     load_tables()
     # log.debug("***** DIR_NORTH = %s", type(DIR_NORTH))
+    """
+    GLOBALS.rooms[1] = Room(vnum=1, name='Entrance', desc='A lit entryway', outside=True,
+                            exits={DIR_NORTH: {'to_room':2}})
 
-    # GLOBALS.rooms[1] = Room(vnum=1, name='Entrance', desc='A lit entryway', outside=True,
-    #                         exits={DIR_NORTH: {'to_room':2}})
+    GLOBALS.rooms[2] = Room(vnum=2, name='Courtyard', desc='An empty courtyard', outside=True,
+                            exits={DIR_SOUTH: {'to_room':1}})
 
-    # GLOBALS.rooms[2] = Room(vnum=2, name='Courtyard', desc='An empty courtyard', outside=True,
-    #                         exits={DIR_SOUTH: {'to_room':1}})
+    GLOBALS.rooms[3] = Room(vnum=3, name='CircleZone', description='A test room with exits', outside=True,
+    exits={0:{'to_room':1},1:{'to_room':1},2:{'to_room':1},3:{'to_room':1},4:{'to_room':1},5:{'to_room':1},6:{'to_room':1},7:{'to_room':1},8:{'to_room':1}})
 
-    # save_to_json(GLOBALS.rooms[1], skip_list=[])
-    # save_to_json(GLOBALS.rooms[2], skip_list=[])
+    save_to_json(GLOBALS.rooms[1])
+    save_to_json(GLOBALS.rooms[2])
+    save_to_json(GLOBALS.rooms[3])
+    """
 
 
 def sync_db():

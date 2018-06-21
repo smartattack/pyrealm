@@ -12,7 +12,7 @@ from user.db import boot_userdb
 from command.cmds_system import do_quit
 from miniboa import TelnetServer
 from utils import log
-from database.tables import boot_db, sync_db
+from database.tables import boot_db, sync_db, save_to_json
 import globals as GLOBALS
 import gametime
 
@@ -41,7 +41,7 @@ def disconnect_hook(client):
         del GLOBALS.lobby[client]
     if client in GLOBALS.players:
         log.debug(' +-> Removing clients[%s]', GLOBALS.players[client].player.name)
-        GLOBALS.players[client].player.save(logout=True)
+        save_to_json(GLOBALS.players[client].player, logout=True)
         if client in GLOBALS.actors:
             GLOBALS.actors.remove(GLOBALS.players[client])
         del GLOBALS.players[client]

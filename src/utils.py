@@ -53,10 +53,10 @@ def to_json(target: object):
 def from_json(inp=str):
     """Deserialize JSON data and return object(s)"""
     try:
+        log.error('Input = %s', inp)
         return jsonpickle.decode(inp, keys=True)
-    except:
-        raise AttributeError('Could not deserialize JSON')
-
+    except Exception as err:
+        raise AttributeError('Could not deserialize JSON: {}'.format(err))
 
 def make_checksum(inp: str):
     """Makes a checksum hash from an input string

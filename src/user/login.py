@@ -3,11 +3,13 @@ Login Handler - Implements a FSM to handle logins and chargen
 """
 
 import time
+import os
 from user.base_user import BaseUser
 from user.helpers import user_online
 from user.account import create_account, validate_password
 from user.db import account_exists, save_account, load_account, record_visit
 from user.user import User
+from database.tables import load_from_json
 from actor.player import Player
 from world.room import Room
 from utils import log
@@ -107,7 +109,9 @@ class Login(BaseUser):
         if self.account['playing']:
             log.debug(' +-> Playing as %s', self.account['playing'])
             try:
-                self.player = Player.load(self, self.account['playing'])
+                #self.player = Player.load(self, self.account['playing'])
+                filename = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR, self.account['playing'].lower() + '.json')
+                self.player = load_from_json(filename)
                 self.player.client = self.client
                 log.debug('CHANGING STATE TO HANDOFF')
                 self.change_state('player_handoff')

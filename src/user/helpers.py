@@ -3,7 +3,7 @@ User utility functions
 """
 
 import globals as GLOBALS
-from actor.player import Player
+#from actor.player import Player
 
 
 def user_online(username):
@@ -22,7 +22,7 @@ def broadcast(msg: str):
             c.send(msg)
 
 
-def send_all(ch: Player, msg: str):
+def send_all(ch, msg: str):
     """Send a message to all other players"""
     if msg is not None:
         for user in GLOBALS.players.values():

@@ -3,6 +3,7 @@ BaseActor class - base class for NPC and Players
 """
 import copy as copy
 from utils import log
+from game_object import GameObject
 
 _DEF_STATS = {
     'hp':    0,
@@ -31,17 +32,16 @@ _DEF_ATTRIBUTES = {
 }
 
 
-class BaseActor(object):
+class BaseActor(GameObject):
     """BaseActor is responsible for holding general settings that apply
     to both NPC and Players.
     Don't call directly
     """
 
-    def __init__(self):
+    def __init__(self, name='Nobody', description='None', **kwargs):
         self.location = None
         self.is_player = False
         
-        self._name = 'nobody'
         self._gender = 'M'
         self._race = ''
         
