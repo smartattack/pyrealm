@@ -25,8 +25,8 @@ TIME_FACTOR = 24
 
 # List of DB tables to load on boot_db
 TABLES = [
-    { 'name': 'rooms', 'path': ROOM_DIR, 'filename': '*.json' },
-    #{ 'name': 'players', 'path': PLAYER_DIR, 'filename': '*.json' }
+    { 'name': 'rooms', 'path': ROOM_DIR, 'filename': '*.json', 'on_boot': True},
+    { 'name': 'players', 'path': PLAYER_DIR, 'filename': '*.json' }
 ]
 
 # Hold mud boot time
@@ -57,3 +57,6 @@ LOBBY_TIMEOUT = 90
 
 # default game state
 GAME_RUNNING = True
+
+# Scale factor for game time
+TIME_FACTOR = 24

@@ -6,6 +6,8 @@ from collections import namedtuple
 from utils import log
 from actor.player import Player
 import globals as GLOBALS
+from game_object import GameObject
+
 
 __all__ = [ 'Room', 'DIR_NAMES', 'DIR_NORTH', 'DIR_EAST', 'DIR_SOUTH', 'DIR_WEST',
             'DIR_UP', 'DIR_DOWN', 'DIR_NORTHEAST', 'DIR_NORTHWEST', 'DIR_SOUTHEAST',
@@ -80,28 +82,34 @@ def match_direction(text: str):
         return None
 
 
-class Room(object):
+class Room(GameObject):
     """
     A room is basically a container object
     """
 
-    def __init__(self, vnum=None, name=None, desc=None,
+    def __init__(self, vnum=None, name=None, description=None,
                  outside=None, exits=None):
+        """NOTE: I am not called on objects loaded from disk."""
+        log.debug("Inside Room.init()")
+        super().__init__(name=name, description=description, skip_list=['actors'])
+        # vnum is used by exits
         self.vnum = vnum
-        self.name = name
-        self.description = desc
         self._outside = outside
         self.actors = []
         self.exits = {}
         if exits:
             self.exits = exits
-        self._checksum = ''
-        self._last_saved = ''
         log.debug('Room created: %s', self.__repr__())
 
-    
+
+    def post_init(self):
+        """This init gets called after a load from disk.  It reconstitutes missing data"""
+        self.actors = []
+
+
     def __repr__(self):
         return 'Room object, vnum={}, name={}'.format(self.vnum, self.name)
+
 
     def is_outside(self):
         """Return true if outside(affected by daylight)"""

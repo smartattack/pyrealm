@@ -8,8 +8,10 @@ import time
 import hashlib
 #from world.room import Room
 from utils import log, to_json, from_json, object_changed, make_checksum
+from game_object import GameObject
 from actor.player import Player
 from actor.race import Race
+from user.user import User
 from actor.npc import NPC
 from world.room import *
 import globals as GLOBALS
@@ -39,6 +41,11 @@ def load_tables():
     """Load database tables"""
     log.info('Loading DB tables:')
     for table_entry in GLOBALS.TABLES:
+        try:
+            if not table_entry['on_boot'] == True:
+                continue
+        except:
+            continue
         log.info(' * %s', table_entry['name'])
         path = os.path.join(GLOBALS.DATA_DIR, table_entry['path'])
         filespec = table_entry['filename']
@@ -49,13 +56,39 @@ def load_tables():
                 load_object(os.path.join(path, filename))
 
 
-def save_to_json(save_object: object, skip_list: list, logout=False):
+def save_tables():
+    """Save database table data"""
+    log.info('Saving DB tables:')
+    for table_entry in GLOBALS.TABLES:
+        log.info(' * %s', table_entry['name'])
+        path = os.path.join(GLOBALS.DATA_DIR, table_entry['path'])
+        filespec = table_entry['filename']
+        name = table_entry['name']
+        try:
+            for item in getattr(GLOBALS, name).values():
+                save_to_json(item, logout=True)
+        except Exception as err:
+            log.error('Could not save GLOBALS.%s : %s', name, err)
+
+
+def save_to_json(save_object: object, logout=False):
     """Generic object save to json"""
     log.debug('FUNC save_to_json(%s)', save_object)
+    # work around for now, maybe we need a list of actual Players
+    if isinstance(save_object, User):
+        save_object = save_object.player
     if isinstance(save_object, Player):
-        obj_id_name = 'Player: {}'.format(save_object.name)
+        obj_id_name = save_object.name.lower()
         pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR)
         filename = os.path.join(pathname, obj_id_name.lower() + '.json')
+        if logout:
+            log.debug('+ Updating playtime for %s += %s', save_object.name, 
+                      save_object.client.duration())
+            # update playtime duration
+            if hasattr(save_object, '_playtime')
+                save_object._playtime += save_object.client.duration()
+            else:
+                save_object._playtime = save_object.client.duration()
     elif isinstance(save_object, Room):
         obj_id_name = str(save_object.vnum)
         pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.ROOM_DIR)
@@ -71,13 +104,13 @@ def save_to_json(save_object: object, skip_list: list, logout=False):
         os.makedirs(pathname, 0o755, True)
     except OSError as err:
         log.critical('Failed to create directory: %s -> %s', pathname, err)
-    skip_list = ['_last_saved', '_checksum'] + skip_list
-    data = to_json(save_object, skip_list=skip_list)
+    data = to_json(save_object)
     checksum = make_checksum(data)
     if object_changed(save_object, checksum) or logout:
         save_object._checksum = checksum
         save_object._last_saved = time.time()
-        log.info('Saving %s', obj_id_name)
+        log.debug('OBJECT: -----> %s', save_object.__dict__)
+        log.info('Saving %s: %s', type(save_object), obj_id_name)
         with open(filename, "w") as file:
             file.write(data)
 
@@ -95,6 +128,7 @@ def load_from_json(filename):
     # Avoid resaving right away
     loaded._last_saved = time.time()
     loaded._checksum = hashlib.md5(data.encode('utf-8')).hexdigest()
+    loaded.post_init()
     return loaded
 
 
@@ -125,16 +159,27 @@ def load_object(filename: str):
         log.error(' +-> Unrecognized object: %s', type(loaded))
         return
 
+
 def boot_db():
     """Attempt to load game data from storage"""
     load_tables()
     # log.debug("***** DIR_NORTH = %s", type(DIR_NORTH))
+    """
+    GLOBALS.rooms[1] = Room(vnum=1, name='Entrance', desc='A lit entryway', outside=True,
+                            exits={DIR_NORTH: {'to_room':2}})
 
-    # GLOBALS.rooms[1] = Room(vnum=1, name='Entrance', desc='A lit entryway', outside=True,
-    #                         exits={DIR_NORTH: {'to_room':2}})
+    GLOBALS.rooms[2] = Room(vnum=2, name='Courtyard', desc='An empty courtyard', outside=True,
+                            exits={DIR_SOUTH: {'to_room':1}})
 
-    # GLOBALS.rooms[2] = Room(vnum=2, name='Courtyard', desc='An empty courtyard', outside=True,
-    #                         exits={DIR_SOUTH: {'to_room':1}})
+    GLOBALS.rooms[3] = Room(vnum=3, name='CircleZone', description='A test room with exits', outside=True,
+    exits={0:{'to_room':1},1:{'to_room':1},2:{'to_room':1},3:{'to_room':1},4:{'to_room':1},5:{'to_room':1},6:{'to_room':1},7:{'to_room':1},8:{'to_room':1}})
 
-    # save_to_json(GLOBALS.rooms[1], skip_list=[])
-    # save_to_json(GLOBALS.rooms[2], skip_list=[])
+    save_to_json(GLOBALS.rooms[1])
+    save_to_json(GLOBALS.rooms[2])
+    save_to_json(GLOBALS.rooms[3])
+    """
+
+
+def sync_db():
+    """Save changed game data, called on shutdown or checkpoint"""
+    save_tables()

@@ -28,11 +28,14 @@ def init_log(filename='log/pyrealm.log', level=logging.DEBUG):
 log = init_log()
 
 
-def to_json(target: object, skip_list=None):
-    """Create a Player() with select fields
-    and serialize to JSON"""
+def to_json(target: object):
+    """Create a Player() with select fields and serialize to JSON"""
 
-    if skip_list is None:
+    try:
+        log.debug('SKIP LIST IMPORTED FOR TARGET: %s, SKIP_LIST: %s', target, target._skip_list)
+        skip_list = target._skip_list
+    except:
+        log.debug('NO SKIP LIST FOR TARGET: %s', target)
         skip_list = []
     p = copy.copy(target)
     for i in skip_list:
@@ -41,23 +44,19 @@ def to_json(target: object, skip_list=None):
             delattr(p, i)
         except AttributeError:
             pass
-    # jsonpickle does the serialization we need, but
-    # to pretty print it to disk, we have to loads/dumps again
+    # format to make more legible
     jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
     jsonpickle.set_preferred_backend('simplejson')
     return jsonpickle.encode(p, keys=True)
-#    return json.dumps(json.loads(jsonpickle.encode(p), ),
-#                      indent=4, sort_keys=True)
-
 
 
 def from_json(inp=str):
     """Deserialize JSON data and return object(s)"""
     try:
+        log.error('Input = %s', inp)
         return jsonpickle.decode(inp, keys=True)
-    except:
-        raise AttributeError('Could not deserialize JSON')
-
+    except Exception as err:
+        raise AttributeError('Could not deserialize JSON: {}'.format(err))
 
 def make_checksum(inp: str):
     """Makes a checksum hash from an input string
