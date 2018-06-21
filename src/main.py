@@ -21,7 +21,7 @@ from update import update_time
 def signal_handler(signal, frame):
     """Make sure we close the db on shutdown"""
     log.info('SIGINT caught, shutting down...')
-    #sync_db()
+    sync_db()
     sys.exit(0)
 
 
@@ -104,7 +104,8 @@ def main():
     log.info('Converted GAME_EPOCH: %s -> %s', GLOBALS.GAME_EPOCH, GLOBALS.EPOCH_S)
     log.info('Game time will be scaled by a factor of: %s', GLOBALS.TIME_FACTOR)
     GLOBALS.boot_time = int(time.time())
-
+    GLOBALS.last_update = GLOBALS.boot_time
+    
     boot_userdb()
     boot_db()
 
