@@ -4,7 +4,6 @@ Utility functions for PyRealm
 
 import logging
 import copy
-import hashlib
 import time
 
 
@@ -30,24 +29,6 @@ log = init_log()
 def time_to_string(timeobj):
     """Convert a time object to a string"""
     return time.ctime(int(timeobj))
-
-
-def make_checksum(inp: str):
-    """Makes a checksum hash from an input string
-    Used to deduplicate objects, avoid saving unchanged data"""
-    return hashlib.md5(inp.encode('utf-8')).hexdigest()
-
-
-def object_changed(test_obj: object, checksum: str):
-    """Compare the object._checksum, if present, against checksum arg
-    Return false if not changed.
-    If no checksum present or checksum changed return true"""
-    if hasattr(test_obj, '_checksum'):
-        if test_obj._checksum == checksum:
-            log.debug('Testing object_changed: %s == %s', type(object), False)
-            return False
-    log.debug('Testing object_changed: %s == %s', type(object), True)
-    return True
 
 
 def stat_color(current: int, maximum: int):

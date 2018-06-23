@@ -7,7 +7,7 @@ import os
 import time
 import hashlib
 import jsonpickle
-from utils import log, object_changed, make_checksum
+from utils import log
 from actor.player import Player
 from actor.race import Race
 from user.user import User
@@ -242,3 +242,21 @@ def from_json(inp=str):
         return jsonpickle.decode(inp, keys=True)
     except Exception as err:
         raise AttributeError('Could not deserialize JSON: {}'.format(err))
+
+
+def make_checksum(inp: str):
+    """Makes a checksum hash from an input string
+    Used to deduplicate objects, avoid saving unchanged data"""
+    return hashlib.md5(inp.encode('utf-8')).hexdigest()
+
+
+def object_changed(test_obj: object, checksum: str):
+    """Compare the object._checksum, if present, against checksum arg
+    Return false if not changed.
+    If no checksum present or checksum changed return true"""
+    if hasattr(test_obj, '_checksum'):
+        if test_obj._checksum == checksum:
+            log.debug('Testing object_changed: %s == %s', type(object), False)
+            return False
+    log.debug('Testing object_changed: %s == %s', type(object), True)
+    return True
