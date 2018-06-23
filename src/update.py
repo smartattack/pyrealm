@@ -8,11 +8,12 @@ import globals as GLOBALS
 from user.helpers import send_all, broadcast
 
 
-GLOBALS.EPOCH_S = int(time.strftime('%s', time.strptime(GLOBALS.GAME_EPOCH, '%Y/%m/%d %H:%M:%S')))
+GLOBALS.EPOCH_S = int(time.strftime('%s', time.strptime(GLOBALS.GAME_EPOCH, \
+                                                        '%Y/%m/%d %H:%M:%S')))
 log.info('Converted GAME_EPOCH: %s -> %s', GLOBALS.GAME_EPOCH, GLOBALS.EPOCH_S)
 
 
-def update_time():
+def update_game_time():
     """Process game time update"""
 
     now = time.time()
@@ -24,7 +25,8 @@ def update_time():
                         + GLOBALS.EPOCH_S
 
     if daylight_changed():
-        broadcast('\n{}\n'.format(GLOBALS.daylight_message[GLOBALS.daylight_level]))
+        # FIXME: this should be wrapped to only send to players who are outside
+        send_all('\n{}\n'.format(GLOBALS.daylight_message[GLOBALS.daylight_level]))
 
 
 def daylight_changed():

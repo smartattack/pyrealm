@@ -60,7 +60,8 @@ LOBBY_TIMEOUT = 90
 GAME_RUNNING = True
 
 # Scale factor for game time
-TIME_FACTOR = 2000
+TIME_FACTOR = 24
+
 
 daylight_level = 0
 daylight_message = [
