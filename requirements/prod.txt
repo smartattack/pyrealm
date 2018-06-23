@@ -1,2 +1,3 @@
 # Packages required by production install
 jsonpickle 
+simplejson

@@ -15,13 +15,16 @@ from miniboa import TelnetServer
 from utils import log
 from database.tables import boot_db, sync_db, save_to_json
 import globals as GLOBALS
-from update import update_time
+from update import update_game_time
+from event import EventQueue
 
+# Debugging
+from debug import log_usage, log_objgraph
 
 def signal_handler(signal, frame):
     """Make sure we close the db on shutdown"""
     log.info('SIGINT caught, shutting down...')
-    #sync_db()
+    sync_db()
     sys.exit(0)
 
 
@@ -104,7 +107,8 @@ def main():
     log.info('Converted GAME_EPOCH: %s -> %s', GLOBALS.GAME_EPOCH, GLOBALS.EPOCH_S)
     log.info('Game time will be scaled by a factor of: %s', GLOBALS.TIME_FACTOR)
     GLOBALS.boot_time = int(time.time())
-
+    GLOBALS.last_update = GLOBALS.boot_time
+    
     boot_userdb()
     boot_db()
 
@@ -115,6 +119,14 @@ def main():
     server.on_connect = connect_hook
     server.on_disconnect = disconnect_hook
 
+    log.info('Starting event queue')
+    GLOBALS.Scheduler = EventQueue()
+    # Must be called BEFORE scheduling any events
+    update_game_time()
+    GLOBALS.Scheduler.add(delay=20, realtime=True, callback=log.debug, args=['--MARK--'], repeat=-1)
+    GLOBALS.Scheduler.add(delay=120, realtime=True, callback=log_usage, args=[], repeat=-1)
+    GLOBALS.Scheduler.add(delay=600, realtime=True, callback=log_objgraph, args=[], repeat=-1)
+
     while GLOBALS.GAME_RUNNING:
         # Tick / run game here
         server.poll()
@@ -122,7 +134,9 @@ def main():
         process_commands()
         #update()
         send_prompts()
-        update_time()
+        update_game_time()
+        GLOBALS.Scheduler.tick()
+
 
     log.info('Server shutdown received')
     sync_db()

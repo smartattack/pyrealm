@@ -15,6 +15,7 @@ DATA_DIR = 'data'
 PLAYER_DIR = 'players'
 RACE_DIR = 'race'
 ROOM_DIR = 'room'
+STATE_DIR = ''
 
 # id number of starting room for new players
 START_ROOM = 1
@@ -51,7 +52,7 @@ actors = []
 rooms = {}
 
 # Timeouts
-PLAYER_TIMEOUT = 1800
+PLAYER_TIMEOUT = 24
 LOBBY_TIMEOUT = 90
 
 
@@ -60,3 +61,12 @@ GAME_RUNNING = True
 
 # Scale factor for game time
 TIME_FACTOR = 24
+
+
+daylight_level = 0
+daylight_message = [
+    'The sky is now completely dark.  Only the stars and the moon light your way.',
+    'The sky begins to brighten as the sun rises to the east.',
+    'The sun is directly overhead.',
+    'The sky dims as the sun begins to set.',
+]

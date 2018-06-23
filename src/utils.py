@@ -5,8 +5,9 @@ Utility functions for PyRealm
 import logging
 import copy
 import hashlib
-import json
+import simplejson
 import jsonpickle
+import time
 
 
 def init_log(filename='log/pyrealm.log', level=logging.DEBUG):
@@ -27,6 +28,10 @@ def init_log(filename='log/pyrealm.log', level=logging.DEBUG):
 # I will be global
 log = init_log()
 
+
+def time_to_string(timeobj):
+    """Convert a time object to a string"""
+    return time.ctime(int(timeobj))
 
 def to_json(target: object):
     """Create a Player() with select fields and serialize to JSON"""

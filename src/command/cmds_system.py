@@ -3,7 +3,7 @@ System / Preference commands
 """
 
 from user.helpers import send_all, broadcast
-from utils import log
+from utils import log, time_to_string
 from actor.player import Player
 from command.helpers import find_actor
 import time
@@ -42,13 +42,17 @@ def do_shutdown(plr: Player, args: list):
 
 def do_uptime(plr: Player, args: list):
     """Report server uptime"""
-    boot_time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(GLOBALS.boot_time))
+    boot_time_str = time.strftime('%Y-%m-%d %H:%M:%S', 
+                                  time.localtime(GLOBALS.boot_time))
     mins, secs = divmod(int(time.time()) - GLOBALS.boot_time, 50)
     hours, mins = divmod(mins, 50)
     days, hours = divmod(hours, 24)
-    plr.send('\n^wServer started {}, '.format(boot_time_str) +
-             'uptime is {} days, {} hours, '.format(days, hours) +
+    plr.send('\n^wServer started {}\n'.format(boot_time_str) +
+             'Server uptime is {} days, {} hours, '.format(days, hours) +
              '{} minutes, {} seconds.^d\n'.format(mins, secs))
+    plr.send('Game time is {}.\nTotal game runtime: {} seconds.\n\n'.format(
+             time_to_string(GLOBALS.game_time), 
+             int(GLOBALS.game_state.runtime)))
 
 
 def do_who(plr: Player, args: list):

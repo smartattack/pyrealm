@@ -6,16 +6,14 @@ import fnmatch
 import os
 import time
 import hashlib
-#from world.room import Room
 from utils import log, to_json, from_json, object_changed, make_checksum
-from game_object import GameObject
 from actor.player import Player
 from actor.race import Race
 from user.user import User
 from actor.npc import NPC
 from world.room import *
 import globals as GLOBALS
-
+from database.game_state import GameState
 
 
 # This module should work as follows:
@@ -36,6 +34,8 @@ import globals as GLOBALS
 # found at last load/boot cycle and reload any watched data newer than last rev.
 #
 # Reload/update will wipe the current list and reload data
+
+
 
 def load_tables():
     """Load database tables"""
@@ -69,6 +69,21 @@ def save_tables():
                 save_to_json(item, logout=True)
         except Exception as err:
             log.error('Could not save GLOBALS.%s : %s', name, err)
+
+
+def save_game_state():
+    """Save global game state to disk, called on shutdown or checkpoint"""
+    log.debug('FUNC save_game_state()')
+    pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.STATE_DIR)
+    filename = os.path.join(pathname, 'state.json')
+    try:
+        os.makedirs(pathname, 0o755, True)
+    except OSError as err:
+        log.critical('Failed to create directory: %s -> %s', pathname, err)
+    data = to_json(GLOBALS.game_state)
+    log.info('Saving game state')
+    with open(filename, "w") as file:
+        file.write(data)
 
 
 def save_to_json(save_object: object, logout=False):
@@ -147,11 +162,11 @@ def load_object(filename: str):
         log.debug('ROOM DATA: %s', loaded)
         GLOBALS.rooms[loaded.vnum] = loaded
     elif isinstance(loaded, Player):
-        log.info(' +-> Loaded object is a Player()')
+        log.info(' +-> Loaded Player()')
     elif isinstance(loaded, NPC):
-        log.info(' +-> Loaded object is an NPC()')
+        log.info(' +-> Loaded NPC()')
     elif isinstance(loaded, Race):
-        log.info(' +-> Loaded object is a Race()')
+        log.info(' +-> Loaded Race()')
     #elif isinstance(loaded, Item):
     #    log.info(' +-> Loaded object is a and Item()')
     #    pass
@@ -163,6 +178,13 @@ def load_object(filename: str):
 def boot_db():
     """Attempt to load game data from storage"""
     load_tables()
+    try:
+        state_file = os.path.join(GLOBALS.DATA_DIR, GLOBALS.STATE_DIR, 'state.json')
+        GLOBALS.game_state = load_from_json(state_file)
+    except Exception as err:
+        log.warning('Game state data not found, initializing... %s', err)
+        GLOBALS.game_state = GameState()
+    
     # log.debug("***** DIR_NORTH = %s", type(DIR_NORTH))
     """
     GLOBALS.rooms[1] = Room(vnum=1, name='Entrance', desc='A lit entryway', outside=True,
@@ -183,3 +205,4 @@ def boot_db():
 def sync_db():
     """Save changed game data, called on shutdown or checkpoint"""
     save_tables()
+    save_game_state()
