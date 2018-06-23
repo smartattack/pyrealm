@@ -12,9 +12,9 @@ from actor.race import Race
 from user.user import User
 from actor.npc import NPC
 from world.room import *
-import globals as GLOBALS
 from database.game_state import GameState
-
+from item.base_item import BaseItem
+import globals as GLOBALS
 
 # This module should work as follows:
 #
@@ -185,6 +185,11 @@ def boot_db():
         log.warning('Game state data not found, initializing... %s', err)
         GLOBALS.game_state = GameState()
     
+    item = BaseItem(name='Magic Wand', description='A magic wand hums with a mysterious energy',
+                    short_desc='magic wand')
+    item.add_to_room(2)
+    
+
     # log.debug("***** DIR_NORTH = %s", type(DIR_NORTH))
     """
     GLOBALS.rooms[1] = Room(vnum=1, name='Entrance', desc='A lit entryway', outside=True,

@@ -14,7 +14,7 @@
 
 ## Items
 
-* Create base_item
+* ~~Create base_item~~
 * Create weapon, armor, book, food, potion, scroll, key, container,
          staff, wand, money, food, clothing, drink, trash, misc?
 
@@ -27,7 +27,7 @@
 
 ## Command Handler
 
-* Create pager
+* Create pager?
 * Test wrapping
 * Create customizable prompt?
 * Create score, help

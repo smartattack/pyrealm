@@ -41,7 +41,7 @@ class Player(BaseActor):
 
 
     def post_init(self):
-        self._skip_list += ['client']
+        self._skip_list.update(['client'])
         self.client = None
 
     def __repr__(self):

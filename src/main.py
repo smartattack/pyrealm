@@ -14,9 +14,10 @@ from command.cmds_system import do_quit
 from miniboa import TelnetServer
 from utils import log
 from database.tables import boot_db, sync_db, save_to_json
-import globals as GLOBALS
 from update import update_game_time
 from event import EventQueue
+import globals as GLOBALS
+
 
 # Debugging
 from debug import log_usage, log_objgraph

@@ -10,7 +10,8 @@ class GameObject(object):
     # This list gets processed by to_json() and anything in it will
     # not be serialized in save game data.  Subclasses add to this
     # list.
-    _skip_list = ['_checksum', '_last_save']
+    _skip_list = set()
+    _skip_list.update(['_checksum', '_last_save'])
 
     def __new__(cls, *args, **kwargs):
         """Custom new() to ensure we get a unique ID"""
@@ -21,13 +22,13 @@ class GameObject(object):
         return this
     
     def __init__(self, name=None, description=None, short_desc=None, **kwargs):
-        log.debug("Inside Room.init()")
-        self._name = name
-        self._description = description
-        self._short_desc = short_desc
+        log.debug('Inside GameObject.init(%s, %s, %s)', name, description, short_desc)
+        self.name = name
+        self.description = description
+        self.short_desc = short_desc
         if 'skip_list' in kwargs:
-            if isinstance(kwargs['skip_list']):
-                self._skip_list += kwargs['skip_list']
+            if isinstance(kwargs['skip_list'], list):
+                self._skip_list.update(kwargs['skip_list'])
         # Update checksum / last_saved
         self._init_accounting()
     
