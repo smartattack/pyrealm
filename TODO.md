@@ -28,7 +28,7 @@
 ## Command Handler
 
 * Create pager?
-* Test wrapping
+* ~~Text wrapping~~
 * Create customizable prompt?
 * Create score, help
 
