@@ -1,9 +1,10 @@
 """
 Utility functions for PyRealm
+
+Logging, text manipulation, colorization.
 """
 
 import logging
-import copy
 import time
 
 
@@ -55,3 +56,20 @@ def xp_to_level(current_level, current_xp):
     """Find XP needed to reach the next level"""
     log.debug('FUNC xp_to_level()')
     return calc_xp(current_level+1) - current_xp
+
+
+def wrap_one_line(input, width):
+    """Returns a one line wrapped to width
+    and the return of the text as a tuple (first_line, remaining)"""
+    words = input.split()
+    first_line = ''
+    while words:
+        try:
+            word = words.pop(0)
+        except Exception as err:
+            log.debug("Uh oh: %s", err)
+        if len(first_line + ' ' + word) > width:
+            return (first_line.lstrip(), word + ' ' + ' '.join(words))
+        else:
+            first_line += ' ' + word
+    return (first_line.lstrip(), None)

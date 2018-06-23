@@ -5,6 +5,7 @@ Database table definitions
 import fnmatch
 import os
 import time
+import copy
 import hashlib
 import jsonpickle
 from utils import log

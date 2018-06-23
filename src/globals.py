@@ -52,7 +52,7 @@ actors = []
 rooms = {}
 
 # Timeouts
-PLAYER_TIMEOUT = 24
+PLAYER_TIMEOUT = 1200
 LOBBY_TIMEOUT = 90
 
 

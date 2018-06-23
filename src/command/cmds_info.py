@@ -27,4 +27,4 @@ def do_look(plr: Player, args: list):
     if args:
         pass
     else:
-        plr.send('{}'.format(GLOBALS.rooms[plr.location].show_info()))
+        plr.send('{}'.format(GLOBALS.rooms[plr.location].show_info(plr.client.columns)))

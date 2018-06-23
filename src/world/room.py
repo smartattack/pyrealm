@@ -3,7 +3,8 @@ Room Class
 """
 
 from collections import namedtuple
-from utils import log
+from utils import log, wrap_one_line
+from miniboa.xterm import word_wrap as miniboa_wrap
 from actor.player import Player
 import globals as GLOBALS
 from game_object import GameObject
@@ -198,15 +199,21 @@ class Room(GameObject):
                                 self._exitstr(DIR_UP).ljust(1, '-'),
                                 self._exitstr(DIR_DOWN).ljust(1, '-'),
                                 self._exitstr(DIR_EAST).ljust(1, '-'))
-        output += '^W{}^d{}   {}  {}\n'.format(' '.ljust(swidth, ' '),
+        (first_line, remaining) = wrap_one_line(self.description, swidth)
+        output += '^g{}^d{}   {}  {}\n'.format(
+                                first_line.ljust(swidth, ' '),
                                 self._exitstr(DIR_SOUTHWEST).ljust(2, ' '),
                                 self._exitstr(DIR_SOUTH).ljust(2,' '),
                                 self._exitstr(DIR_SOUTHEAST).ljust(2, ' '))
-        output += '^g{}^d\n'.format(self.description)
+        if remaining:
+            log.debug("REMAINING=|%s|", remaining)
+            remaining = '\n'.join(miniboa_wrap(remaining, width, indent=0, 
+                                              padding=0)).lstrip()
+            output += '^g{}^d\n'.format(remaining)
         items = []
         for item in self.inventory:
             items.append(item.short_desc)
         if items:
-            output += '^wItems here: ^M\n' + '^w, ^M'.join(items) + '^d'
+            output += '^wItems here:\n^M' + '^w, ^M'.join(items) + '\n^d'
         return output
 
