@@ -6,7 +6,8 @@ import fnmatch
 import os
 import time
 import hashlib
-from utils import log, to_json, from_json, object_changed, make_checksum
+import jsonpickle
+from utils import log, object_changed, make_checksum
 from actor.player import Player
 from actor.race import Race
 from user.user import User
@@ -35,6 +36,43 @@ import globals as GLOBALS
 #
 # Reload/update will wipe the current list and reload data
 
+
+def boot_db():
+    """Attempt to load game data from storage"""
+    load_tables()
+    try:
+        state_file = os.path.join(GLOBALS.DATA_DIR, GLOBALS.STATE_DIR, 'state.json')
+        GLOBALS.game_state = load_from_json(state_file)
+    except Exception as err:
+        log.warning('Game state data not found, initializing... %s', err)
+        GLOBALS.game_state = GameState()
+    
+    item = BaseItem(name='Magic Wand', description='A magic wand hums with a mysterious energy',
+                    short_desc='magic wand')
+    item.add_to_room(2)
+    
+
+    # log.debug("***** DIR_NORTH = %s", type(DIR_NORTH))
+    """
+    GLOBALS.rooms[1] = Room(vnum=1, name='Entrance', desc='A lit entryway', outside=True,
+                            exits={DIR_NORTH: {'to_room':2}})
+
+    GLOBALS.rooms[2] = Room(vnum=2, name='Courtyard', desc='An empty courtyard', outside=True,
+                            exits={DIR_SOUTH: {'to_room':1}})
+
+    GLOBALS.rooms[3] = Room(vnum=3, name='CircleZone', description='A test room with exits', outside=True,
+    exits={0:{'to_room':1},1:{'to_room':1},2:{'to_room':1},3:{'to_room':1},4:{'to_room':1},5:{'to_room':1},6:{'to_room':1},7:{'to_room':1},8:{'to_room':1}})
+
+    save_to_json(GLOBALS.rooms[1])
+    save_to_json(GLOBALS.rooms[2])
+    save_to_json(GLOBALS.rooms[3])
+    """
+
+
+def sync_db():
+    """Save changed game data, called on shutdown or checkpoint"""
+    save_tables()
+    save_game_state()
 
 
 def load_tables():
@@ -175,39 +213,32 @@ def load_object(filename: str):
         return
 
 
-def boot_db():
-    """Attempt to load game data from storage"""
-    load_tables()
+def to_json(target: object):
+    """Create a Player() with select fields and serialize to JSON"""
+
     try:
-        state_file = os.path.join(GLOBALS.DATA_DIR, GLOBALS.STATE_DIR, 'state.json')
-        GLOBALS.game_state = load_from_json(state_file)
+        log.debug('SKIP LIST IMPORTED FOR TARGET: %s, SKIP_LIST: %s', target, target._skip_list)
+        skip_list = target._skip_list
+    except:
+        log.debug('NO SKIP LIST FOR TARGET: %s', target)
+        skip_list = []
+    p = copy.copy(target)
+    for i in skip_list:
+        log.debug('skip_list: %s', i)
+        try:
+            delattr(p, i)
+        except AttributeError:
+            pass
+    # format to make more legible
+    jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
+    jsonpickle.set_preferred_backend('simplejson')
+    return jsonpickle.encode(p, keys=True)
+
+
+def from_json(inp=str):
+    """Deserialize JSON data and return object(s)"""
+    try:
+        log.error('Input = %s', inp)
+        return jsonpickle.decode(inp, keys=True)
     except Exception as err:
-        log.warning('Game state data not found, initializing... %s', err)
-        GLOBALS.game_state = GameState()
-    
-    item = BaseItem(name='Magic Wand', description='A magic wand hums with a mysterious energy',
-                    short_desc='magic wand')
-    item.add_to_room(2)
-    
-
-    # log.debug("***** DIR_NORTH = %s", type(DIR_NORTH))
-    """
-    GLOBALS.rooms[1] = Room(vnum=1, name='Entrance', desc='A lit entryway', outside=True,
-                            exits={DIR_NORTH: {'to_room':2}})
-
-    GLOBALS.rooms[2] = Room(vnum=2, name='Courtyard', desc='An empty courtyard', outside=True,
-                            exits={DIR_SOUTH: {'to_room':1}})
-
-    GLOBALS.rooms[3] = Room(vnum=3, name='CircleZone', description='A test room with exits', outside=True,
-    exits={0:{'to_room':1},1:{'to_room':1},2:{'to_room':1},3:{'to_room':1},4:{'to_room':1},5:{'to_room':1},6:{'to_room':1},7:{'to_room':1},8:{'to_room':1}})
-
-    save_to_json(GLOBALS.rooms[1])
-    save_to_json(GLOBALS.rooms[2])
-    save_to_json(GLOBALS.rooms[3])
-    """
-
-
-def sync_db():
-    """Save changed game data, called on shutdown or checkpoint"""
-    save_tables()
-    save_game_state()
+        raise AttributeError('Could not deserialize JSON: {}'.format(err))

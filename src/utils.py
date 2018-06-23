@@ -5,8 +5,6 @@ Utility functions for PyRealm
 import logging
 import copy
 import hashlib
-import simplejson
-import jsonpickle
 import time
 
 
@@ -33,35 +31,6 @@ def time_to_string(timeobj):
     """Convert a time object to a string"""
     return time.ctime(int(timeobj))
 
-def to_json(target: object):
-    """Create a Player() with select fields and serialize to JSON"""
-
-    try:
-        log.debug('SKIP LIST IMPORTED FOR TARGET: %s, SKIP_LIST: %s', target, target._skip_list)
-        skip_list = target._skip_list
-    except:
-        log.debug('NO SKIP LIST FOR TARGET: %s', target)
-        skip_list = []
-    p = copy.copy(target)
-    for i in skip_list:
-        log.debug('skip_list: %s', i)
-        try:
-            delattr(p, i)
-        except AttributeError:
-            pass
-    # format to make more legible
-    jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
-    jsonpickle.set_preferred_backend('simplejson')
-    return jsonpickle.encode(p, keys=True)
-
-
-def from_json(inp=str):
-    """Deserialize JSON data and return object(s)"""
-    try:
-        log.error('Input = %s', inp)
-        return jsonpickle.decode(inp, keys=True)
-    except Exception as err:
-        raise AttributeError('Could not deserialize JSON: {}'.format(err))
 
 def make_checksum(inp: str):
     """Makes a checksum hash from an input string

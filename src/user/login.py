@@ -109,7 +109,6 @@ class Login(BaseUser):
         if self.account['playing']:
             log.debug(' +-> Playing as %s', self.account['playing'])
             try:
-                #self.player = Player.load(self, self.account['playing'])
                 filename = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR, self.account['playing'].lower() + '.json')
                 self.player = load_from_json(filename)
                 self.player.client = self.client

@@ -5,7 +5,7 @@ Player is an actor being played by a connected user
 import os
 import time
 import hashlib
-from utils import log, from_json, object_changed, make_checksum
+from utils import log, object_changed, make_checksum
 from utils import xp_to_level, stat_color
 from actor.base_actor import BaseActor
 from game_object import GameObject
@@ -106,58 +106,3 @@ class Player(BaseActor):
     def list_abilities(self):
         """Return a list of all abilities for a player"""
         return list(self._abilities).sort()
-
-
-    #def save(self, logout=False):
-    #    """Write to disk"""
-    #    log.debug('FUNC: Player.save()')
-    #    save_to_json(self, logout=logout)
-        """
-        if logout:
-            log.debug('+ Updating playtime for %s += %s', self.name, self.client.duration())
-            # update playtime duration
-            if hasattr(self, '_playtime'):
-                self._playtime += self.client.duration()
-            else:
-                self._playtime = self.client.duration()
-        pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR)
-        try:
-            os.makedirs(pathname, 0o755, True)
-        except OSError as err:
-            log.critical('Failed to create directory: %s -> %s', pathname, err)
-        data = to_json(self)
-        checksum = make_checksum(data)
-        if object_changed(self, checksum) or logout:
-            self._checksum = checksum
-            self._last_saved = time.time()
-            log.info('Saving player: %s', self.name)
-            filename = os.path.join(pathname, self.name.lower() + '.json')
-            with open(filename, "w") as file:
-                file.write(data)
-                #log.debug('PLAYERDATA: {}'.format(data))
-        """
-
-
-    def load(self, username):
-        """Load from disk"""
-        if not username:
-            log.error('Attempted to call Player.load without a username!')
-            raise KeyError('Must include a username with load()')
-        filename = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR, username.lower() + '.json')
-        data = ''
-        log.info('Loading Player(%s)', username)
-        with open(filename, "r") as file:
-            for line in file:
-                data += line
-        try:
-            loaded = from_json(data)
-        except Exception as err:
-            log.error('Could not load Player data: %s', err)
-        if isinstance(loaded, Player):
-            # Avoid resaving right away
-            self._last_saved = time.time()
-            self._checksum = hashlib.md5(data.encode('utf-8')).hexdigest()
-            return loaded
-        else:
-            log.error('Loaded data != Player() - possible corruption')
-            raise IOError('Failed to load player data for {}'.format(username))
