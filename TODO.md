@@ -8,9 +8,9 @@
 ## STORAGE
 
 * ~~Generalized save/load to work with all types (items, rooms, players, npcs, shops, etc)~~
-* Move _checksum, _last_saved into base_object, as properties
-* Move "skip_list" into object as property to avoid having to pass it during save()
-* Boot_db() to load all world objects on startup
+* ~~Move _checksum, _last_saved into base_object~~
+* ~~Move "skip_list" into object as property to avoid having to pass it during save()~~
+* ~~Boot_db() to load all world objects on startup~~
 
 ## Items
 
