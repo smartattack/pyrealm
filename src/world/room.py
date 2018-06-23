@@ -207,6 +207,6 @@ class Room(GameObject):
         for item in self.inventory:
             items.append(item.short_desc)
         if items:
-            output += '^wItems here: ^M\n' + '^w, ^M'.join(items) + '^d'
+            output += '^wItems here: ^M' + '^w, ^M'.join(items) + '^d\n'
         return output
 
