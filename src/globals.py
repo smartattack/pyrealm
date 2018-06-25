@@ -5,10 +5,7 @@ outside of main.py so globals can be included more easily.
 
 # Default Game state / config
 PORT = 1234
-WELCOME_BANNER = '''
-^WWelcome to ^YP^Ry^BR^Cealm^w!^d
-
-'''
+WELCOME_BANNER = '\n^WWelcome to ^YP^Ry^BR^Cealm^w!^d\n\n'
 
 # Storage paths
 DATA_DIR = 'data'
@@ -30,7 +27,7 @@ TABLES = [
     { 'name': 'players', 'path': PLAYER_DIR, 'filename': '*.json' }
 ]
 
-# Hold mud boot time
+# will be populated in main() with current time.time()
 boot_time = -1
 
 # List of client connections (TelnetClient)
@@ -53,7 +50,7 @@ rooms = {}
 
 # Timeouts
 PLAYER_TIMEOUT = 1200
-LOBBY_TIMEOUT = 90
+LOBBY_TIMEOUT = 180
 
 
 # default game state
