@@ -128,8 +128,10 @@ def main():
     GLOBALS.Scheduler.add(delay=300, realtime=True, callback=update_snapshot, args=[], repeat=-1)
     #GLOBALS.Scheduler.add(delay=600, realtime=True, callback=log_objgraph, args=[], repeat=-1)
 
+    loop_count = 0
     while GLOBALS.GAME_RUNNING:
         # Tick / run game here
+        loop_start = time.time()
         server.poll()
         kick_idlers()
         process_commands()
@@ -137,7 +139,10 @@ def main():
         send_prompts()
         update_game_time()
         GLOBALS.Scheduler.tick()
-
+        loop_end = time.time()
+        loop_count += 1
+        if loop_count % 1000 == 0:
+            log.debug('Loop time: %7.5f, total loops: %s', (loop_end - loop_start), loop_count)
 
     log.info('Server shutdown received')
     sync_db()
