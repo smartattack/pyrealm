@@ -11,6 +11,15 @@
 * ~~Move _checksum, _last_saved into base_object~~
 * ~~Move "skip_list" into object as property to avoid having to pass it during save()~~
 * ~~Boot_db() to load all world objects on startup~~
+* Create Templates vs Instances Save/Load functionality.
+* During Instance save (eg. Room), save the Room object w/o inventory, and then create inventory
+  subdir and store flattened inventory item instances there.
+* On load of a room instance, load the container then load the items and assign to parent
+* Items should point to their parent instance (worn_by/on, carried_by, location, etc)
+* Sanity checks on load.
+* Check scripts to scan the instances and template dirs and report/repair any problems
+* This would validate we can load/save world items outside of pyrealm, which is a prereq for
+* Offline World editor!
 
 ## Items
 

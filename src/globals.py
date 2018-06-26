@@ -12,6 +12,7 @@ DATA_DIR = 'data'
 PLAYER_DIR = 'players'
 RACE_DIR = 'race'
 ROOM_DIR = 'room'
+INSTANCE_DIR = 'instances'
 STATE_DIR = ''
 
 # id number of starting room for new players

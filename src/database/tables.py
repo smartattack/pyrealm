@@ -126,7 +126,16 @@ def save_game_state():
 
 
 def save_to_json(save_object: object, logout=False):
-    """Generic object save to json"""
+    """Save an object to JSON file
+    Automatically detects object type and does appropriate save for type.
+    If object has containers, it should save the items as needed, also.
+    Objects may be either templates or instances.  Templates save to
+    separate directories than instances and lack an instance_id but have
+    a template id (vnum).
+    Room, NPC, Player instances save items in a nested folder under the
+    parent instance (nested containers in inventory are flattened on save)
+    """
+
     log.debug('FUNC save_to_json(%s)', save_object)
     # work around for now, maybe we need a list of actual Players
     if isinstance(save_object, User):
@@ -160,7 +169,10 @@ def save_to_json(save_object: object, logout=False):
         log.critical('Failed to create directory: %s -> %s', pathname, err)
     data = to_json(save_object)
     checksum = make_checksum(data)
-    if object_changed(save_object, checksum) or logout:
+    # TODO: if logout, duration was calculated and therefore object should
+    # have changed. TEST ME!
+    #if object_changed(save_object, checksum) or logout:
+    if object_changed(save_object, checksum):
         save_object._checksum = checksum
         save_object._last_saved = time.time()
         log.debug('OBJECT: -----> %s', save_object.__dict__)
