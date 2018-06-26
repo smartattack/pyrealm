@@ -4,7 +4,7 @@ Movement commands
 
 from user.helpers import send_all, broadcast
 from utils import log
-from world.room import Room, match_direction, dir_name
+from world.room import match_direction, dir_name
 from actor.player import Player
 from actor.npc import NPC
 from command.helpers import send_to_room

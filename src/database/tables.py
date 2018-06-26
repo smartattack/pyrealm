@@ -13,9 +13,8 @@ from actor.player import Player
 from actor.race import Race
 from user.user import User
 from actor.npc import NPC
-from world.room import *
 from database.game_state import GameState
-from item.base_item import BaseItem
+from game_object import BaseItem, Room
 import globals as GLOBALS
 
 # This module should work as follows:
@@ -40,14 +39,14 @@ import globals as GLOBALS
 
 def boot_db():
     """Attempt to load game data from storage"""
-    load_tables()
     try:
         state_file = os.path.join(GLOBALS.DATA_DIR, GLOBALS.STATE_DIR, 'state.json')
         GLOBALS.game_state = load_from_json(state_file)
     except Exception as err:
         log.warning('Game state data not found, initializing... %s', err)
         GLOBALS.game_state = GameState()
-    
+    # Be sure GameState is initialized before we load data
+    load_tables()
     item = BaseItem(name='Magic Wand', description='A magic wand hums with a mysterious energy',
                     short_desc='magic wand')
     item.add_to_room(2)

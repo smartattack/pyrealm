@@ -7,7 +7,7 @@ class GameState(object):
     def __init__(self):
         """Only runs on first boot"""
         self._runtime = 0.0
-        self._max_instance = 0
+        self._max_gid = 0
     
     def post_init(self):
         """Needed by load_from_json"""
@@ -21,9 +21,9 @@ class GameState(object):
         self._runtime += seconds
 
     @property
-    def max_instance(self):
-        return self._max_instance
+    def max_gid(self):
+        return self._max_gid
     
-    @max_instance.setter
+    @max_gid.setter
     def max_instance(self, number):
-        self._max_instance = number
+        self._max_gid = number

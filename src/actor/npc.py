@@ -3,7 +3,8 @@ Non-Player Characters (MOBs)
 """
 
 from utils import log
-from actor.base_actor import BaseActor
+from game_object import BaseActor
+
 
 class NPC(BaseActor):
     """NPC will have similar traits to players but lack abilities"""

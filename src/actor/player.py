@@ -7,8 +7,7 @@ import time
 import hashlib
 from utils import log
 from utils import xp_to_level, stat_color
-from actor.base_actor import BaseActor
-from game_object import GameObject
+from game_object import BaseActor
 
 
 import globals as GLOBALS

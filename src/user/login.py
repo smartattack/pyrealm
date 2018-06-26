@@ -11,7 +11,7 @@ from user.db import account_exists, save_account, load_account, record_visit
 from user.user import User
 from database.tables import load_from_json
 from actor.player import Player
-from world.room import Room
+from game_object import Room
 from utils import log
 import globals as GLOBALS
 
@@ -272,6 +272,7 @@ class Login(BaseUser):
         Set command handler, assign commands, initial room
         """
         user = User(self.player.client)
+        log.debug('User created successfully')
         user.client = self.player.client
         user.username = self.account['username']
         user.player = self.player
@@ -283,7 +284,11 @@ class Login(BaseUser):
         GLOBALS.players[self.player.client] = user
         if self.player.location == None:
             self.player.location = GLOBALS.START_ROOM
+        log.debug('Finished! 0')
+        
         GLOBALS.rooms[self.player.location].add_actor(self.player)
+        log.debug('Finished! 1')
         # All actors (Players, NPCs) get entered into global actors table
         GLOBALS.actors.append(self.player)
+        log.debug('Finished! 2')
         user.send('\n')
