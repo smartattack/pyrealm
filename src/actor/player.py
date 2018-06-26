@@ -7,7 +7,8 @@ import time
 import hashlib
 from utils import log
 from utils import xp_to_level, stat_color
-from game_object import BaseActor
+from actor.base_actor import BaseActor
+from game_object import InstanceRegistry
 
 
 import globals as GLOBALS
@@ -19,7 +20,14 @@ Positions = ('dead', 'sleeping', 'sitting', 'fighting', 'standing')
 class Player(BaseActor):
     """Player class - holds information about player characters"""
 
-    def __init__(self, name=None, description=None):
+    def __init__(self):
+        """Not called on load_from_json, but from Player() during login"""
+
+        # Initialize BaseActor.  This must be here to register instance with
+        # all_actors, and BaseActor also calls super.__init__() which generates
+        # the instance's gid.  Keep me first so we can override values below.
+        super().__init__(self)
+
         # This might not be needed - we can probably check
         # if the object is of subclass Player or NPC instead
         self.is_player = True
@@ -38,10 +46,20 @@ class Player(BaseActor):
         # Tracks play time for this character
         self._playtime = 0
 
+        # Make sure we don't serialize client structure!
+        self._skip_list.update(['client'])
+
+        # 
+        log.debug('Registering player %s with instances.all_players')
+        InstanceRegistry.all_players[self.gid] = self
+
 
     def post_init(self):
+        """Called after load_from_json deserializes the structure.  Fills in
+        missing important bits"""
         self._skip_list.update(['client'])
         self.client = None
+
 
     def __repr__(self):
         return 'Player({}) = {}'.format(self._name, self.__dict__)

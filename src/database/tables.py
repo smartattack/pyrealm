@@ -13,8 +13,10 @@ from actor.player import Player
 from actor.race import Race
 from user.user import User
 from actor.npc import NPC
+from item.base_item import BaseItem
+from game_object import instances
+from world.room import Room
 from database.game_state import GameState
-from game_object import BaseItem, Room
 import globals as GLOBALS
 
 # This module should work as follows:
@@ -42,6 +44,8 @@ def boot_db():
     try:
         state_file = os.path.join(GLOBALS.DATA_DIR, GLOBALS.STATE_DIR, 'state.json')
         GLOBALS.game_state = load_from_json(state_file)
+        log.info('Game state, max_gid = %s, runtime = %s',
+                  GLOBALS.game_state.max_gid, GLOBALS.game_state.runtime)
     except Exception as err:
         log.warning('Game state data not found, initializing... %s', err)
         GLOBALS.game_state = GameState()
@@ -189,6 +193,12 @@ def load_from_json(filename):
         for line in file:
             data += line
     loaded = from_json(data)
+    if hasattr(loaded, 'gid'):
+        current_max_gid = max(GLOBALS.game_state.max_gid, instances.gid)
+        if loaded.gid > current_max_gid:
+            log.error('Loaded object %s(%s) > %s', loaded.gid, type(loaded),
+            current_max_gid)
+            GLOBALS.game_state.max_gid = instances.gid = loaded.gid
     log.debug(' * Loaded object: %s', type(loaded))
     # Avoid resaving right away
     loaded._last_saved = time.time()
@@ -217,9 +227,8 @@ def load_object(filename: str):
         log.info(' +-> Loaded NPC()')
     elif isinstance(loaded, Race):
         log.info(' +-> Loaded Race()')
-    #elif isinstance(loaded, Item):
-    #    log.info(' +-> Loaded object is a and Item()')
-    #    pass
+    elif isinstance(loaded, BaseItem):
+        log.info(' +-> Loaded object is a and Item()')
     else:
         log.error(' +-> Unrecognized object: %s', type(loaded))
         return

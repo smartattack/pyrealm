@@ -9,9 +9,9 @@ from user.helpers import user_online
 from user.account import create_account, validate_password
 from user.db import account_exists, save_account, load_account, record_visit
 from user.user import User
-from database.tables import load_from_json
+from database.tables import load_from_json, save_to_json
 from actor.player import Player
-from game_object import Room
+from world.room import Room
 from utils import log
 import globals as GLOBALS
 
@@ -252,7 +252,7 @@ class Login(BaseUser):
             self.player.gender = self.gender
             self.player.race = self.race
             log.info('Saving player %s', self.player.name)
-            self.player.save()
+            save_to_json(self.player)
             self.account['playing'] = self.username
             save_account(self.account)
             self.send('Finished!\n')
@@ -283,12 +283,8 @@ class Login(BaseUser):
         # This enables the user command interpreter via User.driver()
         GLOBALS.players[self.player.client] = user
         if self.player.location == None:
-            self.player.location = GLOBALS.START_ROOM
-        log.debug('Finished! 0')
-        
+            self.player.location = GLOBALS.START_ROOM      
         GLOBALS.rooms[self.player.location].add_actor(self.player)
-        log.debug('Finished! 1')
         # All actors (Players, NPCs) get entered into global actors table
         GLOBALS.actors.append(self.player)
-        log.debug('Finished! 2')
         user.send('\n')
