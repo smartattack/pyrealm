@@ -30,7 +30,7 @@ class Room(GameObject):
         if exits:
             self.exits = exits
         log.debug('Registering Room %s with instances.all_rooms', self.gid)
-        InstanceRegistry.all_rooms[self.gid] = self
+        GLOBALS.all_locations[self.gid] = self
         log.debug('Room created: %s', self.__repr__())
 
 

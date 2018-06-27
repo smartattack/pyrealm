@@ -1,17 +1,13 @@
-# To Do
+### To Do
 
-## Rooms
+## General
 
-* ~~Move code to check/list exits into rooms.py (avoid importing DIR_*)~~
-* ~~Update room info display to wrap based on width (down to maybe 40 chars)~~
+* Config file
+* Command-line arguments
 
-## STORAGE
+## Database / Persistence
 
-* ~~Generalized save/load to work with all types (items, rooms, players, npcs, shops, etc)~~
-* ~~Move _checksum, _last_saved into base_object~~
-* ~~Move "skip_list" into object as property to avoid having to pass it during save()~~
-* ~~Boot_db() to load all world objects on startup~~
-* Create Templates vs Instances Save/Load functionality.
+* Timing / tracking info for object persistence (# of each type, time to load each type)
 * During Instance save (eg. Room), save the Room object w/o inventory, and then create inventory
   subdir and store flattened inventory item instances there.
 * On load of a room instance, load the container then load the items and assign to parent
@@ -20,12 +16,25 @@
 * Check scripts to scan the instances and template dirs and report/repair any problems
 * This would validate we can load/save world items outside of pyrealm, which is a prereq for
 * Offline World editor!
+* ~~Generalized save/load to work with all types (items, rooms, players, npcs, shops, etc)~~
+* ~~Move _checksum, _last_saved into base_object~~
+* ~~Move "skip_list" into object as property to avoid having to pass it during save()~~
+* ~~Boot_db() to load all world objects on startup~~
+* ~~Create Templates vs Instances Save/Load functionality.~~
+* ~~Resolve issues with gid collisions~~
 
 ## Items
 
 * ~~Create base_item~~
 * Create weapon, armor, book, food, potion, scroll, key, container,
          staff, wand, money, food, clothing, drink, trash, misc?
+
+
+## Rooms
+
+* ~~Move code to check/list exits into rooms.py (avoid importing DIR_*)~~
+* ~~Update room info display to wrap based on width (down to maybe 40 chars)~~
+
 
 ## Characters / Chargen / Login
 

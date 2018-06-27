@@ -50,23 +50,24 @@ class GameObject():
 class InstanceRegistry():
     """Creates and tracks unique IDs for all tracked objects"""
     gid = 0
-    all_instances = WeakValueDictionary()
-    all_items = WeakValueDictionary()
-    all_actors = WeakValueDictionary()
-    all_players = WeakValueDictionary()
-    all_npcs = WeakValueDictionary()
-    all_locations = WeakValueDictionary()
 
     @classmethod
     def track(cls, instance):
         """Increment and return an instance id"""
-        InstanceRegistry.gid += 1
+        log.debug('BEFORE InstanceRegistry.gid=%s', cls.gid)
+        if cls.gid in GLOBALS.all_instances:
+            log.warning('GID %s in all_instances, finding next available gid',
+                      cls.gid)
+            while cls.gid in GLOBALS.all_instances:
+                cls.gid += 1
+        else:
+            cls.gid += 1
         # Sync game_state.max_gid so we don't overwrite gids
         # on boot.
-        GLOBALS.game_state.max_gid = InstanceRegistry.gid
-        instance.gid = InstanceRegistry.gid
-        log.debug('Adding instance %s to instances.all_instances', cls.gid)
-        InstanceRegistry.all_items[cls.gid] = instance
+        GLOBALS.game_state.max_gid = cls.gid
+        instance.gid = cls.gid
+        log.debug('Adding instance %s to instances.all_instances', instance.gid)
+        GLOBALS.all_items[instance.gid] = instance
 
-# Create object registry used for global object tracking
+# Initialize instance registry for tracking
 instances = InstanceRegistry()

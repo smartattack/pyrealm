@@ -61,7 +61,7 @@ class BaseActor(GameObject):
 
         super().__init__(self, **kwargs)
         log.debug('Adding actor %s to instances.all_actors', self.gid)
-        InstanceRegistry.all_actors[self.gid] = self
+        GLOBALS.all_actors[self.gid] = self
 
 
     def update(self, **kwargs):

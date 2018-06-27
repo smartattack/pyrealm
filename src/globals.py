@@ -13,6 +13,7 @@ DATA_DIR = 'data'
 PLAYER_DIR = 'players'
 RACE_DIR = 'race'
 ROOM_DIR = 'room'
+ITEM_DIR = 'item'
 INSTANCE_DIR = 'instances'
 STATE_DIR = ''
 
@@ -23,8 +24,12 @@ START_ROOM = 1
 TABLES = [
     { 'name': 'rooms',   'path': ROOM_DIR,
       'filename': '*.json', 'on_boot': True},
-    { 'name': 'players', 'path': PLAYER_DIR,
-      'filename': '*.json' }
+    { 'name': 'players', 'path': INSTANCE_DIR + '/' + PLAYER_DIR,
+      'filename': '*.json', 'on_boot': False },
+    { 'name': 'items', 'path': ITEM_DIR,
+      'filename': '*.json', 'on_boot': True },
+    { 'name': 'item-instances', 'path': INSTANCE_DIR + '/' + ITEM_DIR,
+      'filename': '*.json', 'on_boot': True }
 ]
 
 # will be populated in main() with current time.time()
@@ -39,14 +44,26 @@ lobby = {}
 # logged in users
 users = {}
 
-# players (in-game characters, owned by a user)
-players = {}
-
 # All Players and NPCs
-actors = []
+players = {}
+npcs = {}
+actors = {}
 
 # Holds the map, for now
 rooms = {}
+
+# Item templates
+items = {}
+
+
+# Global instances
+all_instances = {}
+all_items = {}
+all_actors = {}
+all_players = {}
+all_npcs = {}
+all_locations = {}
+
 
 # Timeouts
 PLAYER_TIMEOUT = 1200

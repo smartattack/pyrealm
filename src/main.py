@@ -54,8 +54,7 @@ def disconnect_hook(client):
     if client in GLOBALS.players:
         log.debug(' +-> Removing clients[%s]', GLOBALS.players[client].player.name)
         save_to_json(GLOBALS.players[client].player, logout=True)
-        if client in GLOBALS.actors:
-            GLOBALS.actors.remove(GLOBALS.players[client])
+        # FIXME: clean up player from instances/structures
         del GLOBALS.players[client]
     log.debug(' +-> Removing GLOBALS.clients[%s]', client.addrport())
     GLOBALS.clients.remove(client)

@@ -12,6 +12,6 @@ class NPC(BaseActor):
     def __init__(self):
         BaseActor.__init__(self)
         log.debug('Adding NPC %s to instances.all_npcs', self.gid)
-        InstanceRegistry.all_npc[self.gid] = self
+        GLOBALS.all_npcs[self.gid] = self
 
     """FIXME: Implementation needed"""

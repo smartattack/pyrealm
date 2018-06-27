@@ -51,7 +51,7 @@ class Player(BaseActor):
 
         # 
         log.debug('Registering player %s with instances.all_players')
-        InstanceRegistry.all_players[self.gid] = self
+        GLOBALS.all_players[self.gid] = self
 
 
     def post_init(self):

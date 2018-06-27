@@ -29,7 +29,11 @@ class BaseItem(GameObject):
         self._cost = 0
         self.carried_by = None
         log.debug('Registering item %s with instances.all_items', self.gid)
-        InstanceRegistry.all_items[self.gid] = self
+        GLOBALS.all_items[self.gid] = self
+
+    def post_init(self):
+        """This init gets called after a load from disk.  It reconstitutes missing data"""
+        pass
 
     @property
     def weight(self):
