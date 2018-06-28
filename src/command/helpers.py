@@ -19,6 +19,25 @@ def find_actor(name: str):
     return None
 
 
+def find_help(term: str):
+    """Return a list of any help docs with the term in key or text"""
+    matches = []
+    for title in GLOBALS.helps:
+        if term in title or term in (word for word in GLOBALS.helps[title].split()):
+            matches.append(title)
+    return matches
+     
+
+def get_help_doc(term: str):
+    """Attempt to locate helpfile by name, returns doc"""
+    if term in GLOBALS.helps:
+        return GLOBALS.helps[term]
+    for title in GLOBALS.helps:
+        if title.startswith(term):
+            return GLOBALS.helps[title]
+    return None
+
+
 def send_to_room(omit, room_id, msg):
     """Send text to actors in room"""
     log.debug('FUNC send_to_room()')
@@ -30,3 +49,4 @@ def send_to_room(omit, room_id, msg):
             if actor == omit:
                 continue
             actor.send('\n'+msg)
+

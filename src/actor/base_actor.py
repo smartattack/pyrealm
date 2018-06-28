@@ -4,8 +4,8 @@ Base Actor class
 
 import copy
 from utils import log
-from game_object import GameObject, InstanceRegistry
-
+from game_object import GameObject
+import globals as GLOBALS
 
 _DEF_STATS = {
     'hp':    0,
@@ -54,10 +54,10 @@ class BaseActor(GameObject):
         self._attributes = copy.copy(_DEF_ATTRIBUTES)
 
         # inventory, dict:  k=item, v=count
-        self._carried = {}
+        self.inventory = {}
 
         # items worn or wielded, dict: k=slot, v=item
-        self._worn = {}
+        self.worn = {}
 
         super().__init__(self, **kwargs)
         log.debug('Adding actor %s to instances.all_actors', self.gid)

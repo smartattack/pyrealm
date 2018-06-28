@@ -10,11 +10,12 @@ WELCOME_BANNER = '\n^WWelcome to ^YP^Ry^BR^Cealm^w!^d\n\n'
 
 # Storage paths
 DATA_DIR = 'data'
+HELP_DIR = 'help'
+INSTANCE_DIR = 'instances'
+ITEM_DIR = 'item'
 PLAYER_DIR = 'players'
 RACE_DIR = 'race'
 ROOM_DIR = 'room'
-ITEM_DIR = 'item'
-INSTANCE_DIR = 'instances'
 STATE_DIR = ''
 
 # id number of starting room for new players
@@ -55,6 +56,8 @@ rooms = {}
 # Item templates
 items = {}
 
+# Help files
+helps = {}
 
 # Global instances
 all_instances = {}
