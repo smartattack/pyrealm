@@ -1,8 +1,8 @@
-### To Do
+# To Do
 
 ## General
 
-* Config file
+* Config file?
 * Command-line arguments
 
 ## Database / Persistence
@@ -29,12 +29,10 @@
 * Create weapon, armor, book, food, potion, scroll, key, container,
          staff, wand, money, food, clothing, drink, trash, misc?
 
-
 ## Rooms
 
 * ~~Move code to check/list exits into rooms.py (avoid importing DIR_*)~~
 * ~~Update room info display to wrap based on width (down to maybe 40 chars)~~
-
 
 ## Characters / Chargen / Login
 
