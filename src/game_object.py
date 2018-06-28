@@ -3,7 +3,6 @@ Game Object - Base for all trackable game entities
 """
 
 import time
-from weakref import WeakValueDictionary
 from utils import log
 import globals as GLOBALS
 
@@ -14,7 +13,8 @@ class GameObject():
     # not be serialized in save game data.  Subclasses add to this
     # list.
     _skip_list = set()
-    _skip_list.update(['_checksum', '_last_save'])
+    _skip_list.update(['_checksum', '_last_saved'])
+
 
     def __new__(cls, *args, **kwargs):
         """Custom new() to ensure we get a unique ID"""
@@ -24,9 +24,11 @@ class GameObject():
         this = super().__new__(cls)
         return this
 
-    def __init__(self, name=None, description=None, short_desc=None, **kwargs):    
+
+    def __init__(self, name=None, description=None, short_desc=None, **kwargs):
         log.debug('Inside GameObject.init()')
         self.name = name
+        # Description used in inventory, on the ground
         self.description = description
         self.short_desc = short_desc
         if 'skip_list' in kwargs:
@@ -35,13 +37,14 @@ class GameObject():
         InstanceRegistry.track(self)
         # Update checksum / last_saved
         self._init_accounting()
-    
+
+
     def _init_accounting(self):
         """Initialize checksum and last_saved vars"""
-        self.checksum = ''
+        self._checksum = ''
         self._last_saved = time.time()
-    
-    
+
+
     def post_load_init(self):
         """Override this with any code that needs to run after load from disk"""
         pass
@@ -57,7 +60,7 @@ class InstanceRegistry():
         log.debug('BEFORE InstanceRegistry.gid=%s', cls.gid)
         if cls.gid in GLOBALS.all_instances:
             log.warning('GID %s in all_instances, finding next available gid',
-                      cls.gid)
+                        cls.gid)
             while cls.gid in GLOBALS.all_instances:
                 cls.gid += 1
         else:
@@ -68,6 +71,7 @@ class InstanceRegistry():
         instance.gid = cls.gid
         log.debug('Adding instance %s to instances.all_instances', instance.gid)
         GLOBALS.all_items[instance.gid] = instance
+
 
 # Initialize instance registry for tracking
 instances = InstanceRegistry()

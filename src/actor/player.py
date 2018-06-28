@@ -2,16 +2,12 @@
 Player is an actor being played by a connected user
 """
 
-import os
-import time
-import hashlib
 from utils import log
 from utils import xp_to_level, stat_color
 from actor.base_actor import BaseActor
 from game_object import InstanceRegistry
-
-
 import globals as GLOBALS
+
 
 # Positions - these are parsed in the user command handler
 # Move to globals?
@@ -49,7 +45,8 @@ class Player(BaseActor):
         # Make sure we don't serialize client structure!
         self._skip_list.update(['client'])
 
-        # 
+        # Add to global dictionaries
+        InstanceRegistry.track(self)
         log.debug('Registering player %s with instances.all_players')
         GLOBALS.all_players[self.gid] = self
 
@@ -82,13 +79,13 @@ class Player(BaseActor):
 
     def get_prompt(self):
         """Return a prompt for player"""
-        # FIXME: only calc to_level when XP is changed, store in Player()  
+        # FIXME: only calc to_level when XP is changed, store in Player()
         log.debug('FUN get_prompt()')
         hpcol = stat_color(self._stats['hp'], self._stats['maxhp'])
         mpcol = stat_color(self._stats['mp'], self._stats['maxmp'])
         to_level = xp_to_level(self._stats['level'], self._stats['xp'])
         prompt = '{}{}/{} ^chp {}{}/{} ^cmp ^m{}/{} ^cxp^w> ^d'.format(
-            hpcol, self._stats['hp'], self._stats['maxhp'], 
+            hpcol, self._stats['hp'], self._stats['maxhp'],
             mpcol, self._stats['mp'], self._stats['maxmp'],
             self._stats['xp'], to_level)
         return prompt
