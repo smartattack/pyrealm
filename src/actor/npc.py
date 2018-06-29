@@ -15,3 +15,9 @@ class NPC(BaseActor):
         GLOBALS.all_npcs[self.gid] = self
 
     """FIXME: Implementation needed"""
+    def post_init(self):
+        """Called after load_from_json deserializes the structure.  Fills in
+        missing important bits"""
+        self._skip_list.update(['inventory', 'worn'])
+        self.inventory = []
+        self.worn = []

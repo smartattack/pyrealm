@@ -57,7 +57,7 @@ class BaseActor(GameObject):
         self.inventory = []
 
         # items worn or wielded, dict: k=slot, v=item
-        self.worn = {}
+        self.worn = []
 
         super().__init__(self, **kwargs)
         log.debug('Adding actor %s to instances.all_actors', self.gid)

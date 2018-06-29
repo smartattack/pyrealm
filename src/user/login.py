@@ -255,7 +255,7 @@ class Login(BaseUser):
             self.player.gender = self.gender
             self.player.race = self.race
             log.info('Saving player %s', self.player.name)
-            save_to_json(self.player)
+            save_object(self.player)
             self.account['playing'] = self.username
             save_account(self.account)
             self.send('Finished!\n')

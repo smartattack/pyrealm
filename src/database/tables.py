@@ -32,7 +32,7 @@ def boot_db():
     item = BaseItem(name='Magic Wand', description='A magic wand hums with a mysterious energy',
                     short_desc='magic wand')
     item.add_to_room(2)
-    save_to_json(item)
+    save_object(item)
 
     # Persist game_state if max_gid changed.
     if GLOBALS.game_state.max_gid > last_max_gid:
@@ -49,15 +49,15 @@ def boot_db():
     GLOBALS.rooms[3] = Room(vnum=3, name='CircleZone', description='A test room with exits', outside=True,
     exits={0:{'to_room':1},1:{'to_room':1},2:{'to_room':1},3:{'to_room':1},4:{'to_room':1},5:{'to_room':1},6:{'to_room':1},7:{'to_room':1},8:{'to_room':1}})
 
-    save_to_json(GLOBALS.rooms[1])
-    save_to_json(GLOBALS.rooms[2])
-    save_to_json(GLOBALS.rooms[3])
+    save_object(GLOBALS.rooms[1])
+    save_object(GLOBALS.rooms[2])
+    save_object(GLOBALS.rooms[3])
     """
 
 
-def sync_db():
+def sync_db(force=False):
     """Save changed game data, called on shutdown or checkpoint"""
-    save_tables()
+    save_tables(force=force)
     save_game_state()
 
 
@@ -80,7 +80,7 @@ def load_tables():
                 load_object(os.path.join(path, filename))
 
 
-def save_tables():
+def save_tables(force=False):
     """Save database table data"""
     log.info('Saving DB tables:')
     for table_entry in GLOBALS.TABLES:
@@ -90,7 +90,7 @@ def save_tables():
         name = table_entry['name']
         try:
             for item in getattr(GLOBALS, name).values():
-                save_to_json(item, logout=True)
+                save_object(item, logout=True)
         except Exception as err:
             log.error('Could not save GLOBALS.%s : %s', name, err)
 
@@ -148,87 +148,132 @@ def load_help():
                 log.warning(' +-> ERROR loading "%s": %s', filename, err)
 
 
-def get_save_path(save_object):
+def get_save_path(objdata, save_dir=None):
     """Return the pathname where we should save an object"""
     # FIXME: nested items should have parent dir passed in
         # work around for now, maybe we need a list of actual Players
-    if hasattr(save_object, 'gid'):
-        obj_id_name = str(save_object.gid)
-        if isinstance(save_object, BaseItem):
+    if hasattr(objdata, 'gid'):
+        obj_id_name = str(objdata.gid)
+        if isinstance(objdata, BaseItem):
             log.debug('Saving Item instance %s', obj_id_name)
             pname = GLOBALS.ITEM_DIR
-        elif isinstance(save_object, Room):
+        elif isinstance(objdata, Room):
             log.debug('Saving Room instance %s', obj_id_name)
             pname = GLOBALS.ROOM_DIR
-        elif isinstance(save_object, Player):
+        elif isinstance(objdata, Player):
             # A player is always an instance
             # Here we create a dir for the player and save the player within it
-            obj_id_name = save_object.name.lower()
+            obj_id_name = objdata.name.lower()
             log.debug('Saving Player instance %s', obj_id_name)
             pname = GLOBALS.PLAYER_DIR + '/' + obj_id_name
         else:
-            log.error('save_to_json: Weird object encountered: %s', save_object)
+            log.error('get_save_path(): Weird object encountered: %s', objdata)
             return
-        pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.INSTANCE_DIR, pname)
+        if save_dir:
+            pathname = save_dir
+        else:
+            pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.INSTANCE_DIR, pname)
     else:
-        obj_id_name = str(save_object.vnum)
-        if isinstance(save_object, BaseItem):
+        obj_id_name = str(objdata.vnum)
+        if isinstance(objdata, BaseItem):
             log.debug('Saving Item template %s', obj_id_name)
             pname = GLOBALS.ITEM_DIR
-        elif isinstance(save_object, Room):
+        elif isinstance(objdata, Room):
             log.debug('Saving Room template %s', obj_id_name)
             pname = GLOBALS.ROOM_DIR
-        elif isinstance(save_object, Race):
+        elif isinstance(objdata, Race):
             log.debug('Saving Race instance %s', obj_id_name)
             pname = GLOBALS.RACE_DIR
         else:
-            log.error('save_to_json: Weird object encountered: %s', save_object)
+            log.error('get_save_path(): Weird object encountered: %s', objdata)
             return            
-        pathname = os.path.join(GLOBALS.DATA_DIR, pname)
+        if save_dir:
+            pathname = save_dir
+        else:
+            pathname = os.path.join(GLOBALS.DATA_DIR, pname)
     filename = os.path.join(pathname, obj_id_name + '.json')
     log.debug('SAVE DATA pathname = %s, filename = %s', pathname, filename)
     return (pathname, filename, obj_id_name)
 
 
-def save_to_json(save_object: object, logout=False):
-    """Save an object to JSON file
+def save_object(objdata, logout=False, save_dir=None, force=False):
+    """Save object to disk:
     Automatically detects object type and does appropriate save for type.
-    If object has containers, it should save the items as needed, also.
+    If object has containers, it should save nested objects, also.
     Objects may be either templates or instances.  Templates save to
     separate directories than instances and lack an instance_id but have
     a template id (vnum).
     Room, NPC, Player instances save items in a nested folder under the
     parent instance (nested containers in inventory are flattened on save)
     """
-
-    (pathname, filename, obj_id_name) = get_save_path(save_object)
-    # Make sure we update Player's playtime if shutting down or logging out
-    if logout and isinstance(save_object, Player):
-        log.debug('   + Updating playtime for %s += %s', save_object.name, 
-                  save_object.client.duration())
-        # update playtime duration
-        if hasattr(save_object, '_playtime'):
-            save_object._playtime += save_object.client.duration()
-        else:
-            save_object._playtime = save_object.client.duration()
+    # Do not save instances in items dir if owned by a room or location
+    try:
+        if not save_dir:
+            if objdata.carried_by or objdata.worn_by or objdata.location:
+                return
+    except:
+        pass
+    (pathname, filename, obj_id_name) = get_save_path(objdata, save_dir)
     try:
         os.makedirs(pathname, 0o755, True)
     except OSError as err:
-        log.critical('Failed to create directory: %s -> %s', pathname, err)
-    data = to_json(save_object)
+        log.error('Failed to create directory: %s -> %s', pathname, err)
+    # Update playtime on logout
+    if logout and isinstance(objdata, Player):
+        log.debug('   + Updating playtime for %s += %s', objdata.name, 
+                  objdata.client.duration())
+        # update playtime duration
+        if hasattr(objdata, '_playtime'):
+            objdata._playtime += objdata.client.duration()
+        else:
+            objdata._playtime = objdata.client.duration()
+    log.debug('Calling save_to_json(%s, %s, %s)', objdata.name, filename, obj_id_name)
+    save_to_json(objdata, filename, obj_id_name, force=True)
+    # Handle nested objects that need saving
+    try:
+        child_dir = os.path.join(pathname, GLOBALS.ITEM_DIR)
+        # Clean child dir first, ensures we don't save dropped items
+        try:
+            os.remove(child_dir)
+        except OSError as err:
+            log.error('Failed to remove child dir: %s', child_dir)
+        for item in objdata.inventory:
+            log.debug(' +-> Saving inventory item %s', item.name)
+            save_object(item, save_dir=child_dir, force=True)
+    except:
+        pass
+    try:
+        try:
+            os.remove(child_dir)
+        except OSError as err:
+            log.error('Failed to remove child dir: %s', child_dir)
+        child_dir = os.path.join(pathname, GLOBALS.EQUIP_DIR)
+        for item in objdata.worn:
+            log.debug(' +-> Saving worn item %s', item.name)
+            save_object(item, parent_dir=child_dir)
+    except:
+        pass
+
+
+
+
+def save_to_json(objdata: object, filename: str, obj_id_name: str, force=False):
+    """Save an object to JSON file"""
+    # Make sure we update Player's playtime if shutting down or logging out
+    data = to_json(objdata)
     checksum = make_checksum(data)
     # TODO: if logout, duration was calculated and therefore object should
     # have changed. TEST ME!
-    #if object_changed(save_object, checksum) or logout:
-    if object_changed(save_object, checksum):
-        save_object._checksum = checksum
-        save_object._last_saved = time.time()
-        #log.debug('OBJECT: -----> %s', save_object.__dict__)
-        log.info('   + Saving %s: %s', obj_id_name, type(save_object))
+    #if object_changed(objdata, checksum) or logout:
+    if force or object_changed(objdata, checksum):
+        objdata._checksum = checksum
+        objdata._last_saved = time.time()
+        #log.debug('OBJECT: -----> %s', objdata.__dict__)
+        log.info('   + Saving %s: %s', obj_id_name, type(objdata))
         with open(filename, "w") as file:
             file.write(data)
     else:
-        log.debug('   - Skipping %s: %s - NOT CHANGED', obj_id_name, type(save_object))
+        log.debug('   - Skipping %s: %s - NOT CHANGED', obj_id_name, type(objdata))
 
 
 def load_from_json(filename):

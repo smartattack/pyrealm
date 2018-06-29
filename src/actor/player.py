@@ -54,9 +54,10 @@ class Player(BaseActor):
     def post_init(self):
         """Called after load_from_json deserializes the structure.  Fills in
         missing important bits"""
-        self._skip_list.update(['client'])
+        self._skip_list.update(['client', 'inventory', 'worn'])
         self.client = None
         self.inventory = []
+        self.worn = []
 
 
     def __repr__(self):

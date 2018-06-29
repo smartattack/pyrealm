@@ -84,7 +84,7 @@ class Room(GameObject):
     def remove_item(self, item):
         """Remove an item from room inventory"""
         if item in self.inventory:
-            log.debug('Removing {} from room {} inventory',
+            log.debug('Removing %s from room %s inventory',
                       item.name, self.vnum)
             self.inventory.remove(item)
         else:

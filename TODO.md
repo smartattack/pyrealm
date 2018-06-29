@@ -7,9 +7,8 @@
 
 ## Database / Persistence
 
+* **Nested objects (inventory, f.e.)**
 * Timing / tracking info for object persistence (# of each type, time to load each type)
-* During Instance save (eg. Room), save the Room object w/o inventory, and then create inventory
-  subdir and store flattened inventory item instances there.
 * On load of a room instance, load the container then load the items and assign to parent
 * Items should point to their parent instance (worn_by/on, carried_by, location, etc)
 * Sanity checks on load.

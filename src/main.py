@@ -13,7 +13,7 @@ from user.db import boot_userdb
 from command.cmds_system import do_quit
 from miniboa import TelnetServer
 from utils import log
-from database.tables import boot_db, sync_db, save_to_json
+from database.tables import boot_db, sync_db, save_object
 from update import update_game_time
 from event import EventQueue
 import globals as GLOBALS
@@ -25,7 +25,7 @@ from debug import update_snapshot, log_objgraph
 def signal_handler(signal, frame):
     """Make sure we close the db on shutdown"""
     log.info('SIGINT caught, shutting down...')
-    sync_db()
+    sync_db(force=True)
     sys.exit(0)
 
 
@@ -53,7 +53,7 @@ def disconnect_hook(client):
         del GLOBALS.lobby[client]
     if client in GLOBALS.players:
         log.debug(' +-> Removing clients[%s]', GLOBALS.players[client].player.name)
-        save_to_json(GLOBALS.players[client].player, logout=True)
+        save_object(GLOBALS.players[client].player, logout=True)
         # FIXME: clean up player from instances/structures
         del GLOBALS.players[client]
     log.debug(' +-> Removing GLOBALS.clients[%s]', client.addrport())
@@ -144,7 +144,7 @@ def main():
             log.debug('Loop time: %7.5f, total loops: %s', (loop_end - loop_start), loop_count)
 
     log.info('Server shutdown received')
-    sync_db()
+    sync_db(force=True)
 
 if __name__ == '__main__':
     main()
