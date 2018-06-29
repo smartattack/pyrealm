@@ -24,6 +24,7 @@ class Room(GameObject):
         # vnum is used by exits
         self.vnum = vnum
         self._outside = outside
+        # Inventory is a list of instances
         self.inventory = []
         self.actors = []
         self.exits = {}

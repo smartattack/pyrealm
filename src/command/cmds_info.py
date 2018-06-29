@@ -61,7 +61,7 @@ def do_inventory(plr: Player, args: list):
     """Display player's inventory"""
     if plr.inventory:
         output = 'You are carrying:\n'
-        for item in Player.inventory:
+        for item in plr.inventory:
             output += '{}\n'.format(item.short_desc)
     else:    
         output = 'You are not carrying anything.\n'

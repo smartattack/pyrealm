@@ -53,8 +53,8 @@ class BaseActor(GameObject):
         # Hold player traits (strength, intellect, etc)
         self._attributes = copy.copy(_DEF_ATTRIBUTES)
 
-        # inventory, dict:  k=item, v=count
-        self.inventory = {}
+        # inventory, list of Item() objects
+        self.inventory = []
 
         # items worn or wielded, dict: k=slot, v=item
         self.worn = {}

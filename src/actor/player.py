@@ -56,6 +56,7 @@ class Player(BaseActor):
         missing important bits"""
         self._skip_list.update(['client'])
         self.client = None
+        self.inventory = []
 
 
     def __repr__(self):
