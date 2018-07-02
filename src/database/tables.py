@@ -32,7 +32,7 @@ def boot_db():
     item = BaseItem(name='Magic Wand', description='A magic wand hums with a mysterious energy',
                     short_desc='magic wand')
     item.add_to_room(2)
-    save_object(item)
+    #save_object(item)
 
     # Persist game_state if max_gid changed.
     if GLOBALS.game_state.max_gid > last_max_gid:
@@ -88,11 +88,12 @@ def save_tables(force=False):
         path = os.path.join(GLOBALS.DATA_DIR, table_entry['path'])
         filespec = table_entry['filename']
         name = table_entry['name']
-        try:
-            for item in getattr(GLOBALS, name).values():
-                save_object(item, logout=True)
-        except Exception as err:
-            log.error('Could not save GLOBALS.%s : %s', name, err)
+        for player in GLOBALS.all_players:
+            save_object(player)
+        for inst in GLOBALS.all_items:
+            save_object(item)
+        for room in GLOBALS.rooms:
+            save_object(room)
 
 
 def save_game_state():
@@ -210,6 +211,7 @@ def save_object(objdata, logout=False, save_dir=None, force=False):
     try:
         if not save_dir:
             if objdata.carried_by or objdata.worn_by or objdata.location:
+                log.debug('save_object: Skipping %s: this object is owned', objdata.name)
                 return
     except:
         pass

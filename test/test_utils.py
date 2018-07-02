@@ -9,7 +9,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
 
-from utils import to_json, from_json, make_checksum
+from database.tables import to_json, from_json, make_checksum
 from actor.player import Player
 
 # Setup
