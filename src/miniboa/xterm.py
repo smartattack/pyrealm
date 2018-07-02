@@ -104,7 +104,7 @@ def word_wrap(text, columns=80, indent=4, padding=2):
                 line = ' ' * padding
                 line += word
             else:
-                line += ' ' + word
+                line += word + ' '
         if not line.isspace():
             lines.append(line)
     return lines

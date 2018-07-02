@@ -1,9 +1,11 @@
 """
-BaseActor class - base class for NPC and Players
+Base Actor class
 """
-import copy as copy
+
+import copy
 from utils import log
 from game_object import GameObject
+import globals as GLOBALS
 
 _DEF_STATS = {
     'hp':    0,
@@ -51,13 +53,15 @@ class BaseActor(GameObject):
         # Hold player traits (strength, intellect, etc)
         self._attributes = copy.copy(_DEF_ATTRIBUTES)
 
-        # inventory, dict:  k=item, v=count
-        self._carried = {}
+        # inventory, list of Item() objects
+        self.inventory = []
 
         # items worn or wielded, dict: k=slot, v=item
-        self._worn = {}
+        self.worn = []
 
-        self._skip_list = ['client', '_last_saved', '_checksum']
+        super().__init__(self, **kwargs)
+        log.debug('Adding actor %s to instances.all_actors', self.gid)
+        GLOBALS.all_actors[self.gid] = self
 
 
     def update(self, **kwargs):

@@ -5,6 +5,7 @@ Base User class - base class for logged in accounts. a FSM.
 import sys
 import copy
 from utils import log
+import traceback
 
 
 _DEF_PREFERENCES = {
@@ -47,7 +48,10 @@ class BaseUser(object):
             self.__getattribute__(self._state)()
         except Exception as err:
             # We should never get here
-            log.error('Invalid state passed: %s -> %s', self._state, err)
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            log.error('Invalid state or unhandled exception: %s -> %s', self._state, err)
+            log.debug(traceback.format_tb(exc_traceback))
+            #print(traceback.print_tb(exc_traceback))
             sys.exit(1)
 
 

@@ -4,10 +4,11 @@ Persists game state across restarts.
 
 class GameState(object):
     """Holds global game persistence info"""
+
     def __init__(self):
         """Only runs on first boot"""
         self._runtime = 0.0
-        self._max_instance = 0
+        self._max_gid = 0
     
     def post_init(self):
         """Needed by load_from_json"""
@@ -21,9 +22,9 @@ class GameState(object):
         self._runtime += seconds
 
     @property
-    def max_instance(self):
-        return self._max_instance
+    def max_gid(self):
+        return self._max_gid
     
-    @max_instance.setter
-    def max_instance(self, number):
-        self._max_instance = number
+    @max_gid.setter
+    def max_gid(self, number):
+        self._max_gid = number

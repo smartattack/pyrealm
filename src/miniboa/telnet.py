@@ -188,11 +188,11 @@ class TelnetClient(object):
         """
         self.send(colorize(text, self.use_ansi))
 
-    def send_wrapped(self, text):
+    def send_wrapped(self, text, indent=0, padding=0):
         """
         Send text padded and wrapped to the user's screen width.
         """
-        lines = word_wrap(text, self.columns)
+        lines = word_wrap(text, self.columns, indent, padding)
         for line in lines:
             self.send_cc(line + '\n')
 

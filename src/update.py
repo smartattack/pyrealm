@@ -26,7 +26,8 @@ def update_game_time():
 
     if daylight_changed():
         # FIXME: this should be wrapped to only send to players who are outside
-        send_all('\n{}\n'.format(GLOBALS.daylight_message[GLOBALS.daylight_level]))
+        send_all(None, '\n{}\n'.format(GLOBALS.daylight_message[GLOBALS.daylight_level]))
+
 
 
 def daylight_changed():

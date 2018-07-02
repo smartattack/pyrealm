@@ -2,16 +2,12 @@
 Player is an actor being played by a connected user
 """
 
-import os
-import time
-import hashlib
-from utils import log, from_json, object_changed, make_checksum
+from utils import log
 from utils import xp_to_level, stat_color
 from actor.base_actor import BaseActor
-from game_object import GameObject
-
-
+from game_object import InstanceRegistry
 import globals as GLOBALS
+
 
 # Positions - these are parsed in the user command handler
 # Move to globals?
@@ -20,7 +16,14 @@ Positions = ('dead', 'sleeping', 'sitting', 'fighting', 'standing')
 class Player(BaseActor):
     """Player class - holds information about player characters"""
 
-    def __init__(self, name=None, description=None):
+    def __init__(self):
+        """Not called on load_from_json, but from Player() during login"""
+
+        # Initialize BaseActor.  This must be here to register instance with
+        # all_actors, and BaseActor also calls super.__init__() which generates
+        # the instance's gid.  Keep me first so we can override values below.
+        super().__init__(self)
+
         # This might not be needed - we can probably check
         # if the object is of subclass Player or NPC instead
         self.is_player = True
@@ -39,10 +42,23 @@ class Player(BaseActor):
         # Tracks play time for this character
         self._playtime = 0
 
+        # Make sure we don't serialize client structure!
+        self._skip_list.update(['client'])
+
+        # Add to global dictionaries
+        InstanceRegistry.track(self)
+        log.debug('Registering player %s with instances.all_players')
+        GLOBALS.all_players[self.gid] = self
+
 
     def post_init(self):
-        self._skip_list += ['client']
+        """Called after load_from_json deserializes the structure.  Fills in
+        missing important bits"""
+        self._skip_list.update(['client', 'inventory', 'worn'])
         self.client = None
+        self.inventory = []
+        self.worn = []
+
 
     def __repr__(self):
         return 'Player({}) = {}'.format(self._name, self.__dict__)
@@ -65,13 +81,13 @@ class Player(BaseActor):
 
     def get_prompt(self):
         """Return a prompt for player"""
-        # FIXME: only calc to_level when XP is changed, store in Player()  
+        # FIXME: only calc to_level when XP is changed, store in Player()
         log.debug('FUN get_prompt()')
         hpcol = stat_color(self._stats['hp'], self._stats['maxhp'])
         mpcol = stat_color(self._stats['mp'], self._stats['maxmp'])
         to_level = xp_to_level(self._stats['level'], self._stats['xp'])
         prompt = '{}{}/{} ^chp {}{}/{} ^cmp ^m{}/{} ^cxp^w> ^d'.format(
-            hpcol, self._stats['hp'], self._stats['maxhp'], 
+            hpcol, self._stats['hp'], self._stats['maxhp'],
             mpcol, self._stats['mp'], self._stats['maxmp'],
             self._stats['xp'], to_level)
         return prompt
@@ -106,58 +122,3 @@ class Player(BaseActor):
     def list_abilities(self):
         """Return a list of all abilities for a player"""
         return list(self._abilities).sort()
-
-
-    #def save(self, logout=False):
-    #    """Write to disk"""
-    #    log.debug('FUNC: Player.save()')
-    #    save_to_json(self, logout=logout)
-        """
-        if logout:
-            log.debug('+ Updating playtime for %s += %s', self.name, self.client.duration())
-            # update playtime duration
-            if hasattr(self, '_playtime'):
-                self._playtime += self.client.duration()
-            else:
-                self._playtime = self.client.duration()
-        pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR)
-        try:
-            os.makedirs(pathname, 0o755, True)
-        except OSError as err:
-            log.critical('Failed to create directory: %s -> %s', pathname, err)
-        data = to_json(self)
-        checksum = make_checksum(data)
-        if object_changed(self, checksum) or logout:
-            self._checksum = checksum
-            self._last_saved = time.time()
-            log.info('Saving player: %s', self.name)
-            filename = os.path.join(pathname, self.name.lower() + '.json')
-            with open(filename, "w") as file:
-                file.write(data)
-                #log.debug('PLAYERDATA: {}'.format(data))
-        """
-
-
-    def load(self, username):
-        """Load from disk"""
-        if not username:
-            log.error('Attempted to call Player.load without a username!')
-            raise KeyError('Must include a username with load()')
-        filename = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR, username.lower() + '.json')
-        data = ''
-        log.info('Loading Player(%s)', username)
-        with open(filename, "r") as file:
-            for line in file:
-                data += line
-        try:
-            loaded = from_json(data)
-        except Exception as err:
-            log.error('Could not load Player data: %s', err)
-        if isinstance(loaded, Player):
-            # Avoid resaving right away
-            self._last_saved = time.time()
-            self._checksum = hashlib.md5(data.encode('utf-8')).hexdigest()
-            return loaded
-        else:
-            log.error('Loaded data != Player() - possible corruption')
-            raise IOError('Failed to load player data for {}'.format(username))

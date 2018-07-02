@@ -9,9 +9,10 @@ from user.helpers import user_online
 from user.account import create_account, validate_password
 from user.db import account_exists, save_account, load_account, record_visit
 from user.user import User
-from database.tables import load_from_json
+from database.tables import load_object, save_to_json
 from actor.player import Player
 from world.room import Room
+from game_object import instances
 from utils import log
 import globals as GLOBALS
 
@@ -109,15 +110,16 @@ class Login(BaseUser):
         if self.account['playing']:
             log.debug(' +-> Playing as %s', self.account['playing'])
             try:
-                #self.player = Player.load(self, self.account['playing'])
-                filename = os.path.join(GLOBALS.DATA_DIR, GLOBALS.PLAYER_DIR, self.account['playing'].lower() + '.json')
-                self.player = load_from_json(filename)
+                filename = os.path.join(GLOBALS.DATA_DIR, GLOBALS.INSTANCE_DIR,
+                                        GLOBALS.PLAYER_DIR,
+                                        self.account['playing'].lower(),
+                                        self.account['playing'].lower() + '.json')
+                self.player = load_object(filename)
                 self.player.client = self.client
-                log.debug('CHANGING STATE TO HANDOFF')
                 self.change_state('player_handoff')
                 self.send('Welcome back, {}!\n\n'.format(self.username))
             except Exception as err:
-                log.warning('Player.load(%s): %s', self.username, err)
+                log.warning('FAILED Player.load(%s): %s', self.username, err)
                 self.change_state('new_ask_gender')
             self.driver()
         else:
@@ -253,7 +255,7 @@ class Login(BaseUser):
             self.player.gender = self.gender
             self.player.race = self.race
             log.info('Saving player %s', self.player.name)
-            self.player.save()
+            save_object(self.player)
             self.account['playing'] = self.username
             save_account(self.account)
             self.send('Finished!\n')
@@ -273,6 +275,7 @@ class Login(BaseUser):
         Set command handler, assign commands, initial room
         """
         user = User(self.player.client)
+        log.debug('User created successfully')
         user.client = self.player.client
         user.username = self.account['username']
         user.player = self.player
@@ -283,8 +286,6 @@ class Login(BaseUser):
         # This enables the user command interpreter via User.driver()
         GLOBALS.players[self.player.client] = user
         if self.player.location == None:
-            self.player.location = GLOBALS.START_ROOM
+            self.player.location = GLOBALS.START_ROOM      
         GLOBALS.rooms[self.player.location].add_actor(self.player)
-        # All actors (Players, NPCs) get entered into global actors table
-        GLOBALS.actors.append(self.player)
         user.send('\n')
