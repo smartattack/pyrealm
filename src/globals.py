@@ -26,12 +26,12 @@ START_ROOM = 1
 TABLES = [
     { 'name': 'rooms',   'path': ROOM_DIR,
       'filename': '*.json', 'on_boot': True},
-    { 'name': 'players', 'path': INSTANCE_DIR + '/' + PLAYER_DIR,
-      'filename': '*.json', 'on_boot': False },
-    { 'name': 'items', 'path': ITEM_DIR,
-      'filename': '*.json', 'on_boot': True },
-    { 'name': 'item-instances', 'path': INSTANCE_DIR + '/' + ITEM_DIR,
-      'filename': '*.json', 'on_boot': True }
+#    { 'name': 'players', 'path': INSTANCE_DIR + '/' + PLAYER_DIR,
+#      'filename': '*.json', 'on_boot': False },
+#    { 'name': 'items', 'path': ITEM_DIR,
+#      'filename': '*.json', 'on_boot': True },
+#    { 'name': 'item-instances', 'path': INSTANCE_DIR + '/' + ITEM_DIR,
+#      'filename': '*.json', 'on_boot': True }
 ]
 
 # will be populated in main() with current time.time()
@@ -61,13 +61,23 @@ items = {}
 helps = {}
 
 # Global instances
+all_actors = {}
 all_instances = {}
 all_items = {}
-all_actors = {}
-all_players = {}
-all_npcs = {}
 all_locations = {}
+all_npcs = {}
+all_players = {}
 
+# Index files for world state persistence
+ACTOR_INDEX_FILE = 'all_actors.json'
+INSTANCE_INDEX_FILE = 'all_instances.json'
+ITEMS_INDEX_FILE = 'all_items.json'
+LOCATIONS_INDEX_FILE = 'all_locations.json'
+NPC_INDEX_FILE = 'all_npcs.json'
+PLAYERS_INDEX_FILE = 'all_players.json'
+
+# Auto-save world state interval in seconds
+CHECKPOINT_INTERVAL = 300
 
 # Timeouts
 PLAYER_TIMEOUT = 1200
