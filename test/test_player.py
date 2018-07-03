@@ -6,8 +6,9 @@ PACKAGE_PARENT = '../src'
 SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
-
 from actor.player import Player
+import globals as GLOBALS
+from utils import log
 
 
 def test_player_name():
