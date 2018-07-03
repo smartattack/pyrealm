@@ -97,10 +97,34 @@ def send_prompts():
             user.send_prompt()
 
 
+def tracer(frame, event, arg):
+    """Trace all calls"""
+    # This function is sourced from: https://pymotw.com/2/sys/tracing.html
+    if event != 'call':
+        return
+    co = frame.f_code
+    func_name = co.co_name
+    if func_name == 'write':
+        # Ignore write() calls from print statements
+        return
+    func_line_no = frame.f_lineno
+    func_filename = co.co_filename
+    caller = frame.f_back
+    caller_line_no = caller.f_lineno
+    caller_filename = caller.f_code.co_filename
+    print('Call to {} on line {} of {} from line {} of {}\n'.format(
+          func_name, func_line_no, func_filename,
+          caller_line_no, caller_filename))
+    return
+
+
 def main():
     """Pyrealms main()"""
 
     signal.signal(signal.SIGINT, signal_handler)
+
+    #if __debug__:
+    #    sys.settrace(tracer)
 
     # Start the clock
     GLOBALS.EPOCH_S = int(time.strftime('%s', time.strptime(GLOBALS.GAME_EPOCH, '%Y/%m/%d %H:%M:%S')))

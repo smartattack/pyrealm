@@ -14,6 +14,7 @@ class NPC(BaseActor):
         log.debug('Adding NPC %s to instances.all_npcs', self.gid)
         GLOBALS.all_npcs[self.gid] = self
 
+
     """FIXME: Implementation needed"""
     def post_init(self):
         """Called after load_from_json deserializes the structure.  Fills in
