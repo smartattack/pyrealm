@@ -70,7 +70,7 @@ class InstanceRegistry():
         GLOBALS.game_state.max_gid = cls.gid
         instance.gid = cls.gid
         log.debug('Adding instance %s to instances.all_instances', instance.gid)
-        GLOBALS.all_items[instance.gid] = instance
+        GLOBALS.all_instances[instance.gid] = instance
 
 
 # Initialize instance registry for tracking
