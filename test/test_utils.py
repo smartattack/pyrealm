@@ -20,12 +20,13 @@ def test_json_conversion():
 
     jstest = Player()
     
-    converted = to_json(jstest, [])
+    converted = to_json(jstest)
     restored = from_json(converted)
     if type(restored) != type(jstest):
         errors.append("Restored object type != Original object type")
 
-    converted = to_json(jstest, [ '_name' ])
+    converted._skip_list = [ '_name' ]
+    converted = to_json(jstest)
     restored = from_json(converted)
     if hasattr(jstest, '_name') != True:
         errors.append("Test object is missing required attribute _name - setup failure")

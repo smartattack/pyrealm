@@ -12,10 +12,10 @@ import globals as GLOBALS
 from utils import log
 
 
-def test_player_name():
-    GLOBALS.game_state = GameState()
-    p = Player()
-    assert p.name == 'nobody'
+#def test_player_name():
+#    GLOBALS.game_state = GameState()
+#    p = Player()
+#    assert p.name == 'nobody'
 
 def test_player_set_name():
     GLOBALS.game_state = GameState()
