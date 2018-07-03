@@ -9,16 +9,10 @@ import copy
 import hashlib
 import jsonpickle
 from utils import log
-from actor.player import Player
-from actor.race import Race
-from user.user import User
-from actor.npc import NPC
 from item.base_item import BaseItem
 from game_object import InstanceRegistry, instances
-from world.room import Room
 from database.game_state import GameState
 import globals as GLOBALS
-
 
 
 def boot_db():
@@ -37,22 +31,9 @@ def boot_db():
     # Persist game_state if max_gid changed.
     if GLOBALS.game_state.max_gid > last_max_gid:
         save_game_state()
+    
+    save_instance_indexes()
 
-
-    """
-    GLOBALS.rooms[1] = Room(vnum=1, name='Entrance', desc='A lit entryway', outside=True,
-                            exits={DIR_NORTH: {'to_room':2}})
-
-    GLOBALS.rooms[2] = Room(vnum=2, name='Courtyard', desc='An empty courtyard', outside=True,
-                            exits={DIR_SOUTH: {'to_room':1}})
-
-    GLOBALS.rooms[3] = Room(vnum=3, name='CircleZone', description='A test room with exits', outside=True,
-    exits={0:{'to_room':1},1:{'to_room':1},2:{'to_room':1},3:{'to_room':1},4:{'to_room':1},5:{'to_room':1},6:{'to_room':1},7:{'to_room':1},8:{'to_room':1}})
-
-    save_object(GLOBALS.rooms[1])
-    save_object(GLOBALS.rooms[2])
-    save_object(GLOBALS.rooms[3])
-    """
 
 
 def sync_db(force=False):
@@ -60,6 +41,23 @@ def sync_db(force=False):
     save_tables(force=force)
     save_game_state()
 
+
+def save_instance_indexes():
+    """Persist the instance indexes"""
+    print("Running save_instance_indexes()")
+    for index in [index for index in GLOBALS.__dir__() if index.startswith('all_')]:
+        save_index(getattr(GLOBALS, index))
+
+
+def save_index(index):
+    """Attempt to serialize one instance index"""
+    data = []
+    for instance in index.values():
+        data.append({ 'gid':instance.gid, 'itype':type(instance), 'name':instance.name })
+    data = to_json(data)
+    print("index({}) == \n{}\n\n".format(index, data))
+    return data
+    
 
 def load_tables():
     """Load database tables"""
@@ -149,19 +147,27 @@ def load_help():
                 log.warning(' +-> ERROR loading "%s": %s', filename, err)
 
 
+def objtype(input: object):
+    """Return the class name of the input object"""
+    retval = input.__class__.__name__
+    log.debug('OBJTYPE of %s is: %s', input, retval)
+    return retval
+
+
 def get_save_path(objdata, save_dir=None):
     """Return the pathname where we should save an object"""
     # FIXME: nested items should have parent dir passed in
         # work around for now, maybe we need a list of actual Players
+    type = objtype(objdata)
     if hasattr(objdata, 'gid'):
         obj_id_name = str(objdata.gid)
-        if isinstance(objdata, BaseItem):
+        if type == 'BaseItem':
             log.debug('Saving Item instance %s', obj_id_name)
             pname = GLOBALS.ITEM_DIR
-        elif isinstance(objdata, Room):
+        elif type == 'Room':
             log.debug('Saving Room instance %s', obj_id_name)
             pname = GLOBALS.ROOM_DIR
-        elif isinstance(objdata, Player):
+        elif type == 'Room':
             # A player is always an instance
             # Here we create a dir for the player and save the player within it
             obj_id_name = objdata.name.lower()
@@ -176,15 +182,12 @@ def get_save_path(objdata, save_dir=None):
             pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.INSTANCE_DIR, pname)
     else:
         obj_id_name = str(objdata.vnum)
-        if isinstance(objdata, BaseItem):
+        if type == 'BaseItem':
             log.debug('Saving Item template %s', obj_id_name)
             pname = GLOBALS.ITEM_DIR
-        elif isinstance(objdata, Room):
+        elif type == 'Room':
             log.debug('Saving Room template %s', obj_id_name)
             pname = GLOBALS.ROOM_DIR
-        elif isinstance(objdata, Race):
-            log.debug('Saving Race instance %s', obj_id_name)
-            pname = GLOBALS.RACE_DIR
         else:
             log.error('get_save_path(): Weird object encountered: %s', objdata)
             return            
@@ -221,7 +224,7 @@ def save_object(objdata, logout=False, save_dir=None, force=False):
     except OSError as err:
         log.error('Failed to create directory: %s -> %s', pathname, err)
     # Update playtime on logout
-    if logout and isinstance(objdata, Player):
+    if logout and objtype(objdata) == 'Player':
         log.debug('   + Updating playtime for %s += %s', objdata.name, 
                   objdata.client.duration())
         # update playtime duration
@@ -306,6 +309,7 @@ def load_object(filename: str):
     except Exception as err:
         log.error('Could not load json data: %s', err)
         return
+    type = objtype(loaded)
     if hasattr(loaded, 'gid'):
         template = False
         if loaded.gid in GLOBALS.all_instances:
@@ -318,7 +322,7 @@ def load_object(filename: str):
             current_max_gid)
             GLOBALS.game_state.max_gid = InstanceRegistry.gid = loaded.gid
         GLOBALS.all_instances[loaded.gid] = loaded
-    if isinstance(loaded, Room):
+    if type == 'Room':
         if template:
             log.info(' +-> Loaded object is a Room template')
             GLOBALS.rooms[loaded.vnum] = loaded
@@ -326,14 +330,14 @@ def load_object(filename: str):
             log.info(' +-> Loaded object is a Room instance')
             GLOBALS.all_locations[loaded.gid] = loaded
         log.debug('ROOM DATA: %s', loaded)
-    elif isinstance(loaded, Player):
+    elif type == 'Player':
         if template:
             log.error(' +-> Loaded object is a Player template (ERROR!)')
         else:
             log.info(' +-> Loaded object is a Player instance')
             GLOBALS.all_actors[loaded.gid] = loaded
             GLOBALS.all_players[loaded.gid] = loaded
-    elif isinstance(loaded, NPC):
+    elif type == 'NPC':
         if template:
             log.info(' +-> Loaded object is a NPC template')
             GLOBALS.npcs[loaded.vnum] = loaded
@@ -341,10 +345,10 @@ def load_object(filename: str):
             log.info(' +-> Loaded object is a NPC instance')
             GLOBALS.all_actors[loaded.gid] = loaded
             GLOBALS.all_npcs[loaded.gid] = loaded
-    elif isinstance(loaded, Race):
+    elif type == 'Race':
         log.info(' +-> Loaded Race()')
         # FIXME: implement something here
-    elif isinstance(loaded, BaseItem):
+    elif type == 'BaseItem':
         if template:
             log.info(' +-> Loaded object is an Item template')
             GLOBALS.items[loaded.vnum] = loaded
