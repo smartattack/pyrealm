@@ -59,7 +59,7 @@ def load_game_state():
         state_file = os.path.join(GLOBALS.DATA_DIR, GLOBALS.STATE_DIR,
                                   'state.json')
         GLOBALS.game_state = load_from_json(state_file)
-        log.info('Game state, max_gid = %s, runtime = %s',
+        log.info('Loaded game state, max_gid = %s, runtime = %s',
                   GLOBALS.game_state.max_gid, GLOBALS.game_state.runtime)
     except Exception as err:
         log.warning('Game state data not found, initializing... %s', err)
@@ -67,5 +67,5 @@ def load_game_state():
     # Sync gid counters
     GLOBALS.game_state.max_gid = InstanceRegistry.gid = max(InstanceRegistry.gid,
                                                      GLOBALS.game_state.max_gid)
-    log.debug('AFTER SYNC: GLOBALS.game_state.max_gid=%s, InstanceRegistry.gid=%s',
+    log.info('Final Game state: GLOBALS.game_state.max_gid=%s, InstanceRegistry.gid=%s',
               GLOBALS.game_state.max_gid, InstanceRegistry.gid)

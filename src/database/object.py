@@ -17,8 +17,6 @@ def save_instances(force=False):
 
 def get_save_path(objdata, save_dir=None):
     """Return the pathname where we should save an object"""
-    # FIXME: nested items should have parent dir passed in
-        # work around for now, maybe we need a list of actual Players
     objtype = game_object_type(objdata)
     if hasattr(objdata, 'gid'):
         obj_id_name = str(objdata.gid)
@@ -66,13 +64,11 @@ def load_object(filename: str, check_collision=True):
     loaded = None
     template = True
     try:
-        log.debug('from_json(%s)', filename)
         loaded = load_from_json(filename)
     except Exception as err:
         log.error('Could not load json data: %s', err)
         return
     objtype = game_object_type(loaded)
-    log.debug("------------> TYPE==", objtype)
     if hasattr(loaded, 'gid'):
         template = False
         if check_collision:
@@ -95,24 +91,18 @@ def load_object(filename: str, check_collision=True):
             GLOBALS.all_locations[loaded.gid] = loaded
         log.debug('ROOM DATA: %s', loaded)
     elif objtype == 'Player':
-        if template:
-            log.error(' +-> Loaded object is a Player template (ERROR!)')
-        else:
-            log.info(' +-> Loaded object is a Player instance')
+            log.debug(' +-> Loaded object is a Player instance')
             GLOBALS.all_actors[loaded.gid] = loaded
             GLOBALS.all_players[loaded.gid] = loaded
     elif objtype == 'NPC':
         if template:
-            log.info(' +-> Loaded object is a NPC template')
+            log.debug(' +-> Loaded object is a NPC template')
             GLOBALS.npcs[loaded.vnum] = loaded
         else:
-            log.info(' +-> Loaded object is a NPC instance')
+            log.debug(' +-> Loaded object is a NPC instance')
             GLOBALS.all_actors[loaded.gid] = loaded
             GLOBALS.all_npcs[loaded.gid] = loaded
-    elif objtype == 'Race':
-        log.info(' +-> Loaded Race()')
-        # FIXME: implement something here
-    elif type == 'BaseItem':
+    elif objtype.endswith('Item'):
         if template:
             log.info(' +-> Loaded object is an Item template')
             GLOBALS.items[loaded.vnum] = loaded

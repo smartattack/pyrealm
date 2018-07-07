@@ -10,7 +10,7 @@ from utils import log
 
 def write_file(data: str, filename: str):
     """Write string to disk, no other processing"""
-    log.info('   + Saving %s: %s', filename, type(data))
+    log.debug('   + Saving %s: %s', filename, type(data))
     with open(filename, "w") as file:
         file.write(data)
 
@@ -18,7 +18,7 @@ def write_file(data: str, filename: str):
 def load_file(filename: str):
     """Load a file from disk, no other processing, return string"""
     data = ''
-    log.info('Attempting to load file: %s', filename)
+    log.debug('Attempting to load file: %s', filename)
     with open(filename, "r") as file:
         for line in file:
             data += line
@@ -28,14 +28,14 @@ def load_file(filename: str):
 def to_json(target: object):
     """Create a Player() with select fields and serialize to JSON"""
     try:
-        log.debug('SKIP LIST IMPORTED FOR TARGET: %s, SKIP_LIST: %s', target, target._skip_list)
+        log.debug('skip_list imported for target: %s, SKIP_LIST: %s', target, target._skip_list)
         skip_list = target._skip_list
     except:
-        log.debug('NO SKIP LIST FOR TARGET: %s', target)
+        log.debug('No skip_list found for target: %s', target)
         skip_list = []
     p = copy.copy(target)
     for i in skip_list:
-        log.debug('skip_list: %s', i)
+        log.debug(' +-> skip_list: %s', i)
         try:
             delattr(p, i)
         except AttributeError:
@@ -49,7 +49,7 @@ def to_json(target: object):
 def from_json(inp=str):
     """Deserialize JSON data and return object(s)"""
     try:
-        log.debug('Input = %s', inp)
+        #log.debug('Input = %s', inp)
         return jsonpickle.decode(inp, keys=True)
     except Exception as err:
         raise AttributeError('Could not deserialize JSON: {}'.format(err))
@@ -61,7 +61,5 @@ def object_changed(test_obj: object, checksum: str):
     If no checksum present or checksum changed return true"""
     if hasattr(test_obj, '_checksum'):
         if test_obj._checksum == checksum:
-            log.debug('Testing object_changed: %s == %s', type(object), False)
             return False
-    log.debug('Testing object_changed: %s == %s', type(object), True)
     return True

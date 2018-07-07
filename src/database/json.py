@@ -17,6 +17,10 @@ def save_to_json(objdata: object, filename: str, obj_id_name: str, force=False):
     data = to_json(objdata)
     checksum = make_checksum(data)
     if force or object_changed(objdata, checksum):
+        if force:
+            log.debug('   - Save forced, writing data')
+        else:
+            log.debug('   - Object changed, writing data')
         # Update checksum / last saved
         objdata._checksum = checksum
         objdata._last_saved = time.time()
