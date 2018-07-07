@@ -9,7 +9,8 @@ from user.helpers import user_online
 from user.account import create_account, validate_password
 from user.db import account_exists, save_account, load_account, record_visit
 from user.user import User
-from database.tables import load_object, save_to_json
+from database.object import load_object,  save_object
+from database.json import save_to_json
 from actor.player import Player
 from world.room import Room
 from game_object import instances
@@ -110,11 +111,19 @@ class Login(BaseUser):
         if self.account['playing']:
             log.debug(' +-> Playing as %s', self.account['playing'])
             try:
-                filename = os.path.join(GLOBALS.DATA_DIR, GLOBALS.INSTANCE_DIR,
-                                        GLOBALS.PLAYER_DIR,
-                                        self.account['playing'].lower(),
-                                        self.account['playing'].lower() + '.json')
-                self.player = load_object(filename)
+                #filename = os.path.join(GLOBALS.DATA_DIR, GLOBALS.INSTANCE_DIR,
+                #                        GLOBALS.PLAYER_DIR,
+                #                        self.account['playing'].lower(),
+                #                        self.account['playing'].lower() + '.json')
+                #self.player = load_object(filename)
+                for gid, player in GLOBALS.all_players.items():
+                    log.debug('GID, PLAYER == %s, %s', gid, player)
+                    if player.name == self.account['playing']:
+                        log.info('Found matching player GID %s for "%s"', gid, player.name)
+                        self.player = player
+                        break
+                else:
+                    log.error('Could not locate player in global players list')
                 self.player.client = self.client
                 self.change_state('player_handoff')
                 self.send('Welcome back, {}!\n\n'.format(self.username))
@@ -286,6 +295,6 @@ class Login(BaseUser):
         # This enables the user command interpreter via User.driver()
         GLOBALS.players[self.player.client] = user
         if self.player.location == None:
-            self.player.location = GLOBALS.START_ROOM      
+            self.player.location = GLOBALS.START_ROOM
         GLOBALS.rooms[self.player.location].add_actor(self.player)
         user.send('\n')

@@ -12,10 +12,6 @@ WELCOME_BANNER = '\n^WWelcome to ^YP^Ry^BR^Cealm^w!^d\n\n'
 DATA_DIR = 'data'
 HELP_DIR = 'help'
 INSTANCE_DIR = 'instances'
-ITEM_DIR = 'item'
-EQUIP_DIR = 'equip'
-PLAYER_DIR = 'players'
-RACE_DIR = 'race'
 ROOM_DIR = 'room'
 STATE_DIR = ''
 
@@ -26,12 +22,6 @@ START_ROOM = 1
 TABLES = [
     { 'name': 'rooms',   'path': ROOM_DIR,
       'filename': '*.json', 'on_boot': True},
-#    { 'name': 'players', 'path': INSTANCE_DIR + '/' + PLAYER_DIR,
-#      'filename': '*.json', 'on_boot': False },
-#    { 'name': 'items', 'path': ITEM_DIR,
-#      'filename': '*.json', 'on_boot': True },
-#    { 'name': 'item-instances', 'path': INSTANCE_DIR + '/' + ITEM_DIR,
-#      'filename': '*.json', 'on_boot': True }
 ]
 
 # will be populated in main() with current time.time()
