@@ -4,7 +4,7 @@ Database Index load/save
 
 from utils import log
 from database.json import load_json_index, save_json_index
-
+import globals as GLOBALS
 
 def load_indexes():
     """Load persisted instance indexes"""

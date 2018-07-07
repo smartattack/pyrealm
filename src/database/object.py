@@ -9,11 +9,17 @@ from database.json import save_to_json, load_from_json
 import globals as GLOBALS
 
 
+def save_instances(force=False):
+    """Save all instances to disk"""
+    for instance in GLOBALS.all_instances.values():
+        save_object(instance, force=force)
+
+
 def get_save_path(objdata, save_dir=None):
     """Return the pathname where we should save an object"""
     # FIXME: nested items should have parent dir passed in
         # work around for now, maybe we need a list of actual Players
-    type = game_object_type(objdata)
+    objtype = game_object_type(objdata)
     if hasattr(objdata, 'gid'):
         obj_id_name = str(objdata.gid)
         if save_dir:
@@ -22,6 +28,7 @@ def get_save_path(objdata, save_dir=None):
             pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.INSTANCE_DIR)
         filename = os.path.join(pathname, 'gid_' + obj_id_name + '.json')
     else:
+        log.debug('OBJ_ID_NAME called -> %s (%s)', objdata, objtype)
         obj_id_name = str(objdata.vnum)          
         if save_dir:
             pathname = save_dir

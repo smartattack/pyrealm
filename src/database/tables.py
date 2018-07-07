@@ -10,8 +10,7 @@ from world.room import Room
 from command.helpers import get_room
 from database.help import load_help
 from database.index import load_indexes, save_indexes
-from database.json import save_json_objects
-from database.object import load_object, save_object
+from database.object import load_object, save_object, save_instances
 from database.game_state import GameState, save_game_state, load_game_state
 import globals as GLOBALS
 
@@ -41,11 +40,10 @@ def boot_db():
         save_game_state()
 
 
-
 def sync_db(force=False):
     """Save changed game data, called on shutdown or checkpoint"""
     save_indexes()
-    save_objects(force=force)
+    save_instances(force=force)
     # By now this is only room templates
     save_tables(force=force)
     save_game_state()
@@ -79,7 +77,10 @@ def save_instances(logout=False, force=False):
     """Persist all live game objects"""
     log.debug("Running save_objects")
     # For now we'll wrap to JSON, later maybe to SQLite
-    save_json_objects(logout=logout, force=force)
+    pname = os.path.join(GLOBALS.DATA_DIR)
+    for gid, gobj in GLOBALS.all_instances.items():
+        save_object(gobj, save_dir=pname, logout=logout,
+                    force=force)
 
 
 def load_tables():
