@@ -60,8 +60,11 @@ class Room(GameObject):
         if not act in self.actors:
             log.debug('Adding %s to room %s', act.name, self.vnum)
             self.actors.append(act)
-            # Don't send to NPCs
-            if hasattr(act, 'send'):
+            # Don't send to NPCs or Players who are not connected
+            # FIXME: this should be a notify to an observer
+            # That way NPCs and Players won't be subscribed and
+            # we don't have to do all this checking
+            if hasattr(act, 'send') and hasattr(act.client, 'columns'):
                 act.send(self.show_info(act.client.columns))
 
 

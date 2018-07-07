@@ -5,13 +5,12 @@ Database table definitions
 import fnmatch
 import os
 from utils import log
-from game_object import InstanceRegistry, instances
-from world.room import Room
-from command.helpers import get_room
+from command.helpers import get_room, find_actor
 from database.help import load_help
 from database.index import load_indexes, save_indexes
-from database.object import load_object, save_object, save_instances
-from database.game_state import GameState, save_game_state, load_game_state
+from database.object import load_object, save_object, save_instances, game_object_type
+from database.game_state import save_game_state, load_game_state
+from database.populate import populate
 import globals as GLOBALS
 
 
@@ -22,19 +21,16 @@ def boot_db():
     load_game_state()
     last_max_gid = GLOBALS.game_state.max_gid
     # Index may not exist - don't freak out
+    load_tables()
     try:
         load_indexes()
-    except:
+    except FileNotFoundError:
         pass
     rebuild_links()
-    load_tables()
     load_help()
-    """
-    item = BaseItem(name='Magic Wand', description='A magic wand hums with a mysterious energy',
-                    short_desc='magic wand')
-    item.add_to_room(2)
-    #save_object(item)
-    """
+
+    populate()
+
     # Persist game_state if max_gid changed.
     if GLOBALS.game_state.max_gid > last_max_gid:
         save_game_state()
@@ -69,18 +65,8 @@ def rebuild_links():
             if actor:
                 log.debug('   ** Adding %s to %s', gobj.name, actor.name)
                 actor.add_item(gobj)
-                next
+                continue
             # Find item (container), add item...
-
-
-def save_instances(logout=False, force=False):
-    """Persist all live game objects"""
-    log.debug("Running save_objects")
-    # For now we'll wrap to JSON, later maybe to SQLite
-    pname = os.path.join(GLOBALS.DATA_DIR)
-    for gid, gobj in GLOBALS.all_instances.items():
-        save_object(gobj, save_dir=pname, logout=logout,
-                    force=force)
 
 
 def load_tables():
@@ -88,7 +74,7 @@ def load_tables():
     log.info('Loading DB tables:')
     for table_entry in GLOBALS.TABLES:
         try:
-            if not table_entry['on_boot'] == True:
+            if not table_entry['on_boot']:
                 continue
         except (KeyError, AttributeError):
             continue
@@ -106,4 +92,4 @@ def save_tables(force=False):
     """Save database table data"""
     log.info('Saving DB tables:')
     for room in GLOBALS.rooms.values():
-        save_object(room)
+        save_object(room, force=force)

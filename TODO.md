@@ -9,9 +9,9 @@
 
 * **Nested objects (inventory, f.e.)**
 * Timing / tracking info for object persistence (# of each type, time to load each type)
-* On load of a room instance, load the container then load the items and assign to parent
+* **Items lack "carried_by" "worn_by" attributes!**
 * Items should point to their parent instance (worn_by/on, carried_by, location, etc)
-* Sanity checks on load.
+* **Sanity checks on load.**
 * Check scripts to scan the instances and template dirs and report/repair any problems
 * This would validate we can load/save world items outside of pyrealm, which is a prereq for
 * Offline World editor!

@@ -63,6 +63,19 @@ class Player(BaseActor):
         return 'Player({}) = {}'.format(self._name, self.__dict__)
 
 
+    @property
+    def playtime(self):
+        """Report player's playtime in seconds"""
+        return self._playtime
+
+
+    @playtime.setter
+    def playtime(self, newvalue):
+        """Update player's gameplay duration in seconds"""
+        log.debug('Updating %s playtime to %s(%s)', self.name, type(newvalue), newvalue)
+        self._playtime = newvalue
+
+
     def send(self, msg):
         """Send a message to player, supports color codes"""
         self.client.send_cc(msg)
