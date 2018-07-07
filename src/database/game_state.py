@@ -2,7 +2,9 @@
 Persists game state across restarts.
 """
 
+import os
 from utils import log
+from database.json import to_json, from_json, load_from_json
 import globals as GLOBALS
 from game_object import InstanceRegistry
 

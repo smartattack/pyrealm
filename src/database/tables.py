@@ -105,5 +105,5 @@ def load_tables():
 def save_tables(force=False):
     """Save database table data"""
     log.info('Saving DB tables:')
-    for room in GLOBALS.rooms:
+    for room in GLOBALS.rooms.values():
         save_object(room)

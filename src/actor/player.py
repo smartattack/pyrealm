@@ -46,7 +46,6 @@ class Player(BaseActor):
         self._skip_list.update(['client'])
 
         # Add to global dictionaries
-        InstanceRegistry.track(self)
         log.debug('Registering player %s with instances.all_players')
         GLOBALS.all_players[self.gid] = self
 

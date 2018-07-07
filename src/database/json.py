@@ -9,26 +9,6 @@ from utils import log
 from database.base import load_file, write_file, from_json, to_json, object_changed
 import globals as GLOBALS
 
-def load_json_index():
-    """Loads JSON index into GLOBALS.all_instances"""
-    filename = os.path.join(GLOBALS.DATA_DIR, GLOBALS.INSTANCE_INDEX_FILE)
-    temp_index = from_json(load_file(filename))
-    for entry in temp_index.values():
-        log.debug("Loading entry: %s", entry)
-        entry_file = os.path.join(GLOBALS.DATA_DIR, GLOBALS.INSTANCE_DIR,
-                                  'gid_' + entry.gid + '.json')
-        # Load the object, adds to all_instances
-        # Do NOT attempt to assign a unique GID
-        gobj = load_object(entry_file, check_collision=False)
-        if gobj:
-            log.debug('Adding instance(%s) = %s', gobj.gid, gobj)
-            GLOBALS.all_instances[gobj.gid] = gobj
-
-
-def save_json_index(data):
-    """Saves an index to a JSON file"""
-    log.debug('Running save_index_to_json()')
-    write_file(to_json(data), filename=GLOBALS.INSTANCE_INDEX_FILE)
 
 
 def save_to_json(objdata: object, filename: str, obj_id_name: str, force=False):
