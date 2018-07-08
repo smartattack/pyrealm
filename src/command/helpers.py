@@ -13,7 +13,6 @@ def can_carry(act, item):
     return True
 
 
-
 def find_actor(name: str):
     """Return an actor with given name or None"""
     if name is None:

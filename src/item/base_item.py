@@ -24,10 +24,11 @@ class BaseItem(GameObject):
         log.debug("BaseItem.__init__(name=%s, short_desc=%s)", name, short_desc)
         log.debug("BaseItem.__mro__ = %s", BaseItem.__mro__)
         GameObject.__init__(self, name=name, description=description,
-                            short_desc=short_desc, skip_list=['carried_by'])
+                            short_desc=short_desc)
         self._weight = 0
         self._cost = 0
         self.carried_by = None
+        self.worn_by = None
         log.debug('Registering item %s with instances.all_items', self.gid)
         GLOBALS.all_items[self.gid] = self
 
@@ -54,14 +55,22 @@ class BaseItem(GameObject):
             if self.carried_by:
                 # FIXME: vnum needs to convert to a gid instance id
                 log.warning('Item %s is carried by %s, cannot add to room %s',
-                            self.vnum, self.carried_by.name, location)
+                            self.vnum, self.carried_by, location)
             else:
                 room.add_item(self)        
+
 
     def add_to_actor(self, actor):
         """Add item to actor inventory"""
         #actor.add_item(self)
-        self.carried_by = actor
+        self.carried_by = actor.gid
+
+
+    def equip_to_actor(self, actor):
+        """Add item to actor wear slot"""
+        #FIXME: check if actor has open matching wear slot"""
+        self.worn_by = actor.gid
+
 
 class Container(GameObject):
     """Base container item"""

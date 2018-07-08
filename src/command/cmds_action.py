@@ -26,6 +26,7 @@ def do_drop(plr: Player, args: list):
     # remove from player
     try:
         plr.inventory.remove(item)
+        item.carried_by = None
     except:
         log.error('Could not remove item %s from %s', item.gid, plr.name)
         return 
@@ -67,6 +68,7 @@ def do_get(plr: Player, args: list):
         return
     # add to player
     try:
+        item.add_to_actor(plr)
         plr.inventory.append(item)
     except:
         log.error('Could not add item %s to %s', item.gid, plr.name)

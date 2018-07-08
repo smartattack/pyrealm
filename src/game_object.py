@@ -73,5 +73,12 @@ class InstanceRegistry():
         GLOBALS.all_instances[instance.gid] = instance
 
 
+def get_instance(gid: int):
+    """Return object with matching gid, or None"""
+    if gid in GLOBALS.all_instances:
+        return GLOBALS.all_instances[gid]
+    else:
+        return None
+
 # Initialize instance registry for tracking
 instances = InstanceRegistry()

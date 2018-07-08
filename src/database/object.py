@@ -35,7 +35,7 @@ def get_save_path(objdata, save_dir=None):
             pathname = save_dir
         else:
             pathname = os.path.join(GLOBALS.DATA_DIR, GLOBALS.INSTANCE_DIR)
-        filename = os.path.join(pathname, obj_id_name + '.json')
+        filename = os.path.join(pathname, 'gid_' + obj_id_name + '.json')
     else:
         log.debug('OBJ_ID_NAME called -> %s (%s)', objdata, objtype)
         obj_id_name = str(objdata.vnum)

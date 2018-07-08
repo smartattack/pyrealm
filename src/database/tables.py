@@ -10,6 +10,7 @@ from database.help import load_help
 from database.index import load_indexes, save_indexes
 from database.object import load_object, save_object, save_instances, game_object_type
 from database.game_state import save_game_state, load_game_state
+from game_object import get_instance
 from database.populate import populate
 import globals as GLOBALS
 
@@ -61,10 +62,18 @@ def rebuild_links():
             else:
                 log.warning('Could not find room for %s', gobj.location)
         if hasattr(gobj, 'carried_by') and gobj.carried_by:
-            actor = find_actor(gid)
+            actor = get_instance(gobj.carried_by)
             if actor:
                 log.debug('   ** Adding %s to %s', gobj.name, actor.name)
-                actor.add_item(gobj)
+                actor.inventory.append(gobj)
+                gobj.add_to_actor(actor)
+                continue
+        if hasattr(gobj, 'worn_by') and gobj.worn_by:
+            actor = get_instance(gobj.worn_by)
+            if actor:
+                log.debug('   ** Equipping %s to %s', gobj.name, actor.name)
+                #actor.equip_item(gobj)
+                #gobj.equip_to_actor(actor)
                 continue
             # Find item (container), add item...
 
