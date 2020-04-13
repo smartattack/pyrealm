@@ -4,6 +4,7 @@ Persists game state across restarts.
 
 class GameState(object):
     """Holds global game persistence info"""
+
     def __init__(self):
         """Only runs on first boot"""
         self._runtime = 0.0
@@ -25,5 +26,5 @@ class GameState(object):
         return self._max_gid
     
     @max_gid.setter
-    def max_instance(self, number):
+    def max_gid(self, number):
         self._max_gid = number

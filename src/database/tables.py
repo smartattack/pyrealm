@@ -13,8 +13,10 @@ from actor.player import Player
 from actor.race import Race
 from user.user import User
 from actor.npc import NPC
+from item.base_item import BaseItem
+from game_object import InstanceRegistry
+from world.room import Room
 from database.game_state import GameState
-from game_object import BaseItem, Room
 import globals as GLOBALS
 
 # This module should work as follows:
@@ -189,6 +191,12 @@ def load_from_json(filename):
         for line in file:
             data += line
     loaded = from_json(data)
+    #if hasattr(loaded, 'gid'):
+    #    if loaded.gid > GLOBALS.game_state.max_gid:
+    #        log.error('Loaded object %s(%s) > %s', loaded.gid, type(loaded),
+    #        GLOBALS.game_state.max_gid)
+    #        GLOBALS.game_state.max_gid = loaded.gid
+    #        instances.gid = loaded.gid
     log.debug(' * Loaded object: %s', type(loaded))
     # Avoid resaving right away
     loaded._last_saved = time.time()
@@ -217,9 +225,8 @@ def load_object(filename: str):
         log.info(' +-> Loaded NPC()')
     elif isinstance(loaded, Race):
         log.info(' +-> Loaded Race()')
-    #elif isinstance(loaded, Item):
-    #    log.info(' +-> Loaded object is a and Item()')
-    #    pass
+    elif isinstance(loaded, BaseItem):
+        log.info(' +-> Loaded object is a and Item()')
     else:
         log.error(' +-> Unrecognized object: %s', type(loaded))
         return

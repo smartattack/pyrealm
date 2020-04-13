@@ -4,6 +4,7 @@ outside of main.py so globals can be included more easily.
 """
 
 # Default Game state / config
+game_state = None
 PORT = 1234
 WELCOME_BANNER = '\n^WWelcome to ^YP^Ry^BR^Cealm^w!^d\n\n'
 
